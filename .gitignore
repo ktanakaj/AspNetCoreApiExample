@@ -1,0 +1,13 @@
+.vagrant
+.project
+.settings
+.idea
+.vs
+.vscode
+*.bak
+*.log
+*.suo
+*/bin
+*/obj
+*/*.csproj.user
+!.gitkeep
