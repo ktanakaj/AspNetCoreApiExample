@@ -1,17 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
+﻿// ================================================================================================
+// <summary>
+//      アプリケーション起動用クラスソース</summary>
+//
+// <copyright file="Program.cs">
+//      Copyright (C) 2019 Koichi Tanaka. All rights reserved.</copyright>
+// <author>
+//      Koichi Tanaka</author>
+// ================================================================================================
 
-namespace AspNetCoreApiExample
+namespace Honememo.AspNetCoreApiExample
 {
+    using Microsoft.AspNetCore;
+    using Microsoft.AspNetCore.Hosting;
+
+    /// <summary>
+    /// アプリケーション起動時に最初に呼ばれるクラスです。
+    /// </summary>
     public class Program
     {
+        /// <summary>
+        /// アプリケーションのメインエントリポイントです。
+        /// </summary>
         public static void Main(string[] args)
         {
             CreateWebHostBuilder(args).Build().Run();
