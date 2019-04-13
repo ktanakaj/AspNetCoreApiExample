@@ -17,11 +17,18 @@ namespace Honememo.AspNetCoreApiExample.Models
     /// </summary>
     public class BlogContext : DbContext
     {
+        /// <summary>
+        /// コンテキストを生成する。
+        /// </summary>
+        /// <param name="options"></param>
         public BlogContext(DbContextOptions<BlogContext> options)
             : base(options)
         {
         }
 
+        /// <summary>
+        /// ブログテーブル。
+        /// </summary>
         public DbSet<Blog> Blogs { get; set; }
     }
 }

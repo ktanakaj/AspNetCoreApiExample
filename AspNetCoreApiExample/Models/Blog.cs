@@ -10,6 +10,8 @@
 
 namespace Honememo.AspNetCoreApiExample.Models
 {
+    using System.ComponentModel.DataAnnotations;
+
     /// <summary>
     /// ブログモデルクラス。
     /// </summary>
@@ -19,10 +21,13 @@ namespace Honememo.AspNetCoreApiExample.Models
         /// ブログID。
         /// </summary>
         public long Id { get; set; }
+
         /// <summary>
         /// ブログタイトル。
         /// </summary>
+        [Required]
         public string Name { get; set; }
+
         /// <summary>
         /// ブログ作者のユーザーID。
         /// </summary>

@@ -20,12 +20,20 @@ namespace Honememo.AspNetCoreApiExample.Controllers
     /// <summary>
     /// ブログコントローラクラス。
     /// </summary>
+    [Produces("application/json")]
     [Route("api/[controller]")]
     [ApiController]
     public class BlogsController : ControllerBase
     {
+        /// <summary>
+        /// ブログコンテキスト。
+        /// </summary>
         private readonly BlogContext context;
 
+        /// <summary>
+        /// コンテキストをDIしてコントローラを生成する。
+        /// </summary>
+        /// <param name="context">ブログコンテキスト。</param>
         public BlogsController(BlogContext context)
         {
             this.context = context;
@@ -33,16 +41,25 @@ namespace Honememo.AspNetCoreApiExample.Controllers
 
         // TODO: 更新系APIは、要認証のコントローラを作って移動する
 
-        // GET api/blogs
+        /// <summary>
+        /// ブログ一覧を取得する。
+        /// </summary>
+        /// <returns>ブログ一覧。</returns>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Blog>>> Get()
+        public async Task<ActionResult<IEnumerable<Blog>>> GetBlogs()
         {
             return await context.Blogs.ToListAsync();
         }
 
-        // GET api/blogs/5
+        /// <summary>
+        /// 指定されたブログを取得する。
+        /// </summary>
+        /// <param name="id">ブログID。</param>
+        /// <returns>ブログ。</returns>
         [HttpGet("{id}")]
-        public async Task<ActionResult<Blog>> Get(long id)
+        [ProducesResponseType(200)]
+        [ProducesResponseType(404)]
+        public async Task<ActionResult<Blog>> GetBlog(long id)
         {
             var blog = await context.Blogs.FindAsync(id);
 
@@ -54,18 +71,31 @@ namespace Honememo.AspNetCoreApiExample.Controllers
             return blog;
         }
 
-        // POST api/blogs
+        /// <summary>
+        /// ブログを登録する。
+        /// </summary>
+        /// <param name="blog">ブログ。</param>
+        /// <returns>登録したブログ。</returns>
         [HttpPost]
-        public async Task<ActionResult<Blog>> Post(Blog blog)
+        [ProducesResponseType(201)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult<Blog>> PostBlog(Blog blog)
         {
             context.Blogs.Add(blog);
             await context.SaveChangesAsync();
-            return CreatedAtAction(nameof(Get), new { id = blog.Id }, blog);
+            return CreatedAtAction(nameof(GetBlog), new { id = blog.Id }, blog);
         }
 
-        // PUT api/blogs/5
+        /// <summary>
+        /// ブログを更新する。
+        /// </summary>
+        /// <param name="id">ブログID。</param>
+        /// <param name="blog">更新するブログ情報。</param>
+        /// <returns>処理結果。</returns>
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put(long id, Blog blog)
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
+        public async Task<IActionResult> PutBlog(long id, Blog blog)
         {
             if (id != blog.Id)
             {
@@ -78,9 +108,15 @@ namespace Honememo.AspNetCoreApiExample.Controllers
             return NoContent();
         }
 
-        // DELETE api/blogs/5
+        /// <summary>
+        /// ブログを削除する。
+        /// </summary>
+        /// <param name="id">ブログID。</param>
+        /// <returns>処理結果。</returns>
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(long id)
+        [ProducesResponseType(204)]
+        [ProducesResponseType(404)]
+        public async Task<IActionResult> DeleteBlog(long id)
         {
             var blog = await context.Blogs.FindAsync(id);
 

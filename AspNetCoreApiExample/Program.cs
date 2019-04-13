@@ -26,6 +26,11 @@ namespace Honememo.AspNetCoreApiExample
             CreateWebHostBuilder(args).Build().Run();
         }
 
+        /// <summary>
+        /// Webホストビルダーを生成する。
+        /// </summary>
+        /// <param name="args"></param>
+        /// <returns></returns>
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>();
