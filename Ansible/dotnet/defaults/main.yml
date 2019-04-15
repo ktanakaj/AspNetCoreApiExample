@@ -1,0 +1,2 @@
+dotnet_nginx_conf_src: "nginx.conf.j2"
+dotnet_nginx_conf_dest: "/etc/nginx/default.d/dotnet.conf"

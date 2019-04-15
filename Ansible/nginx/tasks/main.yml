@@ -1,0 +1,8 @@
+---
+- name: Install the latest version of nginx
+  yum: name=nginx state=latest
+  notify: Restart nginx
+
+- name: Open port for HTTP
+  firewalld: service=http permanent=true state=enabled
+  notify: Restart firewalld

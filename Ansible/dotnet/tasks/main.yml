@@ -1,0 +1,13 @@
+---
+- name: Register .NET repository
+  yum: name={{ dotnetsource }} state=present
+
+- name: Install the latest version of .NET Core
+  yum: name=dotnet-sdk-2.1 state=latest
+
+- name: Copy .NET application configuration to nginx
+  template:
+    src: "{{ dotnet_nginx_conf_src }}"
+    dest: "{{ dotnet_nginx_conf_dest }}"
+    force: no
+  notify: Restart nginx

@@ -11,3 +11,5 @@
 */obj
 */*.csproj.user
 !.gitkeep
+Backup/
+UpgradeLog.htm
