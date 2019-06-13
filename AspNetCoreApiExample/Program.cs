@@ -21,6 +21,7 @@ namespace Honememo.AspNetCoreApiExample
         /// <summary>
         /// アプリケーションのメインエントリポイントです。
         /// </summary>
+        /// <param name="args">コマンドラインから指定された起動オプション。</param>
         public static void Main(string[] args)
         {
             CreateWebHostBuilder(args).Build().Run();
@@ -29,8 +30,8 @@ namespace Honememo.AspNetCoreApiExample
         /// <summary>
         /// Webホストビルダーを生成する。
         /// </summary>
-        /// <param name="args"></param>
-        /// <returns></returns>
+        /// <param name="args">コマンドラインから指定された起動オプション。</param>
+        /// <returns>生成したWebホストビルダー。</returns>
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>();

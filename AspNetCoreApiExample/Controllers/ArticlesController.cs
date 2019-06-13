@@ -44,11 +44,12 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         /// <summary>
         /// ブログ記事一覧を取得する。
         /// </summary>
+        /// <param name="blogId">ブログID。</param>
         /// <returns>ブログ記事一覧。</returns>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Article>>> GetArticles(long blogId)
         {
-            return await context.Articles.ToListAsync();
+            return await this.context.Articles.ToListAsync();
         }
 
         /// <summary>
@@ -61,11 +62,11 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         [ProducesResponseType(404)]
         public async Task<ActionResult<Article>> GetArticle(long id)
         {
-            var article = await context.Articles.FindAsync(id);
+            var article = await this.context.Articles.FindAsync(id);
 
             if (article == null)
             {
-                return NotFound();
+                return this.NotFound();
             }
 
             return article;
@@ -81,9 +82,9 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         [ProducesResponseType(400)]
         public async Task<ActionResult<Article>> PostArticle(Article article)
         {
-            context.Articles.Add(article);
-            await context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetArticle), new { id = article.Id }, article);
+            this.context.Articles.Add(article);
+            await this.context.SaveChangesAsync();
+            return this.CreatedAtAction(nameof(this.GetArticle), new { id = article.Id }, article);
         }
 
         /// <summary>
@@ -99,13 +100,13 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         {
             if (id != article.Id)
             {
-                return BadRequest();
+                return this.BadRequest();
             }
 
-            context.Entry(article).State = EntityState.Modified;
-            await context.SaveChangesAsync();
+            this.context.Entry(article).State = EntityState.Modified;
+            await this.context.SaveChangesAsync();
 
-            return NoContent();
+            return this.NoContent();
         }
 
         /// <summary>
@@ -118,17 +119,17 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         [ProducesResponseType(404)]
         public async Task<IActionResult> DeleteArticle(long id)
         {
-            var article = await context.Articles.FindAsync(id);
+            var article = await this.context.Articles.FindAsync(id);
 
             if (article == null)
             {
-                return NotFound();
+                return this.NotFound();
             }
 
-            context.Articles.Remove(article);
-            await context.SaveChangesAsync();
+            this.context.Articles.Remove(article);
+            await this.context.SaveChangesAsync();
 
-            return NoContent();
+            return this.NoContent();
         }
     }
 }

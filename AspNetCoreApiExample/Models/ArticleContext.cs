@@ -20,7 +20,7 @@ namespace Honememo.AspNetCoreApiExample.Models
         /// <summary>
         /// コンテキストを生成する。
         /// </summary>
-        /// <param name="options"></param>
+        /// <param name="options">オプション。</param>
         public ArticleContext(DbContextOptions<ArticleContext> options)
             : base(options)
         {

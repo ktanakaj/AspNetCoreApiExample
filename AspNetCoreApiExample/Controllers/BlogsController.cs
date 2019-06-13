@@ -48,7 +48,7 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Blog>>> GetBlogs()
         {
-            return await context.Blogs.ToListAsync();
+            return await this.context.Blogs.ToListAsync();
         }
 
         /// <summary>
@@ -61,11 +61,11 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         [ProducesResponseType(404)]
         public async Task<ActionResult<Blog>> GetBlog(long id)
         {
-            var blog = await context.Blogs.FindAsync(id);
+            var blog = await this.context.Blogs.FindAsync(id);
 
             if (blog == null)
             {
-                return NotFound();
+                return this.NotFound();
             }
 
             return blog;
@@ -81,9 +81,9 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         [ProducesResponseType(400)]
         public async Task<ActionResult<Blog>> PostBlog(Blog blog)
         {
-            context.Blogs.Add(blog);
-            await context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetBlog), new { id = blog.Id }, blog);
+            this.context.Blogs.Add(blog);
+            await this.context.SaveChangesAsync();
+            return this.CreatedAtAction(nameof(this.GetBlog), new { id = blog.Id }, blog);
         }
 
         /// <summary>
@@ -99,13 +99,13 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         {
             if (id != blog.Id)
             {
-                return BadRequest();
+                return this.BadRequest();
             }
 
-            context.Entry(blog).State = EntityState.Modified;
-            await context.SaveChangesAsync();
+            this.context.Entry(blog).State = EntityState.Modified;
+            await this.context.SaveChangesAsync();
 
-            return NoContent();
+            return this.NoContent();
         }
 
         /// <summary>
@@ -118,17 +118,17 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         [ProducesResponseType(404)]
         public async Task<IActionResult> DeleteBlog(long id)
         {
-            var blog = await context.Blogs.FindAsync(id);
+            var blog = await this.context.Blogs.FindAsync(id);
 
             if (blog == null)
             {
-                return NotFound();
+                return this.NotFound();
             }
 
-            context.Blogs.Remove(blog);
-            await context.SaveChangesAsync();
+            this.context.Blogs.Remove(blog);
+            await this.context.SaveChangesAsync();
 
-            return NoContent();
+            return this.NoContent();
         }
     }
 }

@@ -33,7 +33,7 @@ namespace Honememo.AspNetCoreApiExample
         /// <param name="configuration">アプリケーション設定。</param>
         public Startup(IConfiguration configuration)
         {
-            Configuration = configuration;
+            this.Configuration = configuration;
         }
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace Honememo.AspNetCoreApiExample
         /// <summary>
         /// サービスコンテナ登録などの設定用メソッド。
         /// </summary>
-        /// <param name="services"></param>
+        /// <param name="services">サービスコレクション。</param>
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<BlogContext>(opt =>
@@ -64,8 +64,8 @@ namespace Honememo.AspNetCoreApiExample
         /// <summary>
         /// HTTPリクエストパイプラインなどの設定用メソッド。
         /// </summary>
-        /// <param name="app"></param>
-        /// <param name="env"></param>
+        /// <param name="app">アプリケーションビルダー。</param>
+        /// <param name="env">ホスト環境。</param>
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             if (env.IsDevelopment())
