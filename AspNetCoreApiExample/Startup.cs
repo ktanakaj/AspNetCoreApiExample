@@ -54,8 +54,10 @@ namespace Honememo.AspNetCoreApiExample
             // Swagger定義の設定
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new Info { Title = "ASP.NET Core Web APIサンプルアプリAPI", Version = "0.0.1" });
-                var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var asm = Assembly.GetExecutingAssembly();
+                var product = asm.GetCustomAttribute(typeof(AssemblyProductAttribute)) as AssemblyProductAttribute;
+                c.SwaggerDoc("v1", new Info { Title = product.Product, Version = asm.GetName().Version.ToString() });
+                var xmlFile = $"{asm.GetName().Name}.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 c.IncludeXmlComments(xmlPath);
             });
@@ -76,7 +78,9 @@ namespace Honememo.AspNetCoreApiExample
                 app.UseSwagger();
                 app.UseSwaggerUI(c =>
                 {
-                    c.SwaggerEndpoint("/swagger/v1/swagger.json", "ASP.NET Core Web APIサンプルアプリAPI");
+                    var asm = Assembly.GetExecutingAssembly();
+                    var product = asm.GetCustomAttribute(typeof(AssemblyProductAttribute)) as AssemblyProductAttribute;
+                    c.SwaggerEndpoint("v1/swagger.json", product.Product);
                 });
             }
 
