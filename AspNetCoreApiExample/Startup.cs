@@ -21,6 +21,7 @@ namespace Honememo.AspNetCoreApiExample
     using Microsoft.Extensions.DependencyInjection;
     using Swashbuckle.AspNetCore.Swagger;
     using Honememo.AspNetCoreApiExample.Models;
+    using Honememo.AspNetCoreApiExample.Middlewares;
 
     /// <summary>
     /// Webアプリケーション初期設定用のクラスです。
@@ -84,6 +85,7 @@ namespace Honememo.AspNetCoreApiExample
                 });
             }
 
+            app.UseMiddleware(typeof(ErrorHandlingMiddleware));
             app.UseMvc();
         }
     }
