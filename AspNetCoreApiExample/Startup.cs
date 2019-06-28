@@ -48,7 +48,7 @@ namespace Honememo.AspNetCoreApiExample
         /// <param name="services">サービスコレクション。</param>
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<BlogContext>(opt =>
+            services.AddDbContext<AppDbContext>(opt =>
                 opt.UseInMemoryDatabase("BlogDB"));
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 

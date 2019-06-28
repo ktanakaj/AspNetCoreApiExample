@@ -1,8 +1,8 @@
 ﻿// ================================================================================================
 // <summary>
-//      ブログ記事コンテキストクラスソース</summary>
+//      アプリケーションDBコンテキストクラスソース</summary>
 //
-// <copyright file="ArticleContext.cs">
+// <copyright file="AppDbContext.cs">
 //      Copyright (C) 2019 Koichi Tanaka. All rights reserved.</copyright>
 // <author>
 //      Koichi Tanaka</author>
@@ -13,18 +13,23 @@ namespace Honememo.AspNetCoreApiExample.Models
     using Microsoft.EntityFrameworkCore;
 
     /// <summary>
-    /// ブログ記事コンテキストクラス。
+    /// アプリケーションDBコンテキストクラス。
     /// </summary>
-    public class ArticleContext : DbContext
+    public class AppDbContext : DbContext
     {
         /// <summary>
         /// コンテキストを生成する。
         /// </summary>
         /// <param name="options">オプション。</param>
-        public ArticleContext(DbContextOptions<ArticleContext> options)
+        public AppDbContext(DbContextOptions<AppDbContext> options)
             : base(options)
         {
         }
+
+        /// <summary>
+        /// ブログテーブル。
+        /// </summary>
+        public DbSet<Blog> Blogs { get; set; }
 
         /// <summary>
         /// ブログ記事テーブル。

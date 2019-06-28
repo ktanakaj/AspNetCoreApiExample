@@ -26,15 +26,15 @@ namespace Honememo.AspNetCoreApiExample.Controllers
     public class BlogsController : ControllerBase
     {
         /// <summary>
-        /// ブログコンテキスト。
+        /// アプリケーションDBコンテキスト。
         /// </summary>
-        private readonly BlogContext context;
+        private readonly AppDbContext context;
 
         /// <summary>
         /// コンテキストをDIしてコントローラを生成する。
         /// </summary>
-        /// <param name="context">ブログコンテキスト。</param>
-        public BlogsController(BlogContext context)
+        /// <param name="context">アプリケーションDBコンテキスト。</param>
+        public BlogsController(AppDbContext context)
         {
             this.context = context;
         }

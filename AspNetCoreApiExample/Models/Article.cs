@@ -34,9 +34,9 @@ namespace Honememo.AspNetCoreApiExample.Models
         [Required]
         public string Body { get; set; }
 
-        /// <summary>
-        /// ブログ記事タグ。
-        /// </summary>
-        public string[] Tags { get; set; }
+        ///// <summary>
+        ///// ブログ記事タグ。
+        ///// </summary>
+        // public string[] Tags { get; set; }
     }
 }
