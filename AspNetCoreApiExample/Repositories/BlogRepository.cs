@@ -22,10 +22,16 @@ namespace Honememo.AspNetCoreApiExample.Repositories
     /// </summary>
     public class BlogRepository
     {
+        #region メンバー変数
+
         /// <summary>
         /// アプリケーションDBコンテキスト。
         /// </summary>
         private readonly AppDbContext context;
+
+        #endregion
+
+        #region コンストラクタ
 
         /// <summary>
         /// コンテキストをDIしてリポジトリを生成する。
@@ -35,6 +41,10 @@ namespace Honememo.AspNetCoreApiExample.Repositories
         {
             this.context = context ?? throw new ArgumentNullException(nameof(context));
         }
+
+        #endregion
+
+        #region 参照系メソッド
 
         /// <summary>
         /// ブログを全て取得する。
@@ -72,22 +82,31 @@ namespace Honememo.AspNetCoreApiExample.Repositories
             return blog;
         }
 
+        #endregion
+
+        #region 更新系メソッド
+
         /// <summary>
-        /// ブログを保存する。
+        /// ブログを登録する。
         /// </summary>
         /// <param name="blog">ブログ。</param>
-        /// <returns>保存したブログ。</returns>
-        public async Task<Blog> Save(Blog blog)
+        /// <returns>登録したブログ。</returns>
+        public async Task<Blog> Create(Blog blog)
         {
-            if (blog.Id > 0)
-            {
-                this.context.Entry(blog).State = EntityState.Modified;
-            }
-            else
-            {
-                this.context.Blogs.Add(blog);
-            }
+            blog.Id = 0;
+            this.context.Blogs.Add(blog);
+            await this.context.SaveChangesAsync();
+            return blog;
+        }
 
+        /// <summary>
+        /// ブログを更新する。
+        /// </summary>
+        /// <param name="blog">ブログ。</param>
+        /// <returns>更新したブログ。</returns>
+        public async Task<Blog> Update(Blog blog)
+        {
+            this.context.Entry(blog).State = EntityState.Modified;
             await this.context.SaveChangesAsync();
             return blog;
         }
@@ -98,12 +117,14 @@ namespace Honememo.AspNetCoreApiExample.Repositories
         /// <param name="id">ブログID。</param>
         /// <returns>削除したブログ。</returns>
         /// <exception cref="NotFoundException">ブログが存在しない場合。</exception>
-        public async Task<Blog> Remove(int id)
+        public async Task<Blog> Delete(int id)
         {
             var blog = await this.FindOrFail(id);
             this.context.Blogs.Remove(blog);
             await this.context.SaveChangesAsync();
             return blog;
         }
+
+        #endregion
     }
 }

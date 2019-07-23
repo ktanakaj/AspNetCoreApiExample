@@ -25,10 +25,16 @@ namespace Honememo.AspNetCoreApiExample.Controllers
     [ApiController]
     public class BlogsController : ControllerBase
     {
+        #region メンバー変数
+
         /// <summary>
         /// ブログリポジトリ。
         /// </summary>
         private readonly BlogRepository blogRepository;
+
+        #endregion
+
+        #region コンストラクタ
 
         /// <summary>
         /// リポジトリをDIしてコントローラを生成する。
@@ -39,7 +45,9 @@ namespace Honememo.AspNetCoreApiExample.Controllers
             this.blogRepository = blogRepository;
         }
 
-        // TODO: 更新系APIは、要認証のコントローラを作って移動する
+        #endregion
+
+        #region APIメソッド
 
         /// <summary>
         /// ブログ一覧を取得する。
@@ -64,6 +72,8 @@ namespace Honememo.AspNetCoreApiExample.Controllers
             return await this.blogRepository.FindOrFail(id);
         }
 
+        // TODO: 更新系APIには認証かける
+
         /// <summary>
         /// ブログを登録する。
         /// </summary>
@@ -74,7 +84,7 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         [ProducesResponseType(400)]
         public async Task<ActionResult<Blog>> PostBlog(Blog blog)
         {
-            await this.blogRepository.Save(blog);
+            await this.blogRepository.Create(blog);
             return this.CreatedAtAction(nameof(this.GetBlog), new { id = blog.Id }, blog);
         }
 
@@ -89,12 +99,8 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         [ProducesResponseType(404)]
         public async Task<IActionResult> PutBlog(int id, Blog blog)
         {
-            if (id != blog.Id)
-            {
-                return this.BadRequest();
-            }
-
-            await this.blogRepository.Save(blog);
+            blog.Id = id;
+            await this.blogRepository.Update(blog);
             return this.NoContent();
         }
 
@@ -108,8 +114,10 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         [ProducesResponseType(404)]
         public async Task<IActionResult> DeleteBlog(int id)
         {
-            await this.blogRepository.Remove(id);
+            await this.blogRepository.Delete(id);
             return this.NoContent();
         }
+
+        #endregion
     }
 }

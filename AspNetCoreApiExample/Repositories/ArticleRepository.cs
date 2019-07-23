@@ -23,10 +23,16 @@ namespace Honememo.AspNetCoreApiExample.Repositories
     /// </summary>
     public class ArticleRepository
     {
+        #region メンバー変数
+
         /// <summary>
         /// アプリケーションDBコンテキスト。
         /// </summary>
         private readonly AppDbContext context;
+
+        #endregion
+
+        #region コンストラクタ
 
         /// <summary>
         /// コンテキストをDIしてリポジトリを生成する。
@@ -36,6 +42,10 @@ namespace Honememo.AspNetCoreApiExample.Repositories
         {
             this.context = context ?? throw new ArgumentNullException(nameof(context));
         }
+
+        #endregion
+
+        #region 参照系メソッド
 
         /// <summary>
         /// ブログ記事を全て取得する。
@@ -83,22 +93,31 @@ namespace Honememo.AspNetCoreApiExample.Repositories
             return article;
         }
 
+        #endregion
+
+        #region 更新系メソッド
+
         /// <summary>
-        /// ブログ記事を保存する。
+        /// ブログ記事を登録する。
         /// </summary>
         /// <param name="article">ブログ記事。</param>
-        /// <returns>保存したブログ記事。</returns>
-        public async Task<Article> Save(Article article)
+        /// <returns>登録したブログ記事。</returns>
+        public async Task<Article> Create(Article article)
         {
-            if (article.Id > 0)
-            {
-                this.context.Entry(article).State = EntityState.Modified;
-            }
-            else
-            {
-                this.context.Articles.Add(article);
-            }
+            article.Id = 0;
+            this.context.Articles.Add(article);
+            await this.context.SaveChangesAsync();
+            return article;
+        }
 
+        /// <summary>
+        /// ブログ記事を更新する。
+        /// </summary>
+        /// <param name="article">ブログ記事。</param>
+        /// <returns>更新したブログ記事。</returns>
+        public async Task<Article> Update(Article article)
+        {
+            this.context.Entry(article).State = EntityState.Modified;
             await this.context.SaveChangesAsync();
             return article;
         }
@@ -109,12 +128,14 @@ namespace Honememo.AspNetCoreApiExample.Repositories
         /// <param name="id">ブログ記事ID。</param>
         /// <returns>削除したブログ記事。</returns>
         /// <exception cref="NotFoundException">ブログ記事が存在しない場合。</exception>
-        public async Task<Article> Remove(int id)
+        public async Task<Article> Delete(int id)
         {
             var article = await this.FindOrFail(id);
             this.context.Articles.Remove(article);
             await this.context.SaveChangesAsync();
             return article;
         }
+
+        #endregion
     }
 }

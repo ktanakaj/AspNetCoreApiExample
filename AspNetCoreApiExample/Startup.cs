@@ -28,6 +28,8 @@ namespace Honememo.AspNetCoreApiExample
     /// </summary>
     public class Startup
     {
+        #region コンストラクタ
+
         /// <summary>
         /// コンストラクタ。
         /// </summary>
@@ -37,10 +39,18 @@ namespace Honememo.AspNetCoreApiExample
             this.Configuration = configuration;
         }
 
+        #endregion
+
+        #region プロパティ
+
         /// <summary>
         /// アプリケーション設定。
         /// </summary>
         public IConfiguration Configuration { get; }
+
+        #endregion
+
+        #region メソッド
 
         /// <summary>
         /// サービスコンテナ登録などの設定用メソッド。
@@ -52,6 +62,7 @@ namespace Honememo.AspNetCoreApiExample
                 opt.UseInMemoryDatabase("BlogDB"));
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
+            services.AddScoped<UserRepository>();
             services.AddScoped<BlogRepository>();
             services.AddScoped<ArticleRepository>();
 
@@ -91,5 +102,7 @@ namespace Honememo.AspNetCoreApiExample
             app.UseMiddleware(typeof(ErrorHandlingMiddleware));
             app.UseMvc();
         }
+
+        #endregion
     }
 }

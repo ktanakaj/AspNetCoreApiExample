@@ -35,6 +35,11 @@ namespace Honememo.AspNetCoreApiExample.Repositories
         #region プロパティ
 
         /// <summary>
+        /// ユーザーテーブル。
+        /// </summary>
+        public DbSet<User> Users { get; set; }
+
+        /// <summary>
         /// ブログテーブル。
         /// </summary>
         public DbSet<Blog> Blogs { get; set; }

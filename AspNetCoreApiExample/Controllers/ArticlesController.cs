@@ -25,10 +25,16 @@ namespace Honememo.AspNetCoreApiExample.Controllers
     [ApiController]
     public class ArticlesController : ControllerBase
     {
+        #region メンバー変数
+
         /// <summary>
         /// ブログ記事リポジトリ。
         /// </summary>
         private readonly ArticleRepository articleRepository;
+
+        #endregion
+
+        #region コンストラクタ
 
         /// <summary>
         /// リポジトリをDIしてコントローラを生成する。
@@ -39,7 +45,9 @@ namespace Honememo.AspNetCoreApiExample.Controllers
             this.articleRepository = articleRepository;
         }
 
-        // TODO: 更新系APIは、要認証のコントローラを作って移動する
+        #endregion
+
+        #region APIメソッド
 
         /// <summary>
         /// ブログ記事一覧を取得する。
@@ -65,6 +73,8 @@ namespace Honememo.AspNetCoreApiExample.Controllers
             return await this.articleRepository.Find(id);
         }
 
+        // TODO: 更新系APIには認証かける
+
         /// <summary>
         /// ブログ記事を登録する。
         /// </summary>
@@ -75,7 +85,7 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         [ProducesResponseType(400)]
         public async Task<ActionResult<Article>> PostArticle(Article article)
         {
-            await this.articleRepository.Save(article);
+            await this.articleRepository.Create(article);
             return this.CreatedAtAction(nameof(this.GetArticle), new { id = article.Id }, article);
         }
 
@@ -88,14 +98,10 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         [HttpPut("{id}")]
         [ProducesResponseType(204)]
         [ProducesResponseType(404)]
-        public async Task<IActionResult> PutArticle(long id, Article article)
+        public async Task<IActionResult> PutArticle(int id, Article article)
         {
-            if (id != article.Id)
-            {
-                return this.BadRequest();
-            }
-
-            await this.articleRepository.Save(article);
+            article.Id = id;
+            await this.articleRepository.Update(article);
             return this.NoContent();
         }
 
@@ -109,8 +115,10 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         [ProducesResponseType(404)]
         public async Task<IActionResult> DeleteArticle(int id)
         {
-            await this.articleRepository.Remove(id);
+            await this.articleRepository.Delete(id);
             return this.NoContent();
         }
+
+        #endregion
     }
 }
