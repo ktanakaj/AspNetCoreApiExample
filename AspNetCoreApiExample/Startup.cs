@@ -20,7 +20,6 @@ namespace Honememo.AspNetCoreApiExample
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Swashbuckle.AspNetCore.Swagger;
-    using Honememo.AspNetCoreApiExample.Models;
     using Honememo.AspNetCoreApiExample.Middlewares;
     using Honememo.AspNetCoreApiExample.Repositories;
 

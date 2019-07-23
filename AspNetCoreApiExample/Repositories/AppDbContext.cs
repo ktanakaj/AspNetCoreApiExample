@@ -8,10 +8,11 @@
 //      Koichi Tanaka</author>
 // ================================================================================================
 
-namespace Honememo.AspNetCoreApiExample.Models
+namespace Honememo.AspNetCoreApiExample.Repositories
 {
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Storage;
+    using Honememo.AspNetCoreApiExample.Entities;
 
     /// <summary>
     /// アプリケーションDBコンテキストクラス。

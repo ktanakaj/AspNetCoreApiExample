@@ -8,7 +8,7 @@
 //      Koichi Tanaka</author>
 // ================================================================================================
 
-namespace Honememo.AspNetCoreApiExample.Models
+namespace Honememo.AspNetCoreApiExample.Repositories
 {
     using Microsoft.EntityFrameworkCore.Storage;
 

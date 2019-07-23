@@ -14,7 +14,7 @@ namespace Honememo.AspNetCoreApiExample.Controllers
     using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Mvc;
-    using Honememo.AspNetCoreApiExample.Models;
+    using Honememo.AspNetCoreApiExample.Entities;
     using Honememo.AspNetCoreApiExample.Repositories;
 
     /// <summary>

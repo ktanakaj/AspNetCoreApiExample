@@ -1,6 +1,6 @@
 ﻿// ================================================================================================
 // <summary>
-//      ブログ記事モデルクラスソース</summary>
+//      ブログ記事エンティティクラスソース</summary>
 //
 // <copyright file="Article.cs">
 //      Copyright (C) 2019 Koichi Tanaka. All rights reserved.</copyright>
@@ -8,12 +8,12 @@
 //      Koichi Tanaka</author>
 // ================================================================================================
 
-namespace Honememo.AspNetCoreApiExample.Models
+namespace Honememo.AspNetCoreApiExample.Entities
 {
     using System.ComponentModel.DataAnnotations;
 
     /// <summary>
-    /// ブログ記事モデルクラス。
+    /// ブログ記事エンティティクラス。
     /// </summary>
     public class Article
     {

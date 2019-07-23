@@ -14,8 +14,8 @@ namespace Honememo.AspNetCoreApiExample.Repositories
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using Microsoft.EntityFrameworkCore;
+    using Honememo.AspNetCoreApiExample.Entities;
     using Honememo.AspNetCoreApiExample.Exceptions;
-    using Honememo.AspNetCoreApiExample.Models;
 
     /// <summary>
     /// ブログリポジトリクラス。
