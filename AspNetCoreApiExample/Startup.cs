@@ -22,6 +22,7 @@ namespace Honememo.AspNetCoreApiExample
     using Swashbuckle.AspNetCore.Swagger;
     using Honememo.AspNetCoreApiExample.Models;
     using Honememo.AspNetCoreApiExample.Middlewares;
+    using Honememo.AspNetCoreApiExample.Repositories;
 
     /// <summary>
     /// Webアプリケーション初期設定用のクラスです。
@@ -51,6 +52,9 @@ namespace Honememo.AspNetCoreApiExample
             services.AddDbContext<AppDbContext>(opt =>
                 opt.UseInMemoryDatabase("BlogDB"));
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+
+            services.AddScoped<BlogRepository>();
+            services.AddScoped<ArticleRepository>();
 
             // Swagger定義の設定
             services.AddSwaggerGen(c =>

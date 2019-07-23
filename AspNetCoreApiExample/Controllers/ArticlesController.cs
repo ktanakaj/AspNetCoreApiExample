@@ -14,8 +14,8 @@ namespace Honememo.AspNetCoreApiExample.Controllers
     using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Mvc;
-    using Microsoft.EntityFrameworkCore;
     using Honememo.AspNetCoreApiExample.Models;
+    using Honememo.AspNetCoreApiExample.Repositories;
 
     /// <summary>
     /// ブログ記事コントローラクラス。
@@ -26,17 +26,17 @@ namespace Honememo.AspNetCoreApiExample.Controllers
     public class ArticlesController : ControllerBase
     {
         /// <summary>
-        /// アプリケーションDBコンテキスト。
+        /// ブログ記事リポジトリ。
         /// </summary>
-        private readonly AppDbContext context;
+        private readonly ArticleRepository articleRepository;
 
         /// <summary>
-        /// コンテキストをDIしてコントローラを生成する。
+        /// リポジトリをDIしてコントローラを生成する。
         /// </summary>
-        /// <param name="context">アプリケーションDBコンテキスト。</param>
-        public ArticlesController(AppDbContext context)
+        /// <param name="articleRepository">ブログ記事リポジトリ。</param>
+        public ArticlesController(ArticleRepository articleRepository)
         {
-            this.context = context;
+            this.articleRepository = articleRepository;
         }
 
         // TODO: 更新系APIは、要認証のコントローラを作って移動する
@@ -47,9 +47,9 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         /// <param name="blogId">ブログID。</param>
         /// <returns>ブログ記事一覧。</returns>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Article>>> GetArticles(long blogId)
+        public async Task<ActionResult<IEnumerable<Article>>> GetArticles(int blogId)
         {
-            return await this.context.Articles.ToListAsync();
+            return (await this.articleRepository.FindByBlogId(blogId)).ToList();
         }
 
         /// <summary>
@@ -60,16 +60,9 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         [HttpGet("{id}")]
         [ProducesResponseType(200)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult<Article>> GetArticle(long id)
+        public async Task<ActionResult<Article>> GetArticle(int id)
         {
-            var article = await this.context.Articles.FindAsync(id);
-
-            if (article == null)
-            {
-                return this.NotFound();
-            }
-
-            return article;
+            return await this.articleRepository.Find(id);
         }
 
         /// <summary>
@@ -82,8 +75,7 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         [ProducesResponseType(400)]
         public async Task<ActionResult<Article>> PostArticle(Article article)
         {
-            this.context.Articles.Add(article);
-            await this.context.SaveChangesAsync();
+            await this.articleRepository.Save(article);
             return this.CreatedAtAction(nameof(this.GetArticle), new { id = article.Id }, article);
         }
 
@@ -103,9 +95,7 @@ namespace Honememo.AspNetCoreApiExample.Controllers
                 return this.BadRequest();
             }
 
-            this.context.Entry(article).State = EntityState.Modified;
-            await this.context.SaveChangesAsync();
-
+            await this.articleRepository.Save(article);
             return this.NoContent();
         }
 
@@ -117,18 +107,9 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         [HttpDelete("{id}")]
         [ProducesResponseType(204)]
         [ProducesResponseType(404)]
-        public async Task<IActionResult> DeleteArticle(long id)
+        public async Task<IActionResult> DeleteArticle(int id)
         {
-            var article = await this.context.Articles.FindAsync(id);
-
-            if (article == null)
-            {
-                return this.NotFound();
-            }
-
-            this.context.Articles.Remove(article);
-            await this.context.SaveChangesAsync();
-
+            await this.articleRepository.Remove(id);
             return this.NoContent();
         }
     }

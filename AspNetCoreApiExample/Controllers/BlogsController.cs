@@ -14,8 +14,8 @@ namespace Honememo.AspNetCoreApiExample.Controllers
     using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Mvc;
-    using Microsoft.EntityFrameworkCore;
     using Honememo.AspNetCoreApiExample.Models;
+    using Honememo.AspNetCoreApiExample.Repositories;
 
     /// <summary>
     /// ブログコントローラクラス。
@@ -26,17 +26,17 @@ namespace Honememo.AspNetCoreApiExample.Controllers
     public class BlogsController : ControllerBase
     {
         /// <summary>
-        /// アプリケーションDBコンテキスト。
+        /// ブログリポジトリ。
         /// </summary>
-        private readonly AppDbContext context;
+        private readonly BlogRepository blogRepository;
 
         /// <summary>
-        /// コンテキストをDIしてコントローラを生成する。
+        /// リポジトリをDIしてコントローラを生成する。
         /// </summary>
-        /// <param name="context">アプリケーションDBコンテキスト。</param>
-        public BlogsController(AppDbContext context)
+        /// <param name="blogRepository">ブログリポジトリ。</param>
+        public BlogsController(BlogRepository blogRepository)
         {
-            this.context = context;
+            this.blogRepository = blogRepository;
         }
 
         // TODO: 更新系APIは、要認証のコントローラを作って移動する
@@ -48,7 +48,7 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Blog>>> GetBlogs()
         {
-            return await this.context.Blogs.ToListAsync();
+            return (await this.blogRepository.FindAll()).ToList();
         }
 
         /// <summary>
@@ -59,16 +59,9 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         [HttpGet("{id}")]
         [ProducesResponseType(200)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult<Blog>> GetBlog(long id)
+        public async Task<ActionResult<Blog>> GetBlog(int id)
         {
-            var blog = await this.context.Blogs.FindAsync(id);
-
-            if (blog == null)
-            {
-                return this.NotFound();
-            }
-
-            return blog;
+            return await this.blogRepository.FindOrFail(id);
         }
 
         /// <summary>
@@ -81,8 +74,7 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         [ProducesResponseType(400)]
         public async Task<ActionResult<Blog>> PostBlog(Blog blog)
         {
-            this.context.Blogs.Add(blog);
-            await this.context.SaveChangesAsync();
+            await this.blogRepository.Save(blog);
             return this.CreatedAtAction(nameof(this.GetBlog), new { id = blog.Id }, blog);
         }
 
@@ -95,16 +87,14 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         [HttpPut("{id}")]
         [ProducesResponseType(204)]
         [ProducesResponseType(404)]
-        public async Task<IActionResult> PutBlog(long id, Blog blog)
+        public async Task<IActionResult> PutBlog(int id, Blog blog)
         {
             if (id != blog.Id)
             {
                 return this.BadRequest();
             }
 
-            this.context.Entry(blog).State = EntityState.Modified;
-            await this.context.SaveChangesAsync();
-
+            await this.blogRepository.Save(blog);
             return this.NoContent();
         }
 
@@ -116,18 +106,9 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         [HttpDelete("{id}")]
         [ProducesResponseType(204)]
         [ProducesResponseType(404)]
-        public async Task<IActionResult> DeleteBlog(long id)
+        public async Task<IActionResult> DeleteBlog(int id)
         {
-            var blog = await this.context.Blogs.FindAsync(id);
-
-            if (blog == null)
-            {
-                return this.NotFound();
-            }
-
-            this.context.Blogs.Remove(blog);
-            await this.context.SaveChangesAsync();
-
+            await this.blogRepository.Remove(id);
             return this.NoContent();
         }
     }

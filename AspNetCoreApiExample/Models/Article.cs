@@ -20,7 +20,13 @@ namespace Honememo.AspNetCoreApiExample.Models
         /// <summary>
         /// ブログ記事ID。
         /// </summary>
-        public long Id { get; set; }
+        public int Id { get; set; }
+
+        /// <summary>
+        /// ブログID。
+        /// </summary>
+        [Required]
+        public int BlogId { get; set; }
 
         /// <summary>
         /// ブログ記事タイトル。

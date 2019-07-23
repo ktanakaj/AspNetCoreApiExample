@@ -16,6 +16,7 @@ namespace Honememo.AspNetCoreApiExample.Middlewares
     using Microsoft.AspNetCore.Http;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Serialization;
+    using Honememo.AspNetCoreApiExample.Exceptions;
 
     /// <summary>
     /// エラー処理ミドルウェアクラス。
@@ -78,10 +79,26 @@ namespace Honememo.AspNetCoreApiExample.Middlewares
             // デフォルトは500エラー、例外の種類に応じたステータスコードとエラー情報を返す
             var status = HttpStatusCode.InternalServerError;
             var err = new ErrorObject();
-            err.Message = exception.Message;
 
-            // TODO: 例外のパターンを追加する
             // TODO: メッセージは本番環境ではそのまま返さないようにする
+            err.Message = exception.Message;
+            err.Data = exception.Data;
+            if (exception is AppException appEx)
+            {
+                err.Code = appEx.Code;
+            }
+
+            // TODO: HTTPステータスコードは、ちゃんとやるならエラーコードマスタとか定義してそこから取る。
+            //       マスタ定義するなら、通常例外の業務例外への変換とかもやる。
+            if (exception is BadRequestException)
+            {
+                status = HttpStatusCode.BadRequest;
+            }
+            else if (exception is NotFoundException)
+            {
+                status = HttpStatusCode.NotFound;
+            }
+
             var result = JsonConvert.SerializeObject(
                 new { error = err },
                 new JsonSerializerSettings
@@ -101,13 +118,12 @@ namespace Honememo.AspNetCoreApiExample.Middlewares
         /// <summary>
         /// エラーオブジェクト。
         /// </summary>
-        /// <remarks>フォーマットはJSON-RPC2より流用。</remarks>
         public class ErrorObject
         {
             /// <summary>
             /// エラーコード。
             /// </summary>
-            public int Code { get; set; }
+            public string Code { get; set; }
 
             /// <summary>
             /// エラーメッセージ。

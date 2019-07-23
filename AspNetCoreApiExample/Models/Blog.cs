@@ -20,7 +20,7 @@ namespace Honememo.AspNetCoreApiExample.Models
         /// <summary>
         /// ブログID。
         /// </summary>
-        public long Id { get; set; }
+        public int Id { get; set; }
 
         /// <summary>
         /// ブログタイトル。
@@ -31,6 +31,6 @@ namespace Honememo.AspNetCoreApiExample.Models
         /// <summary>
         /// ブログ作者のユーザーID。
         /// </summary>
-        public long UserId { get; set; }
+        public int UserId { get; set; }
     }
 }

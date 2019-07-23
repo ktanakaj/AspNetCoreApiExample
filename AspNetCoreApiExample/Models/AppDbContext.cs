@@ -11,12 +11,15 @@
 namespace Honememo.AspNetCoreApiExample.Models
 {
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.Storage;
 
     /// <summary>
     /// アプリケーションDBコンテキストクラス。
     /// </summary>
-    public class AppDbContext : DbContext
+    public class AppDbContext : DbContext, IUnitOfWork
     {
+        #region コンストラクタ
+
         /// <summary>
         /// コンテキストを生成する。
         /// </summary>
@@ -25,6 +28,10 @@ namespace Honememo.AspNetCoreApiExample.Models
             : base(options)
         {
         }
+
+        #endregion
+
+        #region プロパティ
 
         /// <summary>
         /// ブログテーブル。
@@ -35,5 +42,20 @@ namespace Honememo.AspNetCoreApiExample.Models
         /// ブログ記事テーブル。
         /// </summary>
         public DbSet<Article> Articles { get; set; }
+
+        #endregion
+
+        #region メソッド
+
+        /// <summary>
+        /// トランザクションを開始する。
+        /// </summary>
+        /// <returns>トランザクション。</returns>
+        public IDbContextTransaction BeginTransaction()
+        {
+            return this.Database.BeginTransaction();
+        }
+
+        #endregion
     }
 }
