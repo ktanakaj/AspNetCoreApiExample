@@ -10,9 +10,11 @@
 
 namespace Honememo.AspNetCoreApiExample.Tests
 {
+    using System;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Mvc.Testing;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.Diagnostics;
     using Microsoft.EntityFrameworkCore.Storage;
     using Microsoft.Extensions.DependencyInjection;
     using Honememo.AspNetCoreApiExample.Repositories;
@@ -20,8 +22,7 @@ namespace Honememo.AspNetCoreApiExample.Tests
     /// <summary>
     /// アプリ独自の設定を入れたWebアプリケーションファクトリクラス。
     /// </summary>
-    /// <typeparam name="TStartup">Webアプリのスタートアップクラス。</typeparam>
-    public class CustomWebApplicationFactory<TStartup> : WebApplicationFactory<TStartup> where TStartup : class
+    public class CustomWebApplicationFactory : WebApplicationFactory<Startup>
     {
         #region 静的変数
 
@@ -29,6 +30,53 @@ namespace Honememo.AspNetCoreApiExample.Tests
         /// インメモリDBのルート。
         /// </summary>
         public static readonly InMemoryDatabaseRoot InMemoryDatabaseRoot = new InMemoryDatabaseRoot();
+
+        #endregion
+
+        #region メンバー変数
+
+        /// <summary>
+        /// WebアプリのインメモリDB名。
+        /// </summary>
+        private readonly string appDbName = "TestBlogDB";
+
+        #endregion
+
+        #region コンストラクタ
+
+        /// <summary>
+        /// Webアプリケーションファクトリを生成する。
+        /// </summary>
+        public CustomWebApplicationFactory()
+        {
+            // 現状の造りだと、Factoryが作られるたび(?)に
+            // テストデータの登録処理も動き、ID重複などが起こるため、
+            // DB名にGUIDを付けて処理ごとに一意にする。
+            // （一度しか作らないようにする手もあるが、そうするとパラレルで動かせなくなるので）
+            this.appDbName += Guid.NewGuid();
+
+            // テスト用の環境変数を登録
+            if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")))
+            {
+                Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Testing");
+            }
+        }
+
+        #endregion
+
+        #region テスト補助用メソッド
+
+        /// <summary>
+        /// WebアプリのDBコンテキストを生成する。
+        /// </summary>
+        /// <returns>DBコンテキスト。</returns>
+        public AppDbContext CreateDbContext()
+        {
+            var builder = new DbContextOptionsBuilder<AppDbContext>();
+            builder.UseInMemoryDatabase(this.appDbName, InMemoryDatabaseRoot);
+            builder.ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
+            return new AppDbContext(builder.Options);
+        }
 
         #endregion
 
@@ -45,7 +93,8 @@ namespace Honememo.AspNetCoreApiExample.Tests
                 // DBをインメモリDBに置き換え
                 services.AddDbContext<AppDbContext>(options =>
                 {
-                    options.UseInMemoryDatabase("TestBlogDB", InMemoryDatabaseRoot);
+                    options.UseInMemoryDatabase(this.appDbName, InMemoryDatabaseRoot);
+                    options.ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
                 });
 
                 // データベースに汎用のテストデータを登録

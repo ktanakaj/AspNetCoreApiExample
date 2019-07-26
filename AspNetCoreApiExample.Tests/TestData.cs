@@ -17,6 +17,10 @@ namespace Honememo.AspNetCoreApiExample.Tests
     /// <summary>
     /// 統合テストのテストデータ生成クラス。
     /// </summary>
+    /// <remarks>
+    /// 汎用のテストデータの登録用です。
+    /// 個別のテストに特化したデータが必要な場合は、各テスト内で自前で登録してください。
+    /// </remarks>
     public class TestData
     {
         #region 公開メソッド
@@ -47,7 +51,7 @@ namespace Honememo.AspNetCoreApiExample.Tests
             {
                 new User()
                 {
-                    Id = 1, Name = "Taro", Password = "PASSWORD"
+                    Id = 100, Name = "Taro", Password = "PASSWORD"
                 },
             };
         }
@@ -62,7 +66,7 @@ namespace Honememo.AspNetCoreApiExample.Tests
             {
                 new Blog()
                 {
-                    Id = 10, UserId = 1, Name = "Taro's Blog"
+                    Id = 1000, UserId = 100, Name = "Taro's Blog"
                 },
             };
         }
@@ -77,7 +81,7 @@ namespace Honememo.AspNetCoreApiExample.Tests
             {
                 new Article()
                 {
-                    Id = 100, BlogId = 10, Subject = "初めまして", Body = "初めまして、太郎です。ブログにようこそ。"
+                    Id = 10000, BlogId = 1000, Subject = "初めまして", Body = "初めまして、太郎です。ブログにようこそ。"
                 },
             };
         }
