@@ -10,6 +10,7 @@
 
 namespace Honememo.AspNetCoreApiExample.Entities
 {
+    using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
 
     /// <summary>
@@ -26,12 +27,19 @@ namespace Honememo.AspNetCoreApiExample.Entities
         /// ユーザー名。
         /// </summary>
         [Required]
+        [MaxLength(191)]
         public string Name { get; set; }
 
         /// <summary>
         /// パスワード。
         /// </summary>
         [Required]
+        [MaxLength(191)]
         public string Password { get; set; }
+
+        /// <summary>
+        /// ユーザーのブログ。
+        /// </summary>
+        public ICollection<Blog> Blogs { get; set; }
     }
 }

@@ -32,17 +32,24 @@ namespace Honememo.AspNetCoreApiExample.Entities
         /// ブログ記事タイトル。
         /// </summary>
         [Required]
+        [MaxLength(191)]
         public string Subject { get; set; }
 
         /// <summary>
         /// ブログ記事本文。
         /// </summary>
         [Required]
+        [MaxLength(65535)]
         public string Body { get; set; }
 
         ///// <summary>
         ///// ブログ記事タグ。
         ///// </summary>
         // public string[] Tags { get; set; }
+
+        /// <summary>
+        /// ブログ。
+        /// </summary>
+        public Blog Blog { get; set; }
     }
 }

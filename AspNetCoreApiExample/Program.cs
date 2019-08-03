@@ -12,6 +12,7 @@ namespace Honememo.AspNetCoreApiExample
 {
     using Microsoft.AspNetCore;
     using Microsoft.AspNetCore.Hosting;
+    using Microsoft.Extensions.Configuration;
 
     /// <summary>
     /// アプリケーション起動時に最初に呼ばれるクラスです。
@@ -34,6 +35,10 @@ namespace Honememo.AspNetCoreApiExample
         /// <returns>生成したWebホストビルダー。</returns>
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
+                .ConfigureAppConfiguration((hostingContext, config) =>
+                {
+                    config.AddEnvironmentVariables(prefix: "EXAMPLEAPP_");
+                })
                 .UseStartup<Startup>();
     }
 }

@@ -1,0 +1,27 @@
+- block:
+  - name: Copy the web app configuration to nginx
+    template:
+      src: "{{ app_nginx_conf_src }}"
+      dest: "{{ app_nginx_conf_dest }}"
+      force: yes
+    notify: Restart nginx
+
+  - name: Create the web application logging directory
+    file: path={{ app_log_dir }} state=directory owner=vagrant group=vagrant mode=0755
+  - name: Create the web application database
+    mysql_db: name={{ item }} encoding=utf8mb4 collation=utf8mb4_bin state=present
+    with_items: "{{ app_db }}"
+    register: app_db_created
+  - name: Craete the web application db user
+    mysql_user: name={{ item[1].user }} password={{ item[1].password }} host={{ item[0] }} priv={{ item[1].privilege }} state=present append_privs=yes
+    with_nested:
+      - [ 'localhost', '%' ]
+      - "{{ app_db_users }}"
+    when: app_db_created.changed
+
+- block:
+  - name: Build the web application
+    shell: dotnet publish chdir={{ app_svr_dir }}
+  - name: Create the web application db tables
+    shell: dotnet ef database update chdir={{ app_svr_dir }}
+  become: false

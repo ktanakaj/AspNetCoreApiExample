@@ -50,16 +50,16 @@ namespace Honememo.AspNetCoreApiExample
 
         #endregion
 
-        #region メソッド
+        #region 公開メソッド
 
         /// <summary>
-        /// サービスコンテナ登録などの設定用メソッド。
+        /// Webアプリケーションのサービス設定用メソッド。
         /// </summary>
         /// <param name="services">サービスコレクション。</param>
+        /// <remarks>設定値の登録や依存関係の登録など、アプリ初期化前の設定を行う。</remarks>
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<AppDbContext>(opt =>
-                opt.UseInMemoryDatabase("BlogDB"));
+            this.ConfigureDatabases(services);
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             services.AddScoped<UserRepository>();
@@ -79,10 +79,11 @@ namespace Honememo.AspNetCoreApiExample
         }
 
         /// <summary>
-        /// HTTPリクエストパイプラインなどの設定用メソッド。
+        /// Webアプリケーションの設定用メソッド。
         /// </summary>
         /// <param name="app">アプリケーションビルダー。</param>
         /// <param name="env">ホスト環境。</param>
+        /// <remarks>初期化されたインスタンスなどを元に、アプリ起動前の設定を行う。</remarks>
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
             if (env.IsDevelopment())
@@ -101,6 +102,30 @@ namespace Honememo.AspNetCoreApiExample
 
             app.UseMiddleware(typeof(ErrorHandlingMiddleware));
             app.UseMvc();
+        }
+
+        #endregion
+
+        #region 内部メソッド
+
+        /// <summary>
+        /// データベースの設定用メソッド。
+        /// </summary>
+        /// <param name="services">サービスコレクション。</param>
+        private void ConfigureDatabases(IServiceCollection services)
+        {
+            var dbconf = this.Configuration.GetSection("Database");
+            switch (dbconf.GetValue<string>("Type")?.ToLower())
+            {
+                case "mysql":
+                    services.AddDbContext<AppDbContext>(opt =>
+                        opt.UseMySql(dbconf.GetValue<string>("ConnectionString")));
+                    break;
+                default:
+                    services.AddDbContext<AppDbContext>(opt =>
+                        opt.UseInMemoryDatabase("AppDB"));
+                    break;
+            }
         }
 
         #endregion

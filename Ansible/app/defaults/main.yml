@@ -1,0 +1,10 @@
+app_nginx_conf_src: "nginx.conf.j2"
+app_nginx_conf_dest: "/etc/nginx/default.d/vagrant.conf"
+app_svr_dir: "/vagrant/AspNetCoreApiExample"
+app_log_dir: "/var/log/local/aspnetcoreapi-example"
+app_db:
+  - blog_db
+app_db_users:
+  - user: blog_usr
+    password: "blog001"
+    privilege: "blog_db.*:ALL"

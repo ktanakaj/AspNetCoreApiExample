@@ -38,7 +38,7 @@ namespace Honememo.AspNetCoreApiExample.Tests
         /// <summary>
         /// WebアプリのインメモリDB名。
         /// </summary>
-        private readonly string appDbName = "TestBlogDB";
+        private readonly string appDbName = "TestAppDB";
 
         #endregion
 
