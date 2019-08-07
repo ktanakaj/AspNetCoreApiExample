@@ -13,6 +13,7 @@ namespace Honememo.AspNetCoreApiExample.Repositories
     using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
+    using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
     using Honememo.AspNetCoreApiExample.Entities;
     using Honememo.AspNetCoreApiExample.Exceptions;
@@ -25,21 +26,21 @@ namespace Honememo.AspNetCoreApiExample.Repositories
         #region メンバー変数
 
         /// <summary>
-        /// アプリケーションDBコンテキスト。
+        /// ユーザーマネージャー。
         /// </summary>
-        private readonly AppDbContext context;
+        private readonly UserManager<User> userManager;
 
         #endregion
 
         #region コンストラクタ
 
         /// <summary>
-        /// コンテキストをDIしてリポジトリを生成する。
+        /// ユーザーマネージャーをDIしてリポジトリを生成する。
         /// </summary>
-        /// <param name="context">アプリケーションDBコンテキスト。</param>
-        public UserRepository(AppDbContext context)
+        /// <param name="userManager">ユーザーマネージャー。</param>
+        public UserRepository(UserManager<User> userManager)
         {
-            this.context = context ?? throw new ArgumentNullException(nameof(context));
+            this.userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
         }
 
         #endregion
@@ -52,7 +53,7 @@ namespace Honememo.AspNetCoreApiExample.Repositories
         /// <returns>ユーザー。</returns>
         public async Task<IList<User>> FindAll()
         {
-            return await this.context.Users.ToListAsync();
+            return await this.userManager.Users.ToListAsync();
         }
 
         /// <summary>
@@ -62,7 +63,7 @@ namespace Honememo.AspNetCoreApiExample.Repositories
         /// <returns>ユーザー。</returns>
         public Task<User> Find(int id)
         {
-            return this.context.Users.FindAsync(id);
+            return this.userManager.FindByIdAsync(id.ToString());
         }
 
         /// <summary>
@@ -94,8 +95,12 @@ namespace Honememo.AspNetCoreApiExample.Repositories
         public async Task<User> Create(User user)
         {
             user.Id = 0;
-            this.context.Users.Add(user);
-            await this.context.SaveChangesAsync();
+            var result = await this.userManager.CreateAsync(user);
+            if (!result.Succeeded)
+            {
+                throw new Exception(result.Errors.ToString());
+            }
+
             return user;
         }
 
@@ -106,8 +111,12 @@ namespace Honememo.AspNetCoreApiExample.Repositories
         /// <returns>更新したユーザー。</returns>
         public async Task<User> Update(User user)
         {
-            this.context.Entry(user).State = EntityState.Modified;
-            await this.context.SaveChangesAsync();
+            var result = await this.userManager.UpdateAsync(user);
+            if (!result.Succeeded)
+            {
+                throw new Exception(result.Errors.ToString());
+            }
+
             return user;
         }
 
@@ -120,8 +129,12 @@ namespace Honememo.AspNetCoreApiExample.Repositories
         public async Task<User> Delete(int id)
         {
             var user = await this.FindOrFail(id);
-            this.context.Users.Remove(user);
-            await this.context.SaveChangesAsync();
+            var result = await this.userManager.DeleteAsync(user);
+            if (!result.Succeeded)
+            {
+                throw new Exception(result.Errors.ToString());
+            }
+
             return user;
         }
 

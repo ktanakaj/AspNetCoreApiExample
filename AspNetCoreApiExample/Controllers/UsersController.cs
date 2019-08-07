@@ -11,6 +11,7 @@
 namespace Honememo.AspNetCoreApiExample.Controllers
 {
     using System.Collections.Generic;
+    using System.ComponentModel.DataAnnotations;
     using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Mvc;
@@ -75,15 +76,19 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         /// <summary>
         /// ユーザーを新規登録する。
         /// </summary>
-        /// <param name="user">ユーザー。</param>
+        /// <param name="body">ユーザー登録情報。</param>
         /// <returns>登録したユーザー。</returns>
         [HttpPost]
         [ProducesResponseType(201)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<User>> PostUser(User user)
+        public async Task<ActionResult<User>> PostUser(PostUserBody body)
         {
             // TODO: 作成と同時にログインするようにする
-            await this.userRepository.Create(user);
+            var user = await this.userRepository.Create(new User()
+            {
+                UserName = body.Name,
+                PasswordHash = body.Password,
+            });
             return this.CreatedAtAction(nameof(this.GetUser), new { id = user.Id }, user);
         }
 
@@ -103,6 +108,29 @@ namespace Honememo.AspNetCoreApiExample.Controllers
             user.Id = id;
             await this.userRepository.Update(user);
             return this.NoContent();
+        }
+
+        #endregion
+
+        #region 内部クラス
+
+        /// <summary>
+        /// ユーザー登録のリクエストパラメータ。
+        /// </summary>
+        public class PostUserBody
+        {
+            /// <summary>
+            /// ユーザー名。
+            /// </summary>
+            [Required]
+            [MaxLength(191)]
+            public string Name { get; set; }
+
+            /// <summary>
+            /// パスワード。
+            /// </summary>
+            [Required]
+            public string Password { get; set; }
         }
 
         #endregion

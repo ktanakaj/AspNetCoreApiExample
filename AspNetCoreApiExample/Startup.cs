@@ -15,11 +15,13 @@ namespace Honememo.AspNetCoreApiExample
     using System.Reflection;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
+    using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Swashbuckle.AspNetCore.Swagger;
+    using Honememo.AspNetCoreApiExample.Entities;
     using Honememo.AspNetCoreApiExample.Middlewares;
     using Honememo.AspNetCoreApiExample.Repositories;
 
@@ -59,9 +61,17 @@ namespace Honememo.AspNetCoreApiExample
         /// <remarks>設定値の登録や依存関係の登録など、アプリ初期化前の設定を行う。</remarks>
         public void ConfigureServices(IServiceCollection services)
         {
-            this.ConfigureDatabases(services);
+            // DB設定
+            services.AddDbContext<AppDbContext>(opt =>
+                this.ApplyDbConfig(opt, this.Configuration.GetSection("Database")));
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
+            // 認証設定
+            services.AddIdentity<User, IdentityRole<int>>()
+                .AddEntityFrameworkStores<AppDbContext>()
+                .AddDefaultTokenProviders();
+
+            // DI設定
             services.AddScoped<UserRepository>();
             services.AddScoped<BlogRepository>();
             services.AddScoped<ArticleRepository>();
@@ -100,6 +110,7 @@ namespace Honememo.AspNetCoreApiExample
                 });
             }
 
+            app.UseAuthentication();
             app.UseMiddleware(typeof(ErrorHandlingMiddleware));
             app.UseMvc();
         }
@@ -109,23 +120,24 @@ namespace Honememo.AspNetCoreApiExample
         #region 内部メソッド
 
         /// <summary>
-        /// データベースの設定用メソッド。
+        /// DBオプションビルダーにDB設定値を適用する。
         /// </summary>
-        /// <param name="services">サービスコレクション。</param>
-        private void ConfigureDatabases(IServiceCollection services)
+        /// <param name="builder">ビルダー。</param>
+        /// <param name="dbconf">DB設定値。</param>
+        /// <returns>メソッドチェーン用のビルダー。</returns>
+        public DbContextOptionsBuilder ApplyDbConfig(DbContextOptionsBuilder builder, IConfigurationSection dbconf)
         {
-            var dbconf = this.Configuration.GetSection("Database");
             switch (dbconf.GetValue<string>("Type")?.ToLower())
             {
                 case "mysql":
-                    services.AddDbContext<AppDbContext>(opt =>
-                        opt.UseMySql(dbconf.GetValue<string>("ConnectionString")));
+                    builder.UseMySql(dbconf.GetValue<string>("ConnectionString"));
                     break;
                 default:
-                    services.AddDbContext<AppDbContext>(opt =>
-                        opt.UseInMemoryDatabase("AppDB"));
+                    builder.UseInMemoryDatabase("AppDB");
                     break;
             }
+
+            return builder;
         }
 
         #endregion

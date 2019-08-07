@@ -51,7 +51,7 @@ namespace Honememo.AspNetCoreApiExample.Tests
             {
                 new User()
                 {
-                    Id = 100, Name = "Taro", Password = "PASSWORD"
+                    Id = 100, UserName = "Taro", PasswordHash = "PASSWORD"
                 },
             };
         }
