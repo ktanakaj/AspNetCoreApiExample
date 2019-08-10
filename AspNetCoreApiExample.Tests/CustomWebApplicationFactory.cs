@@ -11,12 +11,15 @@
 namespace Honememo.AspNetCoreApiExample.Tests
 {
     using System;
+    using System.Net.Http;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Mvc.Testing;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Diagnostics;
     using Microsoft.EntityFrameworkCore.Storage;
     using Microsoft.Extensions.DependencyInjection;
+    using Newtonsoft.Json.Linq;
+    using Honememo.AspNetCoreApiExample.Controllers;
     using Honememo.AspNetCoreApiExample.Repositories;
 
     /// <summary>
@@ -76,6 +79,54 @@ namespace Honememo.AspNetCoreApiExample.Tests
             builder.UseInMemoryDatabase(this.appDbName, InMemoryDatabaseRoot);
             builder.ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
             return new AppDbContext(builder.Options);
+        }
+
+        /// <summary>
+        /// ユーザー認証済のHTTPクライアントを生成する。
+        /// </summary>
+        /// <param name="name">認証するユーザーの名前。未指定時はid=100のユーザー。</param>
+        /// <param name="password">認証するユーザーのパスワード。〃。</param>
+        /// <returns>HTTPクライアントと認証したユーザーのID。</returns>
+        public (HttpClient, int) CreateAuthedClient(string name = "Taro", string password = "PASSWORD")
+        {
+            // 指定された条件でログインして、そのセッションを持つHTTPクライアントを返す
+            var client = this.CreateClient();
+            var body = new UsersController.LoginBody() { UserName = name, Password = password };
+            var response = client.PostAsJsonAsync("/api/users/login", body).Result;
+            var responseString = response.Content.ReadAsStringAsync().Result;
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception(responseString);
+            }
+
+            return (client, (int)JObject.Parse(responseString)["id"]);
+        }
+
+        /// <summary>
+        /// 新規ユーザーのHTTPクライアントを生成する。
+        /// </summary>
+        /// <param name="name">新規ユーザーの名前。未指定時はランダム生成。</param>
+        /// <param name="password">新規ユーザーのパスワード。</param>
+        /// <returns>HTTPクライアントと新規ユーザーのID。</returns>
+        public (HttpClient, int) CreateNewUserClient(string name = null, string password = "TEST_PASSWORD")
+        {
+            // 名前が被るとエラーになるので、未指定時は動的に設定
+            if (string.IsNullOrEmpty(name))
+            {
+                name = "NEW_USER_" + Guid.NewGuid();
+            }
+
+            // 指定された条件でユーザーを作成して、そのセッションを持つHTTPクライアントを返す
+            var client = this.CreateClient();
+            var body = new UsersController.CreateUserBody() { UserName = name, Password = password };
+            var response = client.PostAsJsonAsync("/api/users", body).Result;
+            var responseString = response.Content.ReadAsStringAsync().Result;
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new Exception(responseString);
+            }
+
+            return (client, (int)JObject.Parse(responseString)["id"]);
         }
 
         #endregion

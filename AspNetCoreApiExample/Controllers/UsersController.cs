@@ -14,9 +14,12 @@ namespace Honememo.AspNetCoreApiExample.Controllers
     using System.ComponentModel.DataAnnotations;
     using System.Linq;
     using System.Threading.Tasks;
+    using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
+    using Microsoft.AspNetCore.Identity;
     using Honememo.AspNetCoreApiExample.Entities;
     using Honememo.AspNetCoreApiExample.Repositories;
+    using Honememo.AspNetCoreApiExample.Exceptions;
 
     /// <summary>
     /// ユーザーコントローラクラス。
@@ -24,9 +27,14 @@ namespace Honememo.AspNetCoreApiExample.Controllers
     [Produces("application/json")]
     [Route("api/[controller]")]
     [ApiController]
-    public class UsersController : ControllerBase
+    public class UsersController : AppControllerBase
     {
         #region メンバー変数
+
+        /// <summary>
+        /// サインインマネージャー。
+        /// </summary>
+        private readonly SignInManager<User> signInManager;
 
         /// <summary>
         /// ユーザーリポジトリ。
@@ -38,11 +46,13 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         #region コンストラクタ
 
         /// <summary>
-        /// リポジトリをDIしてコントローラを生成する。
+        /// リポジトリ等をDIしてコントローラを生成する。
         /// </summary>
+        /// <param name="signInManager">サインインマネージャー。</param>
         /// <param name="userRepository">ユーザーリポジトリ。</param>
-        public UsersController(UserRepository userRepository)
+        public UsersController(SignInManager<User> signInManager, UserRepository userRepository)
         {
+            this.signInManager = signInManager;
             this.userRepository = userRepository;
         }
 
@@ -81,32 +91,75 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         [HttpPost]
         [ProducesResponseType(201)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<User>> PostUser(PostUserBody body)
+        public async Task<ActionResult<User>> CreateUser(CreateUserBody body)
         {
-            // TODO: 作成と同時にログインするようにする
-            var user = await this.userRepository.Create(new User()
-            {
-                UserName = body.Name,
-                PasswordHash = body.Password,
-            });
+            // ユーザーを登録し、ログイン中の状態にする
+            var user = await this.userRepository.CreateBy(body.UserName, body.Password);
+            await this.signInManager.SignInAsync(user, false);
             return this.CreatedAtAction(nameof(this.GetUser), new { id = user.Id }, user);
         }
 
-        // TODO: 更新APIは、要認証にして自分のみを更新可にする
+        /// <summary>
+        /// ログインする。
+        /// </summary>
+        /// <param name="body">認証情報。</param>
+        /// <returns>登録したユーザー。</returns>
+        [HttpPost("login")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        public async Task<ActionResult<User>> Login(LoginBody body)
+        {
+            var result = await this.signInManager.PasswordSignInAsync(body.UserName, body.Password, false, false);
+            if (!result.Succeeded)
+            {
+                throw new BadRequestException("name or password is not valid");
+            }
+
+            // ※ この時点では this.User は空で使用できない
+            return await this.userRepository.FindByName(body.UserName);
+        }
 
         /// <summary>
-        /// ユーザーを更新する。
+        /// ログアウトする。
         /// </summary>
-        /// <param name="id">ユーザーID。</param>
-        /// <param name="user">更新するユーザー情報。</param>
-        /// <returns>処理結果。</returns>
-        [HttpPut("{id}")]
-        [ProducesResponseType(204)]
-        [ProducesResponseType(404)]
-        public async Task<IActionResult> PutUser(int id, User user)
+        /// <returns>処理状態。</returns>
+        [HttpPost("logout")]
+        [Authorize]
+        [ProducesResponseType(200)]
+        public async Task<IActionResult> Logout()
         {
-            user.Id = id;
-            await this.userRepository.Update(user);
+            await this.signInManager.SignOutAsync();
+            return this.Ok();
+        }
+
+        /// <summary>
+        /// 認証中ユーザーの情報を変更する。
+        /// </summary>
+        /// <param name="body">ユーザー変更情報。</param>
+        /// <returns>処理結果。</returns>
+        [HttpPut]
+        [Authorize]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public async Task<IActionResult> UpdateUser(UpdateUserBody body)
+        {
+            // ※ 現状ユーザー名の変更のみ対応
+            await this.userRepository.ChangeUserName(this.UserId, body.UserName);
+            return this.NoContent();
+        }
+
+        /// <summary>
+        /// 認証中ユーザーのパスワードを変更する。
+        /// </summary>
+        /// <param name="body">パスワード変更情報。</param>
+        /// <returns>処理結果。</returns>
+        [HttpPut("password")]
+        [Authorize]
+        [ProducesResponseType(204)]
+        [ProducesResponseType(400)]
+        public async Task<IActionResult> ChangePassword(ChangePasswordBody body)
+        {
+            await this.userRepository.ChangePassword(this.UserId, body.CurrentPassword, body.NewPassword);
             return this.NoContent();
         }
 
@@ -117,20 +170,58 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         /// <summary>
         /// ユーザー登録のリクエストパラメータ。
         /// </summary>
-        public class PostUserBody
+        public class CreateUserBody : LoginBody
+        {
+        }
+
+        /// <summary>
+        /// ユーザー更新のリクエストパラメータ。
+        /// </summary>
+        public class UpdateUserBody
         {
             /// <summary>
             /// ユーザー名。
             /// </summary>
             [Required]
             [MaxLength(191)]
-            public string Name { get; set; }
+            public string UserName { get; set; }
+        }
+
+        /// <summary>
+        /// ログインのリクエストパラメータ。
+        /// </summary>
+        public class LoginBody
+        {
+            /// <summary>
+            /// ユーザー名。
+            /// </summary>
+            [Required]
+            [MaxLength(191)]
+            public string UserName { get; set; }
 
             /// <summary>
             /// パスワード。
             /// </summary>
             [Required]
             public string Password { get; set; }
+        }
+
+        /// <summary>
+        /// パスワード変更のリクエストパラメータ。
+        /// </summary>
+        public class ChangePasswordBody
+        {
+            /// <summary>
+            /// 現在のパスワード。
+            /// </summary>
+            [Required]
+            public string CurrentPassword { get; set; }
+
+            /// <summary>
+            /// 新しいパスワード。
+            /// </summary>
+            [Required]
+            public string NewPassword { get; set; }
         }
 
         #endregion

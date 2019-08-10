@@ -12,6 +12,8 @@ namespace Honememo.AspNetCoreApiExample.Repositories
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
+    using System.Security.Claims;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
@@ -67,6 +69,16 @@ namespace Honememo.AspNetCoreApiExample.Repositories
         }
 
         /// <summary>
+        /// ユーザー名でユーザーを取得する。
+        /// </summary>
+        /// <param name="name">ユーザー名。</param>
+        /// <returns>ユーザー。</returns>
+        public Task<User> FindByName(string name)
+        {
+            return this.userManager.FindByNameAsync(name);
+        }
+
+        /// <summary>
         /// ユーザーIDでユーザーを取得する。
         /// </summary>
         /// <param name="id">ユーザーID。</param>
@@ -90,33 +102,53 @@ namespace Honememo.AspNetCoreApiExample.Repositories
         /// <summary>
         /// ユーザーを登録する。
         /// </summary>
-        /// <param name="user">ユーザー。</param>
+        /// <param name="name">ユーザー名。</param>
+        /// <param name="password">パスワード。</param>
         /// <returns>登録したユーザー。</returns>
-        public async Task<User> Create(User user)
+        public async Task<User> CreateBy(string name, string password)
         {
-            user.Id = 0;
-            var result = await this.userManager.CreateAsync(user);
-            if (!result.Succeeded)
+            // ※ 通常は入力値不正しかエラーは発生しない（名前重複やパスワード不許可）
+            var user = new User()
             {
-                throw new Exception(result.Errors.ToString());
-            }
-
+                UserName = name,
+            };
+            this.ThrowBadRequestExceptionIfResultIsNotSucceeded(
+                await this.userManager.CreateAsync(user));
+            this.ThrowBadRequestExceptionIfResultIsNotSucceeded(
+                await this.userManager.AddPasswordAsync(user, password));
             return user;
         }
 
         /// <summary>
-        /// ユーザーを更新する。
+        /// ユーザーの名前を変更する。
         /// </summary>
-        /// <param name="user">ユーザー。</param>
+        /// <param name="id">ユーザーID。</param>
+        /// <param name="userName">新しいユーザー名。</param>
         /// <returns>更新したユーザー。</returns>
-        public async Task<User> Update(User user)
+        /// <exception cref="NotFoundException">ユーザーが存在しない場合。</exception>
+        public async Task<User> ChangeUserName(int id, string userName)
         {
-            var result = await this.userManager.UpdateAsync(user);
-            if (!result.Succeeded)
-            {
-                throw new Exception(result.Errors.ToString());
-            }
+            // ※ 通常は入力値不正しかエラーは発生しない（名前重複）
+            var user = await this.FindOrFail(id);
+            this.ThrowBadRequestExceptionIfResultIsNotSucceeded(
+                await this.userManager.SetUserNameAsync(user, userName));
+            return user;
+        }
 
+        /// <summary>
+        /// ユーザーのパスワードを変更する。
+        /// </summary>
+        /// <param name="id">ユーザーID。</param>
+        /// <param name="currentPasword">現在のパスワード。</param>
+        /// <param name="newPassword">新しいパスワード。</param>
+        /// <returns>更新したユーザー。</returns>
+        /// <exception cref="NotFoundException">ユーザーが存在しない場合。</exception>
+        public async Task<User> ChangePassword(int id, string currentPasword, string newPassword)
+        {
+            // ※ 通常は入力値不正しかエラーは発生しない（パスワード間違いなど）
+            var user = await this.FindOrFail(id);
+            this.ThrowBadRequestExceptionIfResultIsNotSucceeded(
+                await this.userManager.ChangePasswordAsync(user, currentPasword, newPassword));
             return user;
         }
 
@@ -129,13 +161,38 @@ namespace Honememo.AspNetCoreApiExample.Repositories
         public async Task<User> Delete(int id)
         {
             var user = await this.FindOrFail(id);
-            var result = await this.userManager.DeleteAsync(user);
+            this.ThrowExceptionIfResultIsNotSucceeded<Exception>(
+                await this.userManager.DeleteAsync(user));
+            return user;
+        }
+
+        #endregion
+
+        #region 内部メソッド
+
+        /// <summary>
+        /// UserManagerの戻り値が失敗の場合に例外を投げる。
+        /// </summary>
+        /// <typeparam name="T">例外クラス。</typeparam>
+        /// <param name="result">チェックする戻り値。</param>
+        private void ThrowExceptionIfResultIsNotSucceeded<T>(IdentityResult result) where T : Exception, new()
+        {
             if (!result.Succeeded)
             {
-                throw new Exception(result.Errors.ToString());
+                throw (T)Activator.CreateInstance(typeof(T), string.Join(", ", result.Errors.Select(e => e.Description)));
             }
+        }
 
-            return user;
+        /// <summary>
+        /// UserManagerの戻り値が失敗の場合に入力値不正例外を投げる。
+        /// </summary>
+        /// <param name="result">チェックする戻り値。</param>
+        private void ThrowBadRequestExceptionIfResultIsNotSucceeded(IdentityResult result)
+        {
+            if (!result.Succeeded)
+            {
+                throw new BadRequestException(string.Join(", ", result.Errors.Select(e => e.Description)));
+            }
         }
 
         #endregion

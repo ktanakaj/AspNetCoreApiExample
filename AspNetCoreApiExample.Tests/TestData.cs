@@ -51,7 +51,13 @@ namespace Honememo.AspNetCoreApiExample.Tests
             {
                 new User()
                 {
-                    Id = 100, UserName = "Taro", PasswordHash = "PASSWORD"
+                    // ハッシュ化前のパスワードは"PASSWORD"
+                    Id = 100,
+                    UserName = "Taro",
+                    NormalizedUserName = "TARO",
+                    PasswordHash = "AQAAAAEAACcQAAAAELHYhJQlwFRMpSdYMcf6IKSV1ooi979/BOHd8/wNn07b/K2x4WBjreAz4qErGiEt5w==",
+                    SecurityStamp = "7MSORXMIMFO4PO6TD6TSG5UD6ESXO7MU",
+                    ConcurrencyStamp = "4f05fd65-7e0a-41d5-80fd-818ee04b86cf",
                 },
             };
         }
