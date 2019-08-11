@@ -12,6 +12,7 @@ namespace Honememo.AspNetCoreApiExample.Entities
 {
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
+    using Newtonsoft.Json;
 
     /// <summary>
     /// ブログエンティティクラス。
@@ -38,11 +39,13 @@ namespace Honememo.AspNetCoreApiExample.Entities
         /// <summary>
         /// ブログ作者のユーザー。
         /// </summary>
+        [JsonIgnore]
         public User User { get; set; }
 
         /// <summary>
         /// ブログの記事。
         /// </summary>
+        [JsonIgnore]
         public ICollection<Article> Articles { get; set; }
     }
 }

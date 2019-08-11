@@ -11,8 +11,9 @@
 namespace Honememo.AspNetCoreApiExample.Tests.Controllers
 {
     using System.Net.Http;
-    using Xunit;
     using Newtonsoft.Json.Linq;
+    using Xunit;
+    using Honememo.AspNetCoreApiExample.Controllers;
     using Honememo.AspNetCoreApiExample.Entities;
 
     /// <summary>
@@ -32,6 +33,16 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
         /// </summary>
         private readonly HttpClient client;
 
+        /// <summary>
+        /// Webアプリテスト用の認証済HTTPクライアント。
+        /// </summary>
+        private readonly HttpClient authedClient;
+
+        /// <summary>
+        /// 認証済HTTPクライアントのユーザーID。
+        /// </summary>
+        private readonly int userId;
+
         #endregion
 
         #region コンストラクタ
@@ -44,6 +55,7 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
         {
             this.factory = factory;
             this.client = factory.CreateClient();
+            (this.authedClient, this.userId) = factory.CreateAuthedClient();
         }
 
         #endregion
@@ -63,10 +75,11 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
             var json = JToken.Parse(responseString);
             Assert.IsType<JArray>(json);
 
+            // ※ 取れるブログは不確定のため、データがあるかのみテスト
             var array = json as JArray;
             Assert.NotEmpty(array);
-            Assert.Equal(1000, array[0]["id"]);
-            Assert.Equal("Taro's Blog", array[0]["name"]);
+            Assert.Equal(JTokenType.Integer, array[0]["id"].Type);
+            Assert.Equal(JTokenType.String, array[0]["name"].Type);
         }
 
         /// <summary>
@@ -92,8 +105,8 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
         [Fact]
         public async void TestPostBlog()
         {
-            var param = new Blog() { Name = "New Blog" };
-            var response = await this.client.PostAsJsonAsync("/api/blogs", param);
+            var body = new BlogsController.BlogBody() { Name = "New Blog" };
+            var response = await this.authedClient.PostAsJsonAsync("/api/blogs", body);
             var responseString = await response.Content.ReadAsStringAsync();
             Assert.True(response.IsSuccessStatusCode, responseString);
 
@@ -101,11 +114,11 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
             Assert.IsType<JObject>(json);
 
             Assert.NotNull(json["id"]);
-            Assert.Equal(param.Name, json["name"]);
+            Assert.Equal(body.Name, json["name"]);
 
             var dbblog = this.factory.CreateDbContext().Blogs.Find((int)json["id"]);
             Assert.NotNull(dbblog);
-            Assert.Equal(param.Name, dbblog.Name);
+            Assert.Equal(body.Name, dbblog.Name);
         }
 
         /// <summary>
@@ -114,19 +127,19 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
         [Fact]
         public async void TestPutBlog()
         {
-            var blog = new Blog() { Id = 1001, Name = "Blog for PutBlog", UserId = 100 };
+            var blog = new Blog() { Id = 2001, Name = "Blog for PutBlog", UserId = this.userId };
             var db = this.factory.CreateDbContext();
             db.Blogs.Add(blog);
             db.SaveChanges();
 
-            var param = new Blog() { Name = "Updated Blog" };
-            var response = await this.client.PutAsJsonAsync($"/api/blogs/{blog.Id}", param);
+            var body = new BlogsController.BlogBody() { Name = "Updated Blog" };
+            var response = await this.authedClient.PutAsJsonAsync($"/api/blogs/{blog.Id}", body);
             var responseString = await response.Content.ReadAsStringAsync();
             Assert.True(response.IsSuccessStatusCode, responseString);
 
             var dbblog = this.factory.CreateDbContext().Blogs.Find(blog.Id);
             Assert.NotNull(dbblog);
-            Assert.Equal(param.Name, dbblog.Name);
+            Assert.Equal(body.Name, dbblog.Name);
         }
 
         /// <summary>
@@ -135,12 +148,12 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
         [Fact]
         public async void TestDeleteBlog()
         {
-            var blog = new Blog() { Id = 1002, Name = "Blog for DeleteBlog", UserId = 100 };
+            var blog = new Blog() { Id = 2002, Name = "Blog for DeleteBlog", UserId = this.userId };
             var db = this.factory.CreateDbContext();
             db.Blogs.Add(blog);
             db.SaveChanges();
 
-            var response = await this.client.DeleteAsync($"/api/blogs/{blog.Id}");
+            var response = await this.authedClient.DeleteAsync($"/api/blogs/{blog.Id}");
             var responseString = await response.Content.ReadAsStringAsync();
             Assert.True(response.IsSuccessStatusCode, responseString);
 

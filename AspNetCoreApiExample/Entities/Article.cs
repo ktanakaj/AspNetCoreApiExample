@@ -11,6 +11,7 @@
 namespace Honememo.AspNetCoreApiExample.Entities
 {
     using System.ComponentModel.DataAnnotations;
+    using Newtonsoft.Json;
 
     /// <summary>
     /// ブログ記事エンティティクラス。
@@ -50,6 +51,7 @@ namespace Honememo.AspNetCoreApiExample.Entities
         /// <summary>
         /// ブログ。
         /// </summary>
+        [JsonIgnore]
         public Blog Blog { get; set; }
     }
 }

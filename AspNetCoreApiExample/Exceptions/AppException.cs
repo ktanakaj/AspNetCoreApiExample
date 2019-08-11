@@ -17,20 +17,6 @@ namespace Honememo.AspNetCoreApiExample.Exceptions
     /// </summary>
     public class AppException : Exception
     {
-        #region メンバー変数
-
-        /// <summary>
-        /// エラーコード。
-        /// </summary>
-        private string code;
-
-        /// <summary>
-        /// 追加情報。
-        /// </summary>
-        private System.Collections.IDictionary data;
-
-        #endregion
-
         #region コンストラクタ
 
         /// <summary>
@@ -62,8 +48,8 @@ namespace Honememo.AspNetCoreApiExample.Exceptions
         /// <param name="innerException">発生元の例外。</param>
         public AppException(string message, string code, System.Collections.IDictionary data, Exception innerException) : base(message, innerException)
         {
-            this.code = code;
-            this.data = data;
+            this.Code = code;
+            this.Data = data;
         }
 
         #endregion
@@ -73,24 +59,12 @@ namespace Honememo.AspNetCoreApiExample.Exceptions
         /// <summary>
         /// エラーコード。
         /// </summary>
-        public string Code
-        {
-            get
-            {
-                return this.code;
-            }
-        }
+        public string Code { get; }
 
         /// <summary>
         /// 追加情報。
         /// </summary>
-        public override System.Collections.IDictionary Data
-        {
-            get
-            {
-                return this.data;
-            }
-        }
+        public override System.Collections.IDictionary Data { get; }
 
         #endregion
     }
