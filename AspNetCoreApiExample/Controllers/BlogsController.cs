@@ -13,13 +13,10 @@ namespace Honememo.AspNetCoreApiExample.Controllers
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using AutoMapper;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
     using Honememo.AspNetCoreApiExample.Dto;
-    using Honememo.AspNetCoreApiExample.Entities;
-    using Honememo.AspNetCoreApiExample.Exceptions;
-    using Honememo.AspNetCoreApiExample.Repositories;
+    using Honememo.AspNetCoreApiExample.Services;
 
     /// <summary>
     /// ブログコントローラクラス。
@@ -32,28 +29,21 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         #region メンバー変数
 
         /// <summary>
-        /// AutoMapperインスタンス。
-        /// </summary>
-        private readonly IMapper mapper;
-
-        /// <summary>
         /// ブログリポジトリ。
         /// </summary>
-        private readonly BlogRepository blogRepository;
+        private readonly BlogService blogService;
 
         #endregion
 
         #region コンストラクタ
 
         /// <summary>
-        /// リポジトリをDIしてコントローラを生成する。
+        /// サービスをDIしてコントローラを生成する。
         /// </summary>
-        /// <param name="mapper">AutoMapperインスタンス。</param>
-        /// <param name="blogRepository">ブログリポジトリ。</param>
-        public BlogsController(IMapper mapper, BlogRepository blogRepository)
+        /// <param name="blogService">ブログサービス。</param>
+        public BlogsController(BlogService blogService)
         {
-            this.mapper = mapper;
-            this.blogRepository = blogRepository;
+            this.blogService = blogService;
         }
 
         #endregion
@@ -67,7 +57,7 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<BlogDto>>> GetBlogs()
         {
-            return this.mapper.Map<IEnumerable<BlogDto>>(await this.blogRepository.FindAll()).ToList();
+            return (await this.blogService.FindBlogs()).ToList();
         }
 
         /// <summary>
@@ -80,7 +70,7 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         [ProducesResponseType(404)]
         public async Task<ActionResult<BlogDto>> GetBlog(int id)
         {
-            return this.mapper.Map<BlogDto>(await this.blogRepository.FindOrFail(id));
+            return await this.blogService.FindBlog(id);
         }
 
         /// <summary>
@@ -94,10 +84,8 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         [ProducesResponseType(400)]
         public async Task<ActionResult<BlogDto>> PostBlog(BlogEditDto body)
         {
-            var blog = this.mapper.Map<Blog>(body);
-            blog.UserId = this.UserId;
-            blog = await this.blogRepository.Create(blog);
-            return this.CreatedAtAction(nameof(this.GetBlog), new { id = blog.Id }, this.mapper.Map<BlogDto>(blog));
+            var blog = await this.blogService.CreateBlog(this.UserId, body);
+            return this.CreatedAtAction(nameof(this.GetBlog), new { id = blog.Id }, blog);
         }
 
         /// <summary>
@@ -112,13 +100,7 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         [ProducesResponseType(404)]
         public async Task<IActionResult> PutBlog(int id, BlogEditDto body)
         {
-            var blog = await this.blogRepository.FindOrFail(id);
-            if (blog.UserId != this.UserId)
-            {
-                throw new ForbiddenException($"id={id} does not belong to me");
-            }
-
-            await this.blogRepository.Update(this.mapper.Map(body, blog));
+            await this.blogService.UpdateBlog(this.UserId, id, body);
             return this.NoContent();
         }
 
@@ -133,13 +115,7 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         [ProducesResponseType(404)]
         public async Task<IActionResult> DeleteBlog(int id)
         {
-            var blog = await this.blogRepository.FindOrFail(id);
-            if (blog.UserId != this.UserId)
-            {
-                throw new ForbiddenException($"id={id} does not belong to me");
-            }
-
-            await this.blogRepository.Delete(id);
+            await this.blogService.DeleteBlog(this.UserId, id);
             return this.NoContent();
         }
 

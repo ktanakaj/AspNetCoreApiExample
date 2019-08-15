@@ -19,8 +19,8 @@ namespace Honememo.AspNetCoreApiExample.Controllers
     using Microsoft.AspNetCore.Identity;
     using Honememo.AspNetCoreApiExample.Dto;
     using Honememo.AspNetCoreApiExample.Entities;
-    using Honememo.AspNetCoreApiExample.Repositories;
     using Honememo.AspNetCoreApiExample.Exceptions;
+    using Honememo.AspNetCoreApiExample.Services;
 
     /// <summary>
     /// ユーザーコントローラクラス。
@@ -43,25 +43,25 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         private readonly SignInManager<User> signInManager;
 
         /// <summary>
-        /// ユーザーリポジトリ。
+        /// ユーザーサービス。
         /// </summary>
-        private readonly UserRepository userRepository;
+        private readonly UserService userService;
 
         #endregion
 
         #region コンストラクタ
 
         /// <summary>
-        /// リポジトリ等をDIしてコントローラを生成する。
+        /// サービス等をDIしてコントローラを生成する。
         /// </summary>
         /// <param name="mapper">AutoMapperインスタンス。</param>
         /// <param name="signInManager">サインインマネージャー。</param>
-        /// <param name="userRepository">ユーザーリポジトリ。</param>
-        public UsersController(IMapper mapper, SignInManager<User> signInManager, UserRepository userRepository)
+        /// <param name="userService">ユーザーサービス。</param>
+        public UsersController(IMapper mapper, SignInManager<User> signInManager, UserService userService)
         {
             this.mapper = mapper;
             this.signInManager = signInManager;
-            this.userRepository = userRepository;
+            this.userService = userService;
         }
 
         #endregion
@@ -75,7 +75,7 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers()
         {
-            return this.mapper.Map<IEnumerable<UserDto>>(await this.userRepository.FindAll()).ToList();
+            return (await this.userService.FindUsers()).ToList();
         }
 
         /// <summary>
@@ -88,7 +88,7 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         [ProducesResponseType(404)]
         public async Task<ActionResult<UserDto>> GetUser(int id)
         {
-            return this.mapper.Map<UserDto>(await this.userRepository.FindOrFail(id));
+            return await this.userService.FindUser(id);
         }
 
         /// <summary>
@@ -102,7 +102,7 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         public async Task<ActionResult<UserDto>> CreateUser(UserNewDto body)
         {
             // ユーザーを登録し、ログイン中の状態にする
-            var user = await this.userRepository.CreateBy(body.UserName, body.Password);
+            var user = await this.userService.CreateUser(body);
             await this.signInManager.SignInAsync(user, false);
             return this.CreatedAtAction(nameof(this.GetUser), new { id = user.Id }, this.mapper.Map<UserDto>(user));
         }
@@ -124,7 +124,7 @@ namespace Honememo.AspNetCoreApiExample.Controllers
             }
 
             // ※ この時点では this.User は空で使用できない
-            return this.mapper.Map<UserDto>(await this.userRepository.FindByName(body.UserName));
+            return await this.userService.FindUser(body.UserName);
         }
 
         /// <summary>
@@ -151,8 +151,7 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         [ProducesResponseType(400)]
         public async Task<IActionResult> UpdateUser(UserEditDto body)
         {
-            // ※ 現状ユーザー名の変更のみ対応
-            await this.userRepository.ChangeUserName(this.UserId, body.UserName);
+            await this.userService.UpdateUser(this.UserId, body);
             return this.NoContent();
         }
 
@@ -167,7 +166,7 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         [ProducesResponseType(400)]
         public async Task<IActionResult> ChangePassword(ChangePasswordDto body)
         {
-            await this.userRepository.ChangePassword(this.UserId, body.CurrentPassword, body.NewPassword);
+            await this.userService.ChangePassword(this.UserId, body);
             return this.NoContent();
         }
 

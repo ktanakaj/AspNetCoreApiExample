@@ -13,13 +13,10 @@ namespace Honememo.AspNetCoreApiExample.Controllers
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using AutoMapper;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
     using Honememo.AspNetCoreApiExample.Dto;
-    using Honememo.AspNetCoreApiExample.Entities;
-    using Honememo.AspNetCoreApiExample.Exceptions;
-    using Honememo.AspNetCoreApiExample.Repositories;
+    using Honememo.AspNetCoreApiExample.Services;
 
     /// <summary>
     /// ブログ記事コントローラクラス。
@@ -32,35 +29,21 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         #region メンバー変数
 
         /// <summary>
-        /// AutoMapperインスタンス。
+        /// ブログ記事サービス。
         /// </summary>
-        private readonly IMapper mapper;
-
-        /// <summary>
-        /// ブログリポジトリ。
-        /// </summary>
-        private readonly BlogRepository blogRepository;
-
-        /// <summary>
-        /// ブログ記事リポジトリ。
-        /// </summary>
-        private readonly ArticleRepository articleRepository;
+        private readonly ArticleService articleService;
 
         #endregion
 
         #region コンストラクタ
 
         /// <summary>
-        /// リポジトリをDIしてコントローラを生成する。
+        /// サービスをDIしてコントローラを生成する。
         /// </summary>
-        /// <param name="mapper">AutoMapperインスタンス。</param>
-        /// <param name="blogRepository">ブログリポジトリ。</param>
-        /// <param name="articleRepository">ブログ記事リポジトリ。</param>
-        public ArticlesController(IMapper mapper, BlogRepository blogRepository, ArticleRepository articleRepository)
+        /// <param name="articleService">ブログ記事サービス。</param>
+        public ArticlesController(ArticleService articleService)
         {
-            this.mapper = mapper;
-            this.blogRepository = blogRepository;
-            this.articleRepository = articleRepository;
+            this.articleService = articleService;
         }
 
         #endregion
@@ -75,17 +58,7 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<ArticleDto>>> GetArticles([FromQuery] int blogId)
         {
-            IList<Article> results;
-            if (blogId > 0)
-            {
-                results = await this.articleRepository.FindByBlogId(blogId);
-            }
-            else
-            {
-                results = await this.articleRepository.FindAll();
-            }
-
-            return this.mapper.Map<IEnumerable<ArticleDto>>(results).ToList();
+            return (await this.articleService.FindArticles(blogId)).ToList();
         }
 
         /// <summary>
@@ -98,7 +71,7 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         [ProducesResponseType(404)]
         public async Task<ActionResult<ArticleDto>> GetArticle(int id)
         {
-            return this.mapper.Map<ArticleDto>(await this.articleRepository.Find(id));
+            return await this.articleService.FindArticle(id);
         }
 
         /// <summary>
@@ -112,14 +85,8 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         [ProducesResponseType(400)]
         public async Task<ActionResult<ArticleDto>> PostArticle(ArticleNewDto body)
         {
-            var blog = await this.blogRepository.FindOrFail(body.BlogId);
-            if (blog.UserId != this.UserId)
-            {
-                throw new ForbiddenException($"BlogId={body.BlogId} does not belong to me");
-            }
-
-            var article = await this.articleRepository.Create(this.mapper.Map<Article>(body));
-            return this.CreatedAtAction(nameof(this.GetArticle), new { id = article.Id }, this.mapper.Map<ArticleDto>(article));
+            var article = await this.articleService.CreateArticle(this.UserId, body);
+            return this.CreatedAtAction(nameof(this.GetArticle), new { id = article.Id }, article);
         }
 
         /// <summary>
@@ -134,15 +101,7 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         [ProducesResponseType(404)]
         public async Task<IActionResult> PutArticle(int id, ArticleEditDto body)
         {
-            var article = await this.articleRepository.FindOrFail(id);
-            var blog = await this.blogRepository.FindOrFail(article.BlogId);
-            if (blog.UserId != this.UserId)
-            {
-                throw new ForbiddenException($"id={id} does not belong to me");
-            }
-
-            this.mapper.Map(body, article);
-            await this.articleRepository.Update(article);
+            await this.articleService.UpdateArticle(this.UserId, id, body);
             return this.NoContent();
         }
 
@@ -157,14 +116,7 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         [ProducesResponseType(404)]
         public async Task<IActionResult> DeleteArticle(int id)
         {
-            var article = await this.articleRepository.FindOrFail(id);
-            var blog = await this.blogRepository.FindOrFail(article.BlogId);
-            if (blog.UserId != this.UserId)
-            {
-                throw new ForbiddenException($"id={id} does not belong to me");
-            }
-
-            await this.articleRepository.Delete(id);
+            await this.articleService.DeleteArticle(this.UserId, id);
             return this.NoContent();
         }
 

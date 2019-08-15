@@ -26,6 +26,7 @@ namespace Honememo.AspNetCoreApiExample
     using Honememo.AspNetCoreApiExample.Entities;
     using Honememo.AspNetCoreApiExample.Middlewares;
     using Honememo.AspNetCoreApiExample.Repositories;
+    using Honememo.AspNetCoreApiExample.Services;
 
     /// <summary>
     /// Webアプリケーション初期設定用のクラスです。
@@ -95,6 +96,9 @@ namespace Honememo.AspNetCoreApiExample
             services.AddScoped<UserRepository>();
             services.AddScoped<BlogRepository>();
             services.AddScoped<ArticleRepository>();
+            services.AddScoped<UserService>();
+            services.AddScoped<BlogService>();
+            services.AddScoped<ArticleService>();
 
             // Swagger定義の設定
             services.AddSwaggerGen(c =>
