@@ -10,11 +10,12 @@
 
 namespace Honememo.AspNetCoreApiExample.Tests.Controllers
 {
+    using System.Collections.Generic;
     using System.Linq;
     using System.Net.Http;
-    using Newtonsoft.Json.Linq;
+    using Newtonsoft.Json;
     using Xunit;
-    using Honememo.AspNetCoreApiExample.Controllers;
+    using Honememo.AspNetCoreApiExample.Dto;
     using Honememo.AspNetCoreApiExample.Entities;
 
     /// <summary>
@@ -73,19 +74,19 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
             var responseString = await response.Content.ReadAsStringAsync();
             Assert.True(response.IsSuccessStatusCode, responseString);
 
-            var json = JToken.Parse(responseString);
-            Assert.IsType<JArray>(json);
+            var array = JsonConvert.DeserializeObject<IEnumerable<ArticleDto>>(responseString);
 
             // ※ 取れるブログ記事は不確定のため、データがあるかのみテスト
-            var array = json as JArray;
             Assert.NotEmpty(array);
-            Assert.Equal(JTokenType.Integer, array[0]["id"].Type);
-            Assert.Equal(JTokenType.String, array[0]["subject"].Type);
-            Assert.Equal(JTokenType.String, array[0]["body"].Type);
-            Assert.Equal(JTokenType.Integer, array[0]["blogId"].Type);
+
+            var article = array.First();
+            Assert.True(article.Id > 0);
+            Assert.True(!string.IsNullOrEmpty(article.Subject));
+            Assert.True(!string.IsNullOrEmpty(article.Body));
+            Assert.True(article.BlogId > 0);
 
             // 複数のブログを横断して返すこと
-            Assert.True(array.Select((a) => a["blogId"]).Distinct().Count() > 1);
+            Assert.True(array.Select((a) => a.BlogId).Distinct().Count() > 1);
         }
 
         /// <summary>
@@ -98,19 +99,19 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
             var responseString = await response.Content.ReadAsStringAsync();
             Assert.True(response.IsSuccessStatusCode, responseString);
 
-            var json = JToken.Parse(responseString);
-            Assert.IsType<JArray>(json);
+            var array = JsonConvert.DeserializeObject<IEnumerable<ArticleDto>>(responseString);
 
             // ※ 取れるブログ記事は不確定のため、データがあるかのみテスト
-            var array = json as JArray;
             Assert.NotEmpty(array);
-            Assert.Equal(JTokenType.Integer, array[0]["id"].Type);
-            Assert.Equal(JTokenType.String, array[0]["subject"].Type);
-            Assert.Equal(JTokenType.String, array[0]["body"].Type);
-            Assert.Equal(1000, array[0]["blogId"]);
+
+            var article = array.First();
+            Assert.True(article.Id > 0);
+            Assert.True(!string.IsNullOrEmpty(article.Subject));
+            Assert.True(!string.IsNullOrEmpty(article.Body));
+            Assert.True(article.BlogId > 0);
 
             // 指定されたIDのブログのみが取れること
-            Assert.Single(array.Select((a) => a["blogId"]).Distinct());
+            Assert.Single(array.Select((a) => a.BlogId).Distinct());
         }
 
         /// <summary>
@@ -123,12 +124,10 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
             var responseString = await response.Content.ReadAsStringAsync();
             Assert.True(response.IsSuccessStatusCode, responseString);
 
-            var json = JToken.Parse(responseString);
-            Assert.IsType<JObject>(json);
-
-            Assert.Equal(10000, json["id"]);
-            Assert.Equal("初めまして", json["subject"]);
-            Assert.Equal("初めまして、太郎です。ブログにようこそ。", json["body"]);
+            var json = JsonConvert.DeserializeObject<ArticleDto>(responseString);
+            Assert.Equal(10000, json.Id);
+            Assert.Equal("初めまして", json.Subject);
+            Assert.Equal("初めまして、太郎です。ブログにようこそ。", json.Body);
         }
 
         /// <summary>
@@ -137,20 +136,18 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
         [Fact]
         public async void TestPostArticle()
         {
-            var body = new ArticlesController.ArticleBody() { Subject = "New Article", Body = "New Article Body", BlogId = 1000 };
+            var body = new ArticleNewDto() { Subject = "New Article", Body = "New Article Body", BlogId = 1000 };
             var response = await this.authedClient.PostAsJsonAsync("/api/articles", body);
             var responseString = await response.Content.ReadAsStringAsync();
             Assert.True(response.IsSuccessStatusCode, responseString);
 
-            var json = JToken.Parse(responseString);
-            Assert.IsType<JObject>(json);
+            var json = JsonConvert.DeserializeObject<ArticleDto>(responseString);
+            Assert.True(json.Id > 0);
+            Assert.Equal(body.Subject, json.Subject);
+            Assert.Equal(body.Body, json.Body);
+            Assert.Equal(body.BlogId, json.BlogId);
 
-            Assert.NotNull(json["id"]);
-            Assert.Equal(body.Subject, json["subject"]);
-            Assert.Equal(body.Body, json["body"]);
-            Assert.Equal(body.BlogId, json["blogId"]);
-
-            var dbarticle = this.factory.CreateDbContext().Articles.Find((int)json["id"]);
+            var dbarticle = this.factory.CreateDbContext().Articles.Find(json.Id);
             Assert.NotNull(dbarticle);
             Assert.Equal(body.Subject, dbarticle.Subject);
             Assert.Equal(body.Body, dbarticle.Body);
@@ -168,7 +165,7 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
             db.Articles.Add(article);
             db.SaveChanges();
 
-            var body = new ArticlesController.ArticleBody() { Subject = "Updated Article", Body = "Updated Article Body" };
+            var body = new ArticleEditDto() { Subject = "Updated Article", Body = "Updated Article Body" };
             var response = await this.authedClient.PutAsJsonAsync($"/api/articles/{article.Id}", body);
             var responseString = await response.Content.ReadAsStringAsync();
             Assert.True(response.IsSuccessStatusCode, responseString);

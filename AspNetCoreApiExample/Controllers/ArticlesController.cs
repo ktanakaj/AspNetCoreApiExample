@@ -11,11 +11,12 @@
 namespace Honememo.AspNetCoreApiExample.Controllers
 {
     using System.Collections.Generic;
-    using System.ComponentModel.DataAnnotations;
     using System.Linq;
     using System.Threading.Tasks;
+    using AutoMapper;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
+    using Honememo.AspNetCoreApiExample.Dto;
     using Honememo.AspNetCoreApiExample.Entities;
     using Honememo.AspNetCoreApiExample.Exceptions;
     using Honememo.AspNetCoreApiExample.Repositories;
@@ -29,6 +30,11 @@ namespace Honememo.AspNetCoreApiExample.Controllers
     public class ArticlesController : AppControllerBase
     {
         #region メンバー変数
+
+        /// <summary>
+        /// AutoMapperインスタンス。
+        /// </summary>
+        private readonly IMapper mapper;
 
         /// <summary>
         /// ブログリポジトリ。
@@ -47,10 +53,12 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         /// <summary>
         /// リポジトリをDIしてコントローラを生成する。
         /// </summary>
+        /// <param name="mapper">AutoMapperインスタンス。</param>
         /// <param name="blogRepository">ブログリポジトリ。</param>
         /// <param name="articleRepository">ブログ記事リポジトリ。</param>
-        public ArticlesController(BlogRepository blogRepository, ArticleRepository articleRepository)
+        public ArticlesController(IMapper mapper, BlogRepository blogRepository, ArticleRepository articleRepository)
         {
+            this.mapper = mapper;
             this.blogRepository = blogRepository;
             this.articleRepository = articleRepository;
         }
@@ -65,15 +73,19 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         /// <param name="blogId">ブログID。</param>
         /// <returns>ブログ記事一覧。</returns>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Article>>> GetArticles([FromQuery] int blogId)
+        public async Task<ActionResult<IEnumerable<ArticleDto>>> GetArticles([FromQuery] int blogId)
         {
+            IList<Article> results;
             if (blogId > 0)
             {
-                return (await this.articleRepository.FindByBlogId(blogId)).ToList();
-            } else
-            {
-                return (await this.articleRepository.FindAll()).ToList();
+                results = await this.articleRepository.FindByBlogId(blogId);
             }
+            else
+            {
+                results = await this.articleRepository.FindAll();
+            }
+
+            return this.mapper.Map<IEnumerable<ArticleDto>>(results).ToList();
         }
 
         /// <summary>
@@ -84,9 +96,9 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         [HttpGet("{id}")]
         [ProducesResponseType(200)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult<Article>> GetArticle(int id)
+        public async Task<ActionResult<ArticleDto>> GetArticle(int id)
         {
-            return await this.articleRepository.Find(id);
+            return this.mapper.Map<ArticleDto>(await this.articleRepository.Find(id));
         }
 
         /// <summary>
@@ -98,7 +110,7 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         [Authorize]
         [ProducesResponseType(201)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<Article>> PostArticle(ArticleBody body)
+        public async Task<ActionResult<ArticleDto>> PostArticle(ArticleNewDto body)
         {
             var blog = await this.blogRepository.FindOrFail(body.BlogId);
             if (blog.UserId != this.UserId)
@@ -106,13 +118,8 @@ namespace Honememo.AspNetCoreApiExample.Controllers
                 throw new ForbiddenException($"BlogId={body.BlogId} does not belong to me");
             }
 
-            var article = await this.articleRepository.Create(new Article()
-            {
-                BlogId = body.BlogId,
-                Subject = body.Subject,
-                Body = body.Body,
-            });
-            return this.CreatedAtAction(nameof(this.GetArticle), new { id = article.Id }, article);
+            var article = await this.articleRepository.Create(this.mapper.Map<Article>(body));
+            return this.CreatedAtAction(nameof(this.GetArticle), new { id = article.Id }, this.mapper.Map<ArticleDto>(article));
         }
 
         /// <summary>
@@ -125,7 +132,7 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         [Authorize]
         [ProducesResponseType(204)]
         [ProducesResponseType(404)]
-        public async Task<IActionResult> PutArticle(int id, ArticleEditBody body)
+        public async Task<IActionResult> PutArticle(int id, ArticleEditDto body)
         {
             var article = await this.articleRepository.FindOrFail(id);
             var blog = await this.blogRepository.FindOrFail(article.BlogId);
@@ -134,8 +141,7 @@ namespace Honememo.AspNetCoreApiExample.Controllers
                 throw new ForbiddenException($"id={id} does not belong to me");
             }
 
-            article.Subject = body.Subject;
-            article.Body = body.Body;
+            this.mapper.Map(body, article);
             await this.articleRepository.Update(article);
             return this.NoContent();
         }
@@ -160,42 +166,6 @@ namespace Honememo.AspNetCoreApiExample.Controllers
 
             await this.articleRepository.Delete(id);
             return this.NoContent();
-        }
-
-        #endregion
-
-        #region 内部クラス
-
-        /// <summary>
-        /// ブログ記事登録のリクエストパラメータ。
-        /// </summary>
-        public class ArticleBody : ArticleEditBody
-        {
-            /// <summary>
-            /// ブログID。
-            /// </summary>
-            [Required]
-            public int BlogId { get; set; }
-        }
-
-        /// <summary>
-        /// ブログ記事編集のリクエストパラメータ。
-        /// </summary>
-        public class ArticleEditBody
-        {
-            /// <summary>
-            /// ブログ記事タイトル。
-            /// </summary>
-            [Required]
-            [MaxLength(191)]
-            public string Subject { get; set; }
-
-            /// <summary>
-            /// ブログ記事本文。
-            /// </summary>
-            [Required]
-            [MaxLength(65535)]
-            public string Body { get; set; }
         }
 
         #endregion

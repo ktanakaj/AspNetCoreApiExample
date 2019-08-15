@@ -19,7 +19,7 @@ namespace Honememo.AspNetCoreApiExample.Tests
     using Microsoft.EntityFrameworkCore.Storage;
     using Microsoft.Extensions.DependencyInjection;
     using Newtonsoft.Json.Linq;
-    using Honememo.AspNetCoreApiExample.Controllers;
+    using Honememo.AspNetCoreApiExample.Dto;
     using Honememo.AspNetCoreApiExample.Repositories;
 
     /// <summary>
@@ -91,7 +91,7 @@ namespace Honememo.AspNetCoreApiExample.Tests
         {
             // 指定された条件でログインして、そのセッションを持つHTTPクライアントを返す
             var client = this.CreateClient();
-            var body = new UsersController.LoginBody() { UserName = name, Password = password };
+            var body = new LoginDto() { UserName = name, Password = password };
             var response = client.PostAsJsonAsync("/api/users/login", body).Result;
             var responseString = response.Content.ReadAsStringAsync().Result;
             if (!response.IsSuccessStatusCode)
@@ -118,7 +118,7 @@ namespace Honememo.AspNetCoreApiExample.Tests
 
             // 指定された条件でユーザーを作成して、そのセッションを持つHTTPクライアントを返す
             var client = this.CreateClient();
-            var body = new UsersController.CreateUserBody() { UserName = name, Password = password };
+            var body = new UserNewDto() { UserName = name, Password = password };
             var response = client.PostAsJsonAsync("/api/users", body).Result;
             var responseString = response.Content.ReadAsStringAsync().Result;
             if (!response.IsSuccessStatusCode)

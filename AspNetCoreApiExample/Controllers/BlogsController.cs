@@ -11,11 +11,12 @@
 namespace Honememo.AspNetCoreApiExample.Controllers
 {
     using System.Collections.Generic;
-    using System.ComponentModel.DataAnnotations;
     using System.Linq;
     using System.Threading.Tasks;
+    using AutoMapper;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
+    using Honememo.AspNetCoreApiExample.Dto;
     using Honememo.AspNetCoreApiExample.Entities;
     using Honememo.AspNetCoreApiExample.Exceptions;
     using Honememo.AspNetCoreApiExample.Repositories;
@@ -31,6 +32,11 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         #region メンバー変数
 
         /// <summary>
+        /// AutoMapperインスタンス。
+        /// </summary>
+        private readonly IMapper mapper;
+
+        /// <summary>
         /// ブログリポジトリ。
         /// </summary>
         private readonly BlogRepository blogRepository;
@@ -42,9 +48,11 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         /// <summary>
         /// リポジトリをDIしてコントローラを生成する。
         /// </summary>
+        /// <param name="mapper">AutoMapperインスタンス。</param>
         /// <param name="blogRepository">ブログリポジトリ。</param>
-        public BlogsController(BlogRepository blogRepository)
+        public BlogsController(IMapper mapper, BlogRepository blogRepository)
         {
+            this.mapper = mapper;
             this.blogRepository = blogRepository;
         }
 
@@ -57,9 +65,9 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         /// </summary>
         /// <returns>ブログ一覧。</returns>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Blog>>> GetBlogs()
+        public async Task<ActionResult<IEnumerable<BlogDto>>> GetBlogs()
         {
-            return (await this.blogRepository.FindAll()).ToList();
+            return this.mapper.Map<IEnumerable<BlogDto>>(await this.blogRepository.FindAll()).ToList();
         }
 
         /// <summary>
@@ -70,9 +78,9 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         [HttpGet("{id}")]
         [ProducesResponseType(200)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult<Blog>> GetBlog(int id)
+        public async Task<ActionResult<BlogDto>> GetBlog(int id)
         {
-            return await this.blogRepository.FindOrFail(id);
+            return this.mapper.Map<BlogDto>(await this.blogRepository.FindOrFail(id));
         }
 
         /// <summary>
@@ -84,14 +92,12 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         [Authorize]
         [ProducesResponseType(201)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<Blog>> PostBlog(BlogBody body)
+        public async Task<ActionResult<BlogDto>> PostBlog(BlogEditDto body)
         {
-            var blog = await this.blogRepository.Create(new Blog()
-            {
-                Name = body.Name,
-                UserId = this.UserId,
-            });
-            return this.CreatedAtAction(nameof(this.GetBlog), new { id = blog.Id }, blog);
+            var blog = this.mapper.Map<Blog>(body);
+            blog.UserId = this.UserId;
+            blog = await this.blogRepository.Create(blog);
+            return this.CreatedAtAction(nameof(this.GetBlog), new { id = blog.Id }, this.mapper.Map<BlogDto>(blog));
         }
 
         /// <summary>
@@ -104,7 +110,7 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         [Authorize]
         [ProducesResponseType(204)]
         [ProducesResponseType(404)]
-        public async Task<IActionResult> PutBlog(int id, BlogBody body)
+        public async Task<IActionResult> PutBlog(int id, BlogEditDto body)
         {
             var blog = await this.blogRepository.FindOrFail(id);
             if (blog.UserId != this.UserId)
@@ -112,8 +118,7 @@ namespace Honememo.AspNetCoreApiExample.Controllers
                 throw new ForbiddenException($"id={id} does not belong to me");
             }
 
-            blog.Name = body.Name;
-            await this.blogRepository.Update(blog);
+            await this.blogRepository.Update(this.mapper.Map(body, blog));
             return this.NoContent();
         }
 
@@ -136,23 +141,6 @@ namespace Honememo.AspNetCoreApiExample.Controllers
 
             await this.blogRepository.Delete(id);
             return this.NoContent();
-        }
-
-        #endregion
-
-        #region 内部クラス
-
-        /// <summary>
-        /// ブログ登録/編集のリクエストパラメータ。
-        /// </summary>
-        public class BlogBody
-        {
-            /// <summary>
-            /// ブログタイトル。
-            /// </summary>
-            [Required]
-            [MaxLength(191)]
-            public string Name { get; set; }
         }
 
         #endregion

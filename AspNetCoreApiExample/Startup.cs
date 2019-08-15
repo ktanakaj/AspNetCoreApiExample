@@ -13,6 +13,7 @@ namespace Honememo.AspNetCoreApiExample
     using System;
     using System.IO;
     using System.Reflection;
+    using AutoMapper;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Identity;
@@ -21,6 +22,7 @@ namespace Honememo.AspNetCoreApiExample
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Swashbuckle.AspNetCore.Swagger;
+    using Honememo.AspNetCoreApiExample.Dto;
     using Honememo.AspNetCoreApiExample.Entities;
     using Honememo.AspNetCoreApiExample.Middlewares;
     using Honememo.AspNetCoreApiExample.Repositories;
@@ -61,6 +63,14 @@ namespace Honememo.AspNetCoreApiExample
         /// <remarks>設定値の登録や依存関係の登録など、アプリ初期化前の設定を行う。</remarks>
         public void ConfigureServices(IServiceCollection services)
         {
+            // マッピング設定
+            var mappingConfig = new MapperConfiguration(mc =>
+            {
+                mc.AddProfile(new MappingProfile());
+            });
+
+            services.AddSingleton(mappingConfig.CreateMapper());
+
             // DB設定
             services.AddDbContext<AppDbContext>(opt =>
                 this.ApplyDbConfig(opt, this.Configuration.GetSection("Database")));

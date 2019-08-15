@@ -10,10 +10,12 @@
 
 namespace Honememo.AspNetCoreApiExample.Tests.Controllers
 {
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Net.Http;
-    using Newtonsoft.Json.Linq;
+    using Newtonsoft.Json;
     using Xunit;
-    using Honememo.AspNetCoreApiExample.Controllers;
+    using Honememo.AspNetCoreApiExample.Dto;
     using Honememo.AspNetCoreApiExample.Entities;
 
     /// <summary>
@@ -72,14 +74,14 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
             var responseString = await response.Content.ReadAsStringAsync();
             Assert.True(response.IsSuccessStatusCode, responseString);
 
-            var json = JToken.Parse(responseString);
-            Assert.IsType<JArray>(json);
+            var array = JsonConvert.DeserializeObject<IEnumerable<BlogDto>>(responseString);
 
             // ※ 取れるブログは不確定のため、データがあるかのみテスト
-            var array = json as JArray;
             Assert.NotEmpty(array);
-            Assert.Equal(JTokenType.Integer, array[0]["id"].Type);
-            Assert.Equal(JTokenType.String, array[0]["name"].Type);
+
+            var blog = array.First();
+            Assert.True(blog.Id > 0);
+            Assert.True(!string.IsNullOrEmpty(blog.Name));
         }
 
         /// <summary>
@@ -92,11 +94,9 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
             var responseString = await response.Content.ReadAsStringAsync();
             Assert.True(response.IsSuccessStatusCode, responseString);
 
-            var json = JToken.Parse(responseString);
-            Assert.IsType<JObject>(json);
-
-            Assert.Equal(1000, json["id"]);
-            Assert.Equal("Taro's Blog", json["name"]);
+            var json = JsonConvert.DeserializeObject<BlogDto>(responseString);
+            Assert.Equal(1000, json.Id);
+            Assert.Equal("Taro's Blog", json.Name);
         }
 
         /// <summary>
@@ -105,18 +105,16 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
         [Fact]
         public async void TestPostBlog()
         {
-            var body = new BlogsController.BlogBody() { Name = "New Blog" };
+            var body = new BlogEditDto() { Name = "New Blog" };
             var response = await this.authedClient.PostAsJsonAsync("/api/blogs", body);
             var responseString = await response.Content.ReadAsStringAsync();
             Assert.True(response.IsSuccessStatusCode, responseString);
 
-            var json = JToken.Parse(responseString);
-            Assert.IsType<JObject>(json);
+            var json = JsonConvert.DeserializeObject<BlogDto>(responseString);
+            Assert.True(json.Id > 0);
+            Assert.Equal(body.Name, json.Name);
 
-            Assert.NotNull(json["id"]);
-            Assert.Equal(body.Name, json["name"]);
-
-            var dbblog = this.factory.CreateDbContext().Blogs.Find((int)json["id"]);
+            var dbblog = this.factory.CreateDbContext().Blogs.Find(json.Id);
             Assert.NotNull(dbblog);
             Assert.Equal(body.Name, dbblog.Name);
         }
@@ -132,7 +130,7 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
             db.Blogs.Add(blog);
             db.SaveChanges();
 
-            var body = new BlogsController.BlogBody() { Name = "Updated Blog" };
+            var body = new BlogEditDto() { Name = "Updated Blog" };
             var response = await this.authedClient.PutAsJsonAsync($"/api/blogs/{blog.Id}", body);
             var responseString = await response.Content.ReadAsStringAsync();
             Assert.True(response.IsSuccessStatusCode, responseString);

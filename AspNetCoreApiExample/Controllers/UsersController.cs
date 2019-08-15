@@ -11,12 +11,13 @@
 namespace Honememo.AspNetCoreApiExample.Controllers
 {
     using System.Collections.Generic;
-    using System.ComponentModel.DataAnnotations;
     using System.Linq;
     using System.Threading.Tasks;
+    using AutoMapper;
     using Microsoft.AspNetCore.Authorization;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.AspNetCore.Identity;
+    using Honememo.AspNetCoreApiExample.Dto;
     using Honememo.AspNetCoreApiExample.Entities;
     using Honememo.AspNetCoreApiExample.Repositories;
     using Honememo.AspNetCoreApiExample.Exceptions;
@@ -30,6 +31,11 @@ namespace Honememo.AspNetCoreApiExample.Controllers
     public class UsersController : AppControllerBase
     {
         #region メンバー変数
+
+        /// <summary>
+        /// AutoMapperインスタンス。
+        /// </summary>
+        private readonly IMapper mapper;
 
         /// <summary>
         /// サインインマネージャー。
@@ -48,10 +54,12 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         /// <summary>
         /// リポジトリ等をDIしてコントローラを生成する。
         /// </summary>
+        /// <param name="mapper">AutoMapperインスタンス。</param>
         /// <param name="signInManager">サインインマネージャー。</param>
         /// <param name="userRepository">ユーザーリポジトリ。</param>
-        public UsersController(SignInManager<User> signInManager, UserRepository userRepository)
+        public UsersController(IMapper mapper, SignInManager<User> signInManager, UserRepository userRepository)
         {
+            this.mapper = mapper;
             this.signInManager = signInManager;
             this.userRepository = userRepository;
         }
@@ -65,9 +73,9 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         /// </summary>
         /// <returns>ユーザー一覧。</returns>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
+        public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers()
         {
-            return (await this.userRepository.FindAll()).ToList();
+            return this.mapper.Map<IEnumerable<UserDto>>(await this.userRepository.FindAll()).ToList();
         }
 
         /// <summary>
@@ -78,9 +86,9 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         [HttpGet("{id}")]
         [ProducesResponseType(200)]
         [ProducesResponseType(404)]
-        public async Task<ActionResult<User>> GetUser(int id)
+        public async Task<ActionResult<UserDto>> GetUser(int id)
         {
-            return await this.userRepository.FindOrFail(id);
+            return this.mapper.Map<UserDto>(await this.userRepository.FindOrFail(id));
         }
 
         /// <summary>
@@ -91,12 +99,12 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         [HttpPost]
         [ProducesResponseType(201)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<User>> CreateUser(CreateUserBody body)
+        public async Task<ActionResult<UserDto>> CreateUser(UserNewDto body)
         {
             // ユーザーを登録し、ログイン中の状態にする
             var user = await this.userRepository.CreateBy(body.UserName, body.Password);
             await this.signInManager.SignInAsync(user, false);
-            return this.CreatedAtAction(nameof(this.GetUser), new { id = user.Id }, user);
+            return this.CreatedAtAction(nameof(this.GetUser), new { id = user.Id }, this.mapper.Map<UserDto>(user));
         }
 
         /// <summary>
@@ -107,7 +115,7 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         [HttpPost("login")]
         [ProducesResponseType(200)]
         [ProducesResponseType(400)]
-        public async Task<ActionResult<User>> Login(LoginBody body)
+        public async Task<ActionResult<UserDto>> Login(LoginDto body)
         {
             var result = await this.signInManager.PasswordSignInAsync(body.UserName, body.Password, false, false);
             if (!result.Succeeded)
@@ -116,7 +124,7 @@ namespace Honememo.AspNetCoreApiExample.Controllers
             }
 
             // ※ この時点では this.User は空で使用できない
-            return await this.userRepository.FindByName(body.UserName);
+            return this.mapper.Map<UserDto>(await this.userRepository.FindByName(body.UserName));
         }
 
         /// <summary>
@@ -141,7 +149,7 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         [Authorize]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public async Task<IActionResult> UpdateUser(UpdateUserBody body)
+        public async Task<IActionResult> UpdateUser(UserEditDto body)
         {
             // ※ 現状ユーザー名の変更のみ対応
             await this.userRepository.ChangeUserName(this.UserId, body.UserName);
@@ -157,71 +165,10 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         [Authorize]
         [ProducesResponseType(204)]
         [ProducesResponseType(400)]
-        public async Task<IActionResult> ChangePassword(ChangePasswordBody body)
+        public async Task<IActionResult> ChangePassword(ChangePasswordDto body)
         {
             await this.userRepository.ChangePassword(this.UserId, body.CurrentPassword, body.NewPassword);
             return this.NoContent();
-        }
-
-        #endregion
-
-        #region 内部クラス
-
-        /// <summary>
-        /// ユーザー登録のリクエストパラメータ。
-        /// </summary>
-        public class CreateUserBody : LoginBody
-        {
-        }
-
-        /// <summary>
-        /// ユーザー更新のリクエストパラメータ。
-        /// </summary>
-        public class UpdateUserBody
-        {
-            /// <summary>
-            /// ユーザー名。
-            /// </summary>
-            [Required]
-            [MaxLength(191)]
-            public string UserName { get; set; }
-        }
-
-        /// <summary>
-        /// ログインのリクエストパラメータ。
-        /// </summary>
-        public class LoginBody
-        {
-            /// <summary>
-            /// ユーザー名。
-            /// </summary>
-            [Required]
-            [MaxLength(191)]
-            public string UserName { get; set; }
-
-            /// <summary>
-            /// パスワード。
-            /// </summary>
-            [Required]
-            public string Password { get; set; }
-        }
-
-        /// <summary>
-        /// パスワード変更のリクエストパラメータ。
-        /// </summary>
-        public class ChangePasswordBody
-        {
-            /// <summary>
-            /// 現在のパスワード。
-            /// </summary>
-            [Required]
-            public string CurrentPassword { get; set; }
-
-            /// <summary>
-            /// 新しいパスワード。
-            /// </summary>
-            [Required]
-            public string NewPassword { get; set; }
         }
 
         #endregion

@@ -10,10 +10,12 @@
 
 namespace Honememo.AspNetCoreApiExample.Tests.Controllers
 {
+    using System.Collections.Generic;
+    using System.Linq;
     using System.Net.Http;
-    using Newtonsoft.Json.Linq;
+    using Newtonsoft.Json;
     using Xunit;
-    using Honememo.AspNetCoreApiExample.Controllers;
+    using Honememo.AspNetCoreApiExample.Dto;
 
     /// <summary>
     /// ユーザーコントローラのテストクラス。
@@ -71,17 +73,14 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
             var responseString = await response.Content.ReadAsStringAsync();
             Assert.True(response.IsSuccessStatusCode, responseString);
 
-            var json = JToken.Parse(responseString);
-            Assert.IsType<JArray>(json);
+            var array = JsonConvert.DeserializeObject<IEnumerable<UserDto>>(responseString);
 
             // ※ 取れるユーザーは不確定のため、データがあるかのみテスト
-            var array = json as JArray;
             Assert.NotEmpty(array);
-            Assert.Equal(JTokenType.Integer, array[0]["id"].Type);
-            Assert.Equal(JTokenType.String, array[0]["userName"].Type);
 
-            // TODO: 参照不可のユーザー情報が返っていないこと
-            // Assert.Null(array[0]["passwordHash"]);
+            var user = array.First();
+            Assert.True(user.Id > 0);
+            Assert.True(!string.IsNullOrEmpty(user.UserName));
         }
 
         /// <summary>
@@ -94,11 +93,9 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
             var responseString = await response.Content.ReadAsStringAsync();
             Assert.True(response.IsSuccessStatusCode, responseString);
 
-            var json = JToken.Parse(responseString);
-            Assert.IsType<JObject>(json);
-
-            Assert.Equal(100, json["id"]);
-            Assert.Equal("Taro", json["userName"]);
+            var json = JsonConvert.DeserializeObject<UserDto>(responseString);
+            Assert.Equal(100, json.Id);
+            Assert.Equal("Taro", json.UserName);
         }
 
         /// <summary>
@@ -107,18 +104,16 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
         [Fact]
         public async void TestCreateUser()
         {
-            var body = new UsersController.CreateUserBody() { UserName = "Scott", Password = "Tiger" };
+            var body = new UserNewDto() { UserName = "Scott", Password = "Tiger" };
             var response = await this.client.PostAsJsonAsync("/api/users", body);
             var responseString = await response.Content.ReadAsStringAsync();
             Assert.True(response.IsSuccessStatusCode, responseString);
 
-            var json = JToken.Parse(responseString);
-            Assert.IsType<JObject>(json);
+            var json = JsonConvert.DeserializeObject<UserDto>(responseString);
+            Assert.True(json.Id > 0);
+            Assert.Equal(body.UserName, json.UserName);
 
-            Assert.NotNull(json["id"]);
-            Assert.Equal(body.UserName, json["userName"]);
-
-            var dbuser = this.factory.CreateDbContext().Users.Find((int)json["id"]);
+            var dbuser = this.factory.CreateDbContext().Users.Find(json.Id);
             Assert.NotNull(dbuser);
             Assert.Equal(body.UserName, dbuser.UserName);
             Assert.NotNull(dbuser.PasswordHash);
@@ -134,16 +129,14 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
         public async void TestLoginAndLogout()
         {
             // id=100のユーザーでログインしてログアウトする
-            var body = new UsersController.LoginBody() { UserName = "Taro", Password = "PASSWORD" };
+            var body = new LoginDto() { UserName = "Taro", Password = "PASSWORD" };
             var response = await this.client.PostAsJsonAsync("/api/users/login", body);
             var responseString = await response.Content.ReadAsStringAsync();
             Assert.True(response.IsSuccessStatusCode, responseString);
 
-            var json = JToken.Parse(responseString);
-            Assert.IsType<JObject>(json);
-
-            Assert.NotNull(json["id"]);
-            Assert.Equal(body.UserName, json["userName"]);
+            var json = JsonConvert.DeserializeObject<UserDto>(responseString);
+            Assert.Equal(100, json.Id);
+            Assert.Equal(body.UserName, json.UserName);
 
             response = await this.client.PostAsync("/api/users/logout", null);
             responseString = await response.Content.ReadAsStringAsync();
@@ -156,7 +149,7 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
         [Fact]
         public async void TestUpdateUser()
         {
-            var body = new UsersController.UpdateUserBody() { UserName = "Ken" };
+            var body = new UserEditDto() { UserName = "Ken" };
             var response = await this.authedClient.PutAsJsonAsync("/api/users", body);
             var responseString = await response.Content.ReadAsStringAsync();
             Assert.True(response.IsSuccessStatusCode, responseString);
@@ -172,7 +165,7 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
         [Fact]
         public async void TestChangePassword()
         {
-            var body = new UsersController.ChangePasswordBody() { CurrentPassword = "TEST_PASSWORD", NewPassword = "KenKen" };
+            var body = new ChangePasswordDto() { CurrentPassword = "TEST_PASSWORD", NewPassword = "KenKen" };
             var response = await this.authedClient.PutAsJsonAsync("/api/users/password", body);
             var responseString = await response.Content.ReadAsStringAsync();
             Assert.True(response.IsSuccessStatusCode, responseString);
