@@ -54,6 +54,7 @@ namespace Honememo.AspNetCoreApiExample.Middlewares
         /// <returns>処理状態。</returns>
         public async Task Invoke(HttpContext context)
         {
+            // ※ 現状、例外以外のエラー（直接404を返す等）は処理出来ていないので注意
             try
             {
                 await this.next(context);
@@ -76,11 +77,10 @@ namespace Honememo.AspNetCoreApiExample.Middlewares
         /// <returns>処理状態。</returns>
         private Task OnException(HttpContext context, Exception exception)
         {
-            // デフォルトは500エラー、例外の種類に応じたステータスコードとエラー情報を返す
-            var status = HttpStatusCode.InternalServerError;
+            // 例外を元にエラー情報を返す（デフォルトは汎用の500エラー）
+            // TODO: エラーメッセージは本番環境ではそのまま返さないようにする
             var err = new ErrorObject();
-
-            // TODO: メッセージは本番環境ではそのまま返さないようにする
+            err.Code = "INTERNAL_SERVER_ERROR";
             err.Message = exception.Message;
             err.Data = exception.Data;
             if (exception is AppException appEx)
@@ -90,13 +90,18 @@ namespace Honememo.AspNetCoreApiExample.Middlewares
 
             // TODO: HTTPステータスコードは、ちゃんとやるならエラーコードマスタとか定義してそこから取る。
             //       マスタ定義するなら、通常例外の業務例外への変換とかもやる。
-            if (exception is BadRequestException)
+            var status = HttpStatusCode.InternalServerError;
+            switch (err.Code)
             {
-                status = HttpStatusCode.BadRequest;
-            }
-            else if (exception is NotFoundException)
-            {
-                status = HttpStatusCode.NotFound;
+                case "BAD_REQUEST":
+                    status = HttpStatusCode.BadRequest;
+                    break;
+                case "FORBIDDEN":
+                    status = HttpStatusCode.Forbidden;
+                    break;
+                case "NOT_FOUND":
+                    status = HttpStatusCode.NotFound;
+                    break;
             }
 
             var result = JsonConvert.SerializeObject(

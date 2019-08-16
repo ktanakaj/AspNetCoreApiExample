@@ -89,7 +89,7 @@ namespace Honememo.AspNetCoreApiExample.Services
         /// <exception cref="NotFoundException">ブログ記事が存在しない場合。</exception>
         public async Task<ArticleDto> FindArticle(int id)
         {
-            return this.mapper.Map<ArticleDto>(await this.articleRepository.Find(id));
+            return this.mapper.Map<ArticleDto>(await this.articleRepository.FindOrFail(id));
         }
 
         /// <summary>
