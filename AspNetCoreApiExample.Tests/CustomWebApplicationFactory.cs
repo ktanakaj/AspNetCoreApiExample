@@ -142,7 +142,7 @@ namespace Honememo.AspNetCoreApiExample.Tests
             builder.ConfigureServices(services =>
             {
                 // DBをインメモリDBに置き換え
-                services.AddDbContext<AppDbContext>(options =>
+                services.AddDbContextPool<AppDbContext>(options =>
                 {
                     options.UseInMemoryDatabase(this.appDbName, InMemoryDatabaseRoot);
                     options.ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));

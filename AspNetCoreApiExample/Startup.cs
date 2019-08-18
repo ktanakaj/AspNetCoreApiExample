@@ -21,6 +21,8 @@ namespace Honememo.AspNetCoreApiExample
     using Microsoft.EntityFrameworkCore;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Logging.Debug;
     using Swashbuckle.AspNetCore.Swagger;
     using Honememo.AspNetCoreApiExample.Dto;
     using Honememo.AspNetCoreApiExample.Entities;
@@ -33,6 +35,15 @@ namespace Honememo.AspNetCoreApiExample
     /// </summary>
     public class Startup
     {
+        #region メンバー変数
+
+        /// <summary>
+        /// DBコンテキスト用のロガーファクトリー。
+        /// </summary>
+        private static LoggerFactory sqlLoggerFactory;
+
+        #endregion
+
         #region コンストラクタ
 
         /// <summary>
@@ -73,7 +84,7 @@ namespace Honememo.AspNetCoreApiExample
             services.AddSingleton(mappingConfig.CreateMapper());
 
             // DB設定
-            services.AddDbContext<AppDbContext>(opt =>
+            services.AddDbContextPool<AppDbContext>(opt =>
                 this.ApplyDbConfig(opt, this.Configuration.GetSection("Database")));
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
@@ -135,6 +146,8 @@ namespace Honememo.AspNetCoreApiExample
             }
 
             app.UseAuthentication();
+            app.UseMiddleware(typeof(EnableBufferingMiddleware));
+            app.UseMiddleware(typeof(AccessLogMiddleware));
             app.UseMiddleware(typeof(ErrorHandlingMiddleware));
             app.UseMvc();
         }
@@ -151,6 +164,22 @@ namespace Honememo.AspNetCoreApiExample
         /// <returns>メソッドチェーン用のビルダー。</returns>
         public DbContextOptionsBuilder ApplyDbConfig(DbContextOptionsBuilder builder, IConfigurationSection dbconf)
         {
+            // ロガーの設定
+            // ※ ロガーインスタンスは複数のDBコンテキストで共用すべきとあるので、ない場合だけ生成
+            // TODO: ON/OFFや出力先を設定で変えられるようにする
+            if (sqlLoggerFactory == null)
+            {
+                sqlLoggerFactory = new LoggerFactory(new[]
+                {
+                    new DebugLoggerProvider((category, level) =>
+                        category == DbLoggerCategory.Database.Command.Name && level == LogLevel.Information)
+                });
+            }
+
+            builder.EnableSensitiveDataLogging();
+            builder.UseLoggerFactory(sqlLoggerFactory);
+
+            // DB接続設定
             switch (dbconf.GetValue<string>("Type")?.ToLower())
             {
                 case "mysql":

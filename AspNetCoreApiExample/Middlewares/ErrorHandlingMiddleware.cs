@@ -14,6 +14,7 @@ namespace Honememo.AspNetCoreApiExample.Middlewares
     using System.Net;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.Extensions.Logging;
     using Newtonsoft.Json;
     using Newtonsoft.Json.Serialization;
     using Honememo.AspNetCoreApiExample.Exceptions;
@@ -30,6 +31,11 @@ namespace Honememo.AspNetCoreApiExample.Middlewares
         /// </summary>
         private readonly RequestDelegate next;
 
+        /// <summary>
+        /// ロガー。
+        /// </summary>
+        private readonly ILogger<ErrorHandlingMiddleware> logger;
+
         #endregion
 
         #region コンストラクタ
@@ -38,9 +44,11 @@ namespace Honememo.AspNetCoreApiExample.Middlewares
         /// ミドルウェアを生成する。
         /// </summary>
         /// <param name="next">次の処理のデリゲート。</param>
-        public ErrorHandlingMiddleware(RequestDelegate next)
+        /// <param name="logger">ロガー。</param>
+        public ErrorHandlingMiddleware(RequestDelegate next, ILogger<ErrorHandlingMiddleware> logger)
         {
             this.next = next;
+            this.logger = logger;
         }
 
         #endregion
@@ -104,6 +112,18 @@ namespace Honememo.AspNetCoreApiExample.Middlewares
                     break;
             }
 
+            // エラーログを出力。ステータスコードに応じてログレベルを切り替え
+            // TODO: エラーマスタ定義するなら、ログレベルもマスタに持たせる
+            if ((int)status >= 500)
+            {
+                this.logger.LogError(0, exception, string.Empty);
+            }
+            else
+            {
+                this.logger.LogDebug(0, exception, string.Empty);
+            }
+
+            // レスポンスを生成
             var result = JsonConvert.SerializeObject(
                 new { error = err },
                 new JsonSerializerSettings
