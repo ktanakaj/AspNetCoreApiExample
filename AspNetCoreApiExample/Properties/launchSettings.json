@@ -15,7 +15,8 @@
       "launchUrl": "swagger",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "EXAMPLEAPP_DATABASE__TYPE": "InMemory"
+        "EXAMPLEAPP_DATABASE__TYPE": "InMemory",
+        "EXAMPLEAPP_SERILOG__WRITETO__0__ARGS__PATH": "%TEMP%\\AspNetCoreApiExample\\app.log"
       }
     },
     "AspNetCoreApiExample": {

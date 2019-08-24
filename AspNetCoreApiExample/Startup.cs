@@ -35,15 +35,6 @@ namespace Honememo.AspNetCoreApiExample
     /// </summary>
     public class Startup
     {
-        #region メンバー変数
-
-        /// <summary>
-        /// DBコンテキスト用のロガーファクトリー。
-        /// </summary>
-        private static LoggerFactory sqlLoggerFactory;
-
-        #endregion
-
         #region コンストラクタ
 
         /// <summary>
@@ -85,7 +76,10 @@ namespace Honememo.AspNetCoreApiExample
 
             // DB設定
             services.AddDbContextPool<AppDbContext>(opt =>
-                this.ApplyDbConfig(opt, this.Configuration.GetSection("Database")));
+            {
+                var provider = services.BuildServiceProvider();
+                this.ApplyDbConfig(opt, this.Configuration.GetSection("Database"), provider.GetService<ILoggerFactory>());
+            });
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
             // 認証設定
@@ -161,23 +155,14 @@ namespace Honememo.AspNetCoreApiExample
         /// </summary>
         /// <param name="builder">ビルダー。</param>
         /// <param name="dbconf">DB設定値。</param>
+        /// <param name="loggerFactory">DBロガーのファクトリー。</param>
         /// <returns>メソッドチェーン用のビルダー。</returns>
-        public DbContextOptionsBuilder ApplyDbConfig(DbContextOptionsBuilder builder, IConfigurationSection dbconf)
+        public DbContextOptionsBuilder ApplyDbConfig(DbContextOptionsBuilder builder, IConfigurationSection dbconf, ILoggerFactory loggerFactory)
         {
             // ロガーの設定
-            // ※ ロガーインスタンスは複数のDBコンテキストで共用すべきとあるので、ない場合だけ生成
             // TODO: ON/OFFや出力先を設定で変えられるようにする
-            if (sqlLoggerFactory == null)
-            {
-                sqlLoggerFactory = new LoggerFactory(new[]
-                {
-                    new DebugLoggerProvider((category, level) =>
-                        category == DbLoggerCategory.Database.Command.Name && level == LogLevel.Information)
-                });
-            }
-
             builder.EnableSensitiveDataLogging();
-            builder.UseLoggerFactory(sqlLoggerFactory);
+            builder.UseLoggerFactory(loggerFactory);
 
             // DB接続設定
             switch (dbconf.GetValue<string>("Type")?.ToLower())
