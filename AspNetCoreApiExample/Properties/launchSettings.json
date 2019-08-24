@@ -16,7 +16,9 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "EXAMPLEAPP_DATABASE__TYPE": "InMemory",
-        "EXAMPLEAPP_SERILOG__WRITETO__0__ARGS__PATH": "%TEMP%\\AspNetCoreApiExample\\app.log"
+        "EXAMPLEAPP_SERILOG__WRITETO__0__ARGS__CONFIGURELOGGER__WRITETO__0__ARGS__PATH": "%TEMP%\\AspNetCoreApiExample\\app.log",
+        "EXAMPLEAPP_SERILOG__WRITETO__1__ARGS__CONFIGURELOGGER__WRITETO__0__ARGS__PATH": "%TEMP%\\AspNetCoreApiExample\\access.log",
+        "EXAMPLEAPP_SERILOG__WRITETO__2__ARGS__CONFIGURELOGGER__WRITETO__0__ARGS__PATH": "%TEMP%\\AspNetCoreApiExample\\sql.log"
       }
     },
     "AspNetCoreApiExample": {

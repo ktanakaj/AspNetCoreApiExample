@@ -22,7 +22,6 @@ namespace Honememo.AspNetCoreApiExample
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
-    using Microsoft.Extensions.Logging.Debug;
     using Swashbuckle.AspNetCore.Swagger;
     using Honememo.AspNetCoreApiExample.Dto;
     using Honememo.AspNetCoreApiExample.Entities;
@@ -77,8 +76,9 @@ namespace Honememo.AspNetCoreApiExample
             // DB設定
             services.AddDbContextPool<AppDbContext>(opt =>
             {
-                var provider = services.BuildServiceProvider();
-                this.ApplyDbConfig(opt, this.Configuration.GetSection("Database"), provider.GetService<ILoggerFactory>());
+                opt.EnableSensitiveDataLogging();
+                opt.UseLoggerFactory(services.BuildServiceProvider().GetService<ILoggerFactory>());
+                this.ApplyDbConfig(opt, this.Configuration.GetSection("Database"));
             });
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
@@ -155,15 +155,9 @@ namespace Honememo.AspNetCoreApiExample
         /// </summary>
         /// <param name="builder">ビルダー。</param>
         /// <param name="dbconf">DB設定値。</param>
-        /// <param name="loggerFactory">DBロガーのファクトリー。</param>
         /// <returns>メソッドチェーン用のビルダー。</returns>
-        public DbContextOptionsBuilder ApplyDbConfig(DbContextOptionsBuilder builder, IConfigurationSection dbconf, ILoggerFactory loggerFactory)
+        public DbContextOptionsBuilder ApplyDbConfig(DbContextOptionsBuilder builder, IConfigurationSection dbconf)
         {
-            // ロガーの設定
-            // TODO: ON/OFFや出力先を設定で変えられるようにする
-            builder.EnableSensitiveDataLogging();
-            builder.UseLoggerFactory(loggerFactory);
-
             // DB接続設定
             switch (dbconf.GetValue<string>("Type")?.ToLower())
             {
