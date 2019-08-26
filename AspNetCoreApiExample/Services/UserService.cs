@@ -10,6 +10,7 @@
 
 namespace Honememo.AspNetCoreApiExample.Services
 {
+    using System;
     using System.Collections.Generic;
     using System.Threading.Tasks;
     using AutoMapper;
@@ -75,20 +76,11 @@ namespace Honememo.AspNetCoreApiExample.Services
         }
 
         /// <summary>
-        /// 指定されたユーザーを取得する。
-        /// </summary>
-        /// <param name="name">ユーザー名。</param>
-        /// <returns>ユーザー。</returns>
-        public async Task<UserDto> FindUser(string name)
-        {
-            return this.mapper.Map<UserDto>(await this.userRepository.FindByName(name));
-        }
-
-        /// <summary>
         /// ユーザーを新規登録する。
         /// </summary>
         /// <param name="param">ユーザー登録情報。</param>
         /// <returns>登録したユーザー。</returns>
+        /// <exception cref="BadRequestException">入力値が不正な場合。</exception>
         public async Task<User> CreateUser(UserNewDto param)
         {
             return await this.userRepository.CreateBy(param.UserName, param.Password);
@@ -101,6 +93,7 @@ namespace Honememo.AspNetCoreApiExample.Services
         /// <param name="param">ユーザー変更情報。</param>
         /// <returns>処理結果。</returns>
         /// <exception cref="NotFoundException">ユーザーが存在しない場合。</exception>
+        /// <exception cref="BadRequestException">入力値が不正な場合。</exception>
         public async Task UpdateUser(int userId, UserEditDto param)
         {
             // ※ 現状ユーザー名の変更のみ対応
@@ -114,9 +107,28 @@ namespace Honememo.AspNetCoreApiExample.Services
         /// <param name="param">パスワード変更情報。</param>
         /// <returns>処理結果。</returns>
         /// <exception cref="NotFoundException">ユーザーが存在しない場合。</exception>
+        /// <exception cref="BadRequestException">パスワードが変更条件を満たさない場合。</exception>
         public async Task ChangePassword(int userId, ChangePasswordDto param)
         {
             await this.userRepository.ChangePassword(userId, param.CurrentPassword, param.NewPassword);
+        }
+
+        /// <summary>
+        /// ログイン用にユーザーを取得&amp;更新する。
+        /// </summary>
+        /// <param name="name">ユーザー名。</param>
+        /// <returns>ユーザー情報。</returns>
+        /// <exception cref="NotFoundException">ユーザーが存在しない場合。</exception>
+        public async Task<UserDto> FindAndUpdateForLogin(string name)
+        {
+            var user = await this.userRepository.FindByName(name);
+            if (user == null)
+            {
+                throw new NotFoundException($"name = {name} is not found");
+            }
+
+            user.LastLogin = DateTimeOffset.UtcNow;
+            return this.mapper.Map<UserDto>(await this.userRepository.Update(user));
         }
 
         #endregion

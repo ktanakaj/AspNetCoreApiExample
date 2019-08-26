@@ -10,12 +10,13 @@
 
 namespace Honememo.AspNetCoreApiExample.Entities
 {
+    using System;
     using System.ComponentModel.DataAnnotations;
 
     /// <summary>
     /// ブログ記事エンティティクラス。
     /// </summary>
-    public class Article
+    public class Article : IHasTimestamp
     {
         /// <summary>
         /// ブログ記事ID。
@@ -41,6 +42,16 @@ namespace Honememo.AspNetCoreApiExample.Entities
         [Required]
         [MaxLength(65535)]
         public string Body { get; set; }
+
+        /// <summary>
+        /// 登録日時。
+        /// </summary>
+        public DateTimeOffset? CreatedAt { get; set; }
+
+        /// <summary>
+        /// 更新日時。
+        /// </summary>
+        public DateTimeOffset? UpdatedAt { get; set; }
 
         ///// <summary>
         ///// ブログ記事タグ。

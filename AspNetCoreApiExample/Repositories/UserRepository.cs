@@ -110,6 +110,7 @@ namespace Honememo.AspNetCoreApiExample.Repositories
             var user = new User()
             {
                 UserName = name,
+                LastLogin = DateTimeOffset.UtcNow
             };
             this.ThrowBadRequestExceptionIfResultIsNotSucceeded(
                 await this.userManager.CreateAsync(user));
@@ -148,6 +149,18 @@ namespace Honememo.AspNetCoreApiExample.Repositories
             var user = await this.FindOrFail(id);
             this.ThrowBadRequestExceptionIfResultIsNotSucceeded(
                 await this.userManager.ChangePasswordAsync(user, currentPasword, newPassword));
+            return user;
+        }
+
+        /// <summary>
+        /// ユーザーを更新する。
+        /// </summary>
+        /// <param name="user">ユーザー。</param>
+        /// <returns>更新したユーザー。</returns>
+        public async Task<User> Update(User user)
+        {
+            this.ThrowBadRequestExceptionIfResultIsNotSucceeded(
+                await this.userManager.UpdateAsync(user));
             return user;
         }
 

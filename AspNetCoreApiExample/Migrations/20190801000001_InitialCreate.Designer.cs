@@ -30,9 +30,13 @@ namespace Honememo.AspNetCoreApiExample.Migrations
                         .IsRequired()
                         .HasMaxLength(65535);
 
+                    b.Property<DateTimeOffset?>("CreatedAt");
+
                     b.Property<string>("Subject")
                         .IsRequired()
                         .HasMaxLength(191);
+
+                    b.Property<DateTimeOffset?>("UpdatedAt");
 
                     b.HasKey("Id");
 
@@ -46,9 +50,13 @@ namespace Honememo.AspNetCoreApiExample.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
 
+                    b.Property<DateTimeOffset?>("CreatedAt");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(191);
+
+                    b.Property<DateTimeOffset?>("UpdatedAt");
 
                     b.Property<int>("UserId");
 
@@ -69,10 +77,14 @@ namespace Honememo.AspNetCoreApiExample.Migrations
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken();
 
+                    b.Property<DateTimeOffset?>("CreatedAt");
+
                     b.Property<string>("Email")
                         .HasMaxLength(191);
 
                     b.Property<bool>("EmailConfirmed");
+
+                    b.Property<DateTimeOffset?>("LastLogin");
 
                     b.Property<bool>("LockoutEnabled");
 
@@ -93,6 +105,8 @@ namespace Honememo.AspNetCoreApiExample.Migrations
                     b.Property<string>("SecurityStamp");
 
                     b.Property<bool>("TwoFactorEnabled");
+
+                    b.Property<DateTimeOffset?>("UpdatedAt");
 
                     b.Property<string>("UserName")
                         .HasMaxLength(191);

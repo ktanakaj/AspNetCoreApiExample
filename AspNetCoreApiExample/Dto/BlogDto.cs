@@ -10,6 +10,7 @@
 
 namespace Honememo.AspNetCoreApiExample.Dto
 {
+    using System;
     using System.ComponentModel.DataAnnotations;
     using Honememo.AspNetCoreApiExample.Entities;
 
@@ -30,5 +31,15 @@ namespace Honememo.AspNetCoreApiExample.Dto
         /// </summary>
         [Required]
         public int UserId { get; set; }
+
+        /// <summary>
+        /// 登録日時。
+        /// </summary>
+        public DateTimeOffset CreatedAt { get; set; }
+
+        /// <summary>
+        /// 更新日時。
+        /// </summary>
+        public DateTimeOffset UpdatedAt { get; set; }
     }
 }

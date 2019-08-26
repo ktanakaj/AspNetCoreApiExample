@@ -124,7 +124,7 @@ namespace Honememo.AspNetCoreApiExample.Controllers
             }
 
             // ※ この時点では this.User は空で使用できない
-            return await this.userService.FindUser(body.UserName);
+            return await this.userService.FindAndUpdateForLogin(body.UserName);
         }
 
         /// <summary>

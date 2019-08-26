@@ -10,6 +10,7 @@
 
 namespace Honememo.AspNetCoreApiExample.Tests.Controllers
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Net.Http;
@@ -105,6 +106,7 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
         [Fact]
         public async void TestPostBlog()
         {
+            var now = DateTimeOffset.UtcNow;
             var body = new BlogEditDto() { Name = "New Blog" };
             var response = await this.authedClient.PostAsJsonAsync("/api/blogs", body);
             var responseString = await response.Content.ReadAsStringAsync();
@@ -113,10 +115,14 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
             var json = JsonConvert.DeserializeObject<BlogDto>(responseString);
             Assert.True(json.Id > 0);
             Assert.Equal(body.Name, json.Name);
+            Assert.True(json.CreatedAt > now);
+            Assert.True(json.UpdatedAt > now);
 
             var dbblog = this.factory.CreateDbContext().Blogs.Find(json.Id);
             Assert.NotNull(dbblog);
             Assert.Equal(body.Name, dbblog.Name);
+            Assert.Equal(json.CreatedAt, dbblog.CreatedAt);
+            Assert.Equal(json.UpdatedAt, dbblog.UpdatedAt);
         }
 
         /// <summary>
@@ -125,6 +131,7 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
         [Fact]
         public async void TestPutBlog()
         {
+            var now = DateTimeOffset.UtcNow;
             var blog = new Blog() { Id = 2001, Name = "Blog for PutBlog", UserId = this.userId };
             var db = this.factory.CreateDbContext();
             db.Blogs.Add(blog);
@@ -138,6 +145,7 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
             var dbblog = this.factory.CreateDbContext().Blogs.Find(blog.Id);
             Assert.NotNull(dbblog);
             Assert.Equal(body.Name, dbblog.Name);
+            Assert.True(dbblog.UpdatedAt > now);
         }
 
         /// <summary>

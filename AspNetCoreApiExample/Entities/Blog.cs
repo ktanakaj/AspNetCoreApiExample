@@ -10,13 +10,14 @@
 
 namespace Honememo.AspNetCoreApiExample.Entities
 {
+    using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
 
     /// <summary>
     /// ブログエンティティクラス。
     /// </summary>
-    public class Blog
+    public class Blog : IHasTimestamp
     {
         /// <summary>
         /// ブログID。
@@ -34,6 +35,16 @@ namespace Honememo.AspNetCoreApiExample.Entities
         /// ブログ作者のユーザーID。
         /// </summary>
         public int UserId { get; set; }
+
+        /// <summary>
+        /// 登録日時。
+        /// </summary>
+        public DateTimeOffset? CreatedAt { get; set; }
+
+        /// <summary>
+        /// 更新日時。
+        /// </summary>
+        public DateTimeOffset? UpdatedAt { get; set; }
 
         /// <summary>
         /// ブログ作者のユーザー。

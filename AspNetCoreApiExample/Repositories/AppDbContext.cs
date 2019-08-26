@@ -10,6 +10,10 @@
 
 namespace Honememo.AspNetCoreApiExample.Repositories
 {
+    using System;
+    using System.Linq;
+    using System.Threading;
+    using System.Threading.Tasks;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore;
@@ -59,6 +63,31 @@ namespace Honememo.AspNetCoreApiExample.Repositories
             return this.Database.BeginTransaction();
         }
 
+        /// <summary>
+        /// コンテキストの変更をDBに保存する。
+        /// </summary>
+        /// <param name="acceptAllChangesOnSuccess">保存成功時にAcceptAllChangesを呼び出すか？</param>
+        /// <returns>DBの更新件数。</returns>
+        public override int SaveChanges(bool acceptAllChangesOnSuccess)
+        {
+            // DB保存前に更新日時の更新を行う
+            this.TouchChangedEntities();
+            return base.SaveChanges(acceptAllChangesOnSuccess);
+        }
+
+        /// <summary>
+        /// コンテキストの変更をDBに保存する。
+        /// </summary>
+        /// <param name="acceptAllChangesOnSuccess">保存成功時にAcceptAllChangesを呼び出すか？</param>
+        /// <param name="cancellationToken">処理キャンセル用トークン。</param>
+        /// <returns>DBの更新件数。</returns>
+        public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default(CancellationToken))
+        {
+            // DB保存前に更新日時の更新を行う
+            this.TouchChangedEntities();
+            return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+        }
+
         #endregion
 
         #region 内部メソッド
@@ -95,6 +124,26 @@ namespace Honememo.AspNetCoreApiExample.Repositories
                 entity.Property(m => m.LoginProvider).HasMaxLength(191);
                 entity.Property(m => m.Name).HasMaxLength(191);
             });
+        }
+
+        /// <summary>
+        /// 変更されているエンティティの登録日時/更新日時を更新する。
+        /// </summary>
+        private void TouchChangedEntities()
+        {
+            var entities = ChangeTracker.Entries()
+                .Where(x => x.Entity is IHasTimestamp && (x.State == EntityState.Added || x.State == EntityState.Modified));
+
+            var now = DateTimeOffset.UtcNow;
+            foreach (var entity in entities)
+            {
+                if (entity.State == EntityState.Added)
+                {
+                    ((IHasTimestamp)entity.Entity).CreatedAt = now;
+                }
+
+                ((IHasTimestamp)entity.Entity).UpdatedAt = now;
+            }
         }
 
         #endregion

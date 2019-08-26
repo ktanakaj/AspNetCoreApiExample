@@ -1,4 +1,4 @@
-﻿// ================================================================================================
+﻿﻿// ================================================================================================
 // <summary>
 //      初期DBマイグレーションスクリプトクラスソース</summary>
 //
@@ -59,7 +59,10 @@ namespace Honememo.AspNetCoreApiExample.Migrations
                     TwoFactorEnabled = table.Column<bool>(nullable: false),
                     LockoutEnd = table.Column<DateTimeOffset>(nullable: true),
                     LockoutEnabled = table.Column<bool>(nullable: false),
-                    AccessFailedCount = table.Column<int>(nullable: false)
+                    AccessFailedCount = table.Column<int>(nullable: false),
+                    LastLogin = table.Column<DateTimeOffset>(nullable: true),
+                    CreatedAt = table.Column<DateTimeOffset>(nullable: true),
+                    UpdatedAt = table.Column<DateTimeOffset>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -179,7 +182,9 @@ namespace Honememo.AspNetCoreApiExample.Migrations
                     Id = table.Column<int>(nullable: false)
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     Name = table.Column<string>(maxLength: 191, nullable: false),
-                    UserId = table.Column<int>(nullable: false)
+                    UserId = table.Column<int>(nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(nullable: true),
+                    UpdatedAt = table.Column<DateTimeOffset>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -200,7 +205,9 @@ namespace Honememo.AspNetCoreApiExample.Migrations
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     BlogId = table.Column<int>(nullable: false),
                     Subject = table.Column<string>(maxLength: 191, nullable: false),
-                    Body = table.Column<string>(maxLength: 65535, nullable: false)
+                    Body = table.Column<string>(maxLength: 65535, nullable: false),
+                    CreatedAt = table.Column<DateTimeOffset>(nullable: true),
+                    UpdatedAt = table.Column<DateTimeOffset>(nullable: true)
                 },
                 constraints: table =>
                 {

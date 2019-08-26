@@ -10,6 +10,7 @@
 
 namespace Honememo.AspNetCoreApiExample.Tests.Controllers
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Net.Http;
@@ -136,6 +137,7 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
         [Fact]
         public async void TestPostArticle()
         {
+            var now = DateTimeOffset.UtcNow;
             var body = new ArticleNewDto() { Subject = "New Article", Body = "New Article Body", BlogId = 1000 };
             var response = await this.authedClient.PostAsJsonAsync("/api/articles", body);
             var responseString = await response.Content.ReadAsStringAsync();
@@ -146,12 +148,16 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
             Assert.Equal(body.Subject, json.Subject);
             Assert.Equal(body.Body, json.Body);
             Assert.Equal(body.BlogId, json.BlogId);
+            Assert.True(json.CreatedAt > now);
+            Assert.True(json.UpdatedAt > now);
 
             var dbarticle = this.factory.CreateDbContext().Articles.Find(json.Id);
             Assert.NotNull(dbarticle);
             Assert.Equal(body.Subject, dbarticle.Subject);
             Assert.Equal(body.Body, dbarticle.Body);
             Assert.Equal(body.BlogId, dbarticle.BlogId);
+            Assert.Equal(json.CreatedAt, dbarticle.CreatedAt);
+            Assert.Equal(json.UpdatedAt, dbarticle.UpdatedAt);
         }
 
         /// <summary>
@@ -160,6 +166,7 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
         [Fact]
         public async void TestPutArticle()
         {
+            var now = DateTimeOffset.UtcNow;
             var article = new Article() { Id = 20001, Subject = "Article for PutArticle", Body = "PutArticle Body", BlogId = 1000 };
             var db = this.factory.CreateDbContext();
             db.Articles.Add(article);
@@ -174,6 +181,7 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
             Assert.NotNull(dbarticle);
             Assert.Equal(body.Subject, dbarticle.Subject);
             Assert.Equal(body.Body, dbarticle.Body);
+            Assert.True(dbarticle.UpdatedAt > now);
         }
 
         /// <summary>

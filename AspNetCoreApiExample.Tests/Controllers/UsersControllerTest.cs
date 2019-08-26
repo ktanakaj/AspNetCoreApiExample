@@ -10,6 +10,7 @@
 
 namespace Honememo.AspNetCoreApiExample.Tests.Controllers
 {
+    using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Net.Http;
@@ -104,6 +105,7 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
         [Fact]
         public async void TestCreateUser()
         {
+            var now = DateTimeOffset.UtcNow;
             var body = new UserNewDto() { UserName = "Scott", Password = "Tiger" };
             var response = await this.client.PostAsJsonAsync("/api/users", body);
             var responseString = await response.Content.ReadAsStringAsync();
@@ -112,11 +114,17 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
             var json = JsonConvert.DeserializeObject<UserDto>(responseString);
             Assert.True(json.Id > 0);
             Assert.Equal(body.UserName, json.UserName);
+            Assert.True(json.LastLogin > now);
+            Assert.True(json.CreatedAt > now);
+            Assert.True(json.UpdatedAt > now);
 
             var dbuser = this.factory.CreateDbContext().Users.Find(json.Id);
             Assert.NotNull(dbuser);
             Assert.Equal(body.UserName, dbuser.UserName);
             Assert.NotNull(dbuser.PasswordHash);
+            Assert.Equal(json.LastLogin, dbuser.LastLogin);
+            Assert.Equal(json.CreatedAt, dbuser.CreatedAt);
+            Assert.Equal(json.UpdatedAt, dbuser.UpdatedAt);
 
             // TODO: パスワードハッシュが正しいものであるかも確認する
             // TODO: 新規ユーザーで認証されたことも確認する
@@ -129,6 +137,7 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
         public async void TestLoginAndLogout()
         {
             // id=100のユーザーでログインしてログアウトする
+            var now = DateTimeOffset.UtcNow;
             var body = new LoginDto() { UserName = "Taro", Password = "PASSWORD" };
             var response = await this.client.PostAsJsonAsync("/api/users/login", body);
             var responseString = await response.Content.ReadAsStringAsync();
@@ -137,6 +146,10 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
             var json = JsonConvert.DeserializeObject<UserDto>(responseString);
             Assert.Equal(100, json.Id);
             Assert.Equal(body.UserName, json.UserName);
+            Assert.True(json.LastLogin > now);
+
+            var dbuser = this.factory.CreateDbContext().Users.Find(json.Id);
+            Assert.Equal(json.LastLogin, dbuser.LastLogin);
 
             response = await this.client.PostAsync("/api/users/logout", null);
             responseString = await response.Content.ReadAsStringAsync();
@@ -149,6 +162,7 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
         [Fact]
         public async void TestUpdateUser()
         {
+            var now = DateTimeOffset.UtcNow;
             var body = new UserEditDto() { UserName = "Ken" };
             var response = await this.authedClient.PutAsJsonAsync("/api/users", body);
             var responseString = await response.Content.ReadAsStringAsync();
@@ -157,6 +171,7 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
             var dbuser = this.factory.CreateDbContext().Users.Find(this.userId);
             Assert.NotNull(dbuser);
             Assert.Equal(body.UserName, dbuser.UserName);
+            Assert.True(dbuser.UpdatedAt > now);
         }
 
         /// <summary>
@@ -165,6 +180,7 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
         [Fact]
         public async void TestChangePassword()
         {
+            var now = DateTimeOffset.UtcNow;
             var body = new ChangePasswordDto() { CurrentPassword = "TEST_PASSWORD", NewPassword = "KenKen" };
             var response = await this.authedClient.PutAsJsonAsync("/api/users/password", body);
             var responseString = await response.Content.ReadAsStringAsync();
@@ -173,6 +189,7 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
             var dbuser = this.factory.CreateDbContext().Users.Find(this.userId);
             Assert.NotNull(dbuser);
             Assert.NotNull(dbuser.PasswordHash);
+            Assert.True(dbuser.UpdatedAt > now);
 
             // TODO: パスワードハッシュが正しいものであるかも確認する
         }
