@@ -1,0 +1,3 @@
+- name: Restart Application
+  service: name={{ app_svr_service_name }} state=restarted enabled=yes
+  become: yes

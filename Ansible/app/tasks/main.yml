@@ -7,7 +7,7 @@
     notify: Restart nginx
 
   - name: Create the web application logging directory
-    file: path={{ app_log_dir }} state=directory owner=vagrant group=vagrant mode=0755
+    file: path={{ app_log_dir }} state=directory owner={{ user }} group={{ group }} mode=0777
   - name: Create the web application database
     mysql_db: name={{ item }} encoding=utf8mb4 collation=utf8mb4_bin state=present
     with_items: "{{ app_db }}"
@@ -19,9 +19,17 @@
       - "{{ app_db_users }}"
     when: app_db_created.changed
 
+  - name: Copy the web app service to systemd
+    template:
+      src: "{{ app_svr_service_src }}"
+      dest: "{{ app_svr_service_dest }}"
+      force: yes
+    notify: Restart Application
+
 - block:
   - name: Build the web application
-    shell: dotnet publish chdir={{ app_svr_dir }}
+    shell: dotnet publish -c {{ build_configuration }} chdir={{ app_svr_dir }}
+    notify: Restart Application
   - name: Create the web application db tables
     shell: dotnet ef database update chdir={{ app_svr_dir }}
   become: false
