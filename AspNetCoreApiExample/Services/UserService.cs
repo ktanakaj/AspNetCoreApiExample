@@ -83,6 +83,9 @@ namespace Honememo.AspNetCoreApiExample.Services
         /// <exception cref="BadRequestException">入力値が不正な場合。</exception>
         public async Task<User> CreateUser(UserNewDto param)
         {
+            // FIXME: CreateBy()は本当はトランザクションが必要。
+            //        しかしIUnitOfWorkの仕組みでは機能せず？
+            //        TransactionScopeなら行けるようだが、ライブラリが未対応なので対応待ち。
             return await this.userRepository.CreateBy(param.UserName, param.Password);
         }
 

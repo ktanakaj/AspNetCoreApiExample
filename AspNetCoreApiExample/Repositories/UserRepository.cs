@@ -104,6 +104,7 @@ namespace Honememo.AspNetCoreApiExample.Repositories
         /// <param name="name">ユーザー名。</param>
         /// <param name="password">パスワード。</param>
         /// <returns>登録したユーザー。</returns>
+        /// <remarks>処理の都合上、二回DBを更新します。呼び元でトランザクションしてください。</remarks>
         public async Task<User> CreateBy(string name, string password)
         {
             // ※ 通常は入力値不正しかエラーは発生しない（名前重複やパスワード不許可）

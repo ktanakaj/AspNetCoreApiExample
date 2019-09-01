@@ -97,6 +97,7 @@ namespace Honememo.AspNetCoreApiExample
             });
 
             // DI設定
+            services.AddScoped<IUnitOfWork, AppDbContext>();
             services.Scan(scan => scan
                 .FromCallingAssembly()
                     .AddClasses(classes => classes.Where(type => type.Name.EndsWith("Repository") || type.Name.EndsWith("Service")))
