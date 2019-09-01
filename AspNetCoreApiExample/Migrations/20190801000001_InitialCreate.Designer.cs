@@ -12,6 +12,10 @@ namespace Honememo.AspNetCoreApiExample.Migrations
     [Migration("20190801000001_InitialCreate")]
     partial class InitialCreate
     {
+        /// <summary>
+        /// ターゲットモデルのビルド。
+        /// </summary>
+        /// <param name="modelBuilder">モデルビルダー。</param>
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
@@ -65,6 +69,18 @@ namespace Honememo.AspNetCoreApiExample.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Blogs");
+                });
+
+            modelBuilder.Entity("Honememo.AspNetCoreApiExample.Entities.Tag", b =>
+                {
+                    b.Property<int>("ArticleId");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(191);
+
+                    b.HasKey("ArticleId", "Name");
+
+                    b.ToTable("Tags");
                 });
 
             modelBuilder.Entity("Honememo.AspNetCoreApiExample.Entities.User", b =>
@@ -244,6 +260,14 @@ namespace Honememo.AspNetCoreApiExample.Migrations
                     b.HasOne("Honememo.AspNetCoreApiExample.Entities.User", "User")
                         .WithMany("Blogs")
                         .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("Honememo.AspNetCoreApiExample.Entities.Tag", b =>
+                {
+                    b.HasOne("Honememo.AspNetCoreApiExample.Entities.Article", "Article")
+                        .WithMany("Tags")
+                        .HasForeignKey("ArticleId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 

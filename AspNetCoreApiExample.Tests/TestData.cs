@@ -100,11 +100,19 @@ namespace Honememo.AspNetCoreApiExample.Tests
             {
                 new Article()
                 {
-                    Id = 10000, BlogId = 1000, Subject = "初めまして", Body = "初めまして、太郎です。ブログにようこそ。"
+                    Id = 10000,
+                    BlogId = 1000,
+                    Subject = "初めまして",
+                    Body = "初めまして、太郎です。ブログにようこそ。",
+                    Tags = new List<Tag>() { new Tag() { Name = "Blog" }, new Tag() { Name = "お知らせ" } }
                 },
                 new Article()
                 {
-                    Id = 10100, BlogId = 1010, Subject = "次郎です", Body = "次郎のブログです。"
+                    Id = 10100,
+                    BlogId = 1010,
+                    Subject = "次郎です",
+                    Body = "次郎のブログです。",
+                    Tags = new List<Tag>() { new Tag() { Name = "Blog" } }
                 },
             };
         }

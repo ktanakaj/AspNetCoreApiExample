@@ -10,6 +10,7 @@
 
 namespace Honememo.AspNetCoreApiExample.Dto
 {
+    using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
 
     /// <summary>
@@ -30,5 +31,12 @@ namespace Honememo.AspNetCoreApiExample.Dto
         [Required]
         [MaxLength(65535)]
         public string Body { get; set; }
+
+        /// <summary>
+        /// 記事に付けられたタグ。
+        /// </summary>
+        [Required]
+        [MaxLength(10)]
+        public ICollection<string> Tags { get; set; }
     }
 }

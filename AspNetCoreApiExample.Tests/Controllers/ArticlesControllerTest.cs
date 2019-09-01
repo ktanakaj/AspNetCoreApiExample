@@ -14,6 +14,7 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
     using System.Collections.Generic;
     using System.Linq;
     using System.Net.Http;
+    using Microsoft.EntityFrameworkCore;
     using Newtonsoft.Json;
     using Xunit;
     using Honememo.AspNetCoreApiExample.Dto;
@@ -85,6 +86,7 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
             Assert.True(!string.IsNullOrEmpty(article.Subject));
             Assert.True(!string.IsNullOrEmpty(article.Body));
             Assert.True(article.BlogId > 0);
+            Assert.NotNull(article.Tags);
 
             // 複数のブログを横断して返すこと
             Assert.True(array.Select((a) => a.BlogId).Distinct().Count() > 1);
@@ -110,6 +112,7 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
             Assert.True(!string.IsNullOrEmpty(article.Subject));
             Assert.True(!string.IsNullOrEmpty(article.Body));
             Assert.True(article.BlogId > 0);
+            Assert.NotNull(article.Tags);
 
             // 指定されたIDのブログのみが取れること
             Assert.Single(array.Select((a) => a.BlogId).Distinct());
@@ -129,6 +132,8 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
             Assert.Equal(10000, json.Id);
             Assert.Equal("初めまして", json.Subject);
             Assert.Equal("初めまして、太郎です。ブログにようこそ。", json.Body);
+            Assert.Contains("Blog", json.Tags);
+            Assert.Contains("お知らせ", json.Tags);
         }
 
         /// <summary>
@@ -138,7 +143,7 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
         public async void TestPostArticle()
         {
             var now = DateTimeOffset.UtcNow;
-            var body = new ArticleNewDto() { Subject = "New Article", Body = "New Article Body", BlogId = 1000 };
+            var body = new ArticleNewDto() { Subject = "New Article", Body = "New Article Body", BlogId = 1000, Tags = new string[] { "Blog", "新規" } };
             var response = await this.authedClient.PostAsJsonAsync("/api/articles", body);
             var responseString = await response.Content.ReadAsStringAsync();
             Assert.True(response.IsSuccessStatusCode, responseString);
@@ -150,6 +155,8 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
             Assert.Equal(body.BlogId, json.BlogId);
             Assert.True(json.CreatedAt > now);
             Assert.True(json.UpdatedAt > now);
+            Assert.Contains(body.Tags.First(), json.Tags);
+            Assert.Contains(body.Tags.Last(), json.Tags);
 
             var dbarticle = this.factory.CreateDbContext().Articles.Find(json.Id);
             Assert.NotNull(dbarticle);
@@ -158,6 +165,10 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
             Assert.Equal(body.BlogId, dbarticle.BlogId);
             Assert.Equal(json.CreatedAt, dbarticle.CreatedAt);
             Assert.Equal(json.UpdatedAt, dbarticle.UpdatedAt);
+            foreach (var t in body.Tags)
+            {
+                Assert.Contains(t, json.Tags);
+            }
         }
 
         /// <summary>
@@ -167,21 +178,27 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
         public async void TestPutArticle()
         {
             var now = DateTimeOffset.UtcNow;
-            var article = new Article() { Id = 20001, Subject = "Article for PutArticle", Body = "PutArticle Body", BlogId = 1000 };
+            var article = new Article() { Id = 20001, Subject = "Article for PutArticle", Body = "PutArticle Body", BlogId = 1000, Tags = new List<Tag>() { new Tag() { Name = "Blog" }, new Tag() { Name = "変更前" } } };
             var db = this.factory.CreateDbContext();
             db.Articles.Add(article);
             db.SaveChanges();
 
-            var body = new ArticleEditDto() { Subject = "Updated Article", Body = "Updated Article Body" };
+            var body = new ArticleEditDto() { Subject = "Updated Article", Body = "Updated Article Body", Tags = new string[] { "変更後" } };
             var response = await this.authedClient.PutAsJsonAsync($"/api/articles/{article.Id}", body);
             var responseString = await response.Content.ReadAsStringAsync();
             Assert.True(response.IsSuccessStatusCode, responseString);
 
-            var dbarticle = this.factory.CreateDbContext().Articles.Find(article.Id);
+            var dbarticle = this.factory.CreateDbContext().Articles.Include(a => a.Tags).First(a => a.Id == article.Id);
             Assert.NotNull(dbarticle);
             Assert.Equal(body.Subject, dbarticle.Subject);
             Assert.Equal(body.Body, dbarticle.Body);
             Assert.True(dbarticle.UpdatedAt > now);
+
+            Assert.NotEmpty(dbarticle.Tags.Where(n => n.Name == body.Tags.First()));
+            foreach (var o in article.Tags)
+            {
+                Assert.Empty(dbarticle.Tags.Where(n => n.Name == o.Name));
+            }
         }
 
         /// <summary>
@@ -190,7 +207,7 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
         [Fact]
         public async void TestDeleteArticle()
         {
-            var article = new Article() { Id = 20002, Subject = "Article for DeleteArticle", Body = "DeleteArticle Body", BlogId = 1000 };
+            var article = new Article() { Id = 20002, Subject = "Article for DeleteArticle", Body = "DeleteArticle Body", BlogId = 1000, Tags = new List<Tag>() { new Tag() { Name = "Blog" } } };
             var db = this.factory.CreateDbContext();
             db.Articles.Add(article);
             db.SaveChanges();
@@ -200,6 +217,7 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
             Assert.True(response.IsSuccessStatusCode, responseString);
 
             Assert.Null(this.factory.CreateDbContext().Articles.Find(article.Id));
+            Assert.Null(this.factory.CreateDbContext().Tags.Find(article.Id, article.Tags.First().Name));
         }
 
         #endregion

@@ -50,6 +50,11 @@ namespace Honememo.AspNetCoreApiExample.Repositories
         /// </summary>
         public DbSet<Article> Articles { get; set; }
 
+        /// <summary>
+        /// ブログ記事のタグテーブル。
+        /// </summary>
+        public DbSet<Tag> Tags { get; set; }
+
         #endregion
 
         #region 公開メソッド
@@ -99,7 +104,16 @@ namespace Honememo.AspNetCoreApiExample.Repositories
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            this.ConfigureIdentityEntities(modelBuilder);
+            Tag.OnModelCreating(modelBuilder);
+        }
 
+        /// <summary>
+        /// ASP.NET Core IdentityのEntityの設定を行う。
+        /// </summary>
+        /// <param name="modelBuilder">モデルビルダー。</param>
+        private void ConfigureIdentityEntities(ModelBuilder modelBuilder)
+        {
             // ASP.NET Core Identityが自動生成するEntityがMySQLのutf8mb4の
             // 文字数制限でエラーになるので、定義を上書きする。
             modelBuilder.Entity<User>(entity =>

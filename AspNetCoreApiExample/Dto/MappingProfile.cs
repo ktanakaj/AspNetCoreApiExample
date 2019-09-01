@@ -10,6 +10,7 @@
 
 namespace Honememo.AspNetCoreApiExample.Dto
 {
+    using System.Linq;
     using AutoMapper;
     using Honememo.AspNetCoreApiExample.Entities;
 
@@ -25,12 +26,15 @@ namespace Honememo.AspNetCoreApiExample.Dto
         {
             this.CreateMap<User, UserDto>();
             this.CreateMap<Blog, BlogDto>();
-            this.CreateMap<Article, ArticleDto>();
+            this.CreateMap<Article, ArticleDto>()
+                .ForMember(dest => dest.Tags, opt => opt.MapFrom(src => src.Tags.Select(t => t.Name)));
             this.CreateMap<UserNewDto, User>();
             this.CreateMap<UserEditDto, User>();
             this.CreateMap<BlogEditDto, Blog>();
-            this.CreateMap<ArticleNewDto, Article>();
-            this.CreateMap<ArticleEditDto, Article>();
+            this.CreateMap<ArticleNewDto, Article>()
+                .ForMember(dest => dest.Tags, opt => opt.MapFrom(src => src.Tags.Distinct().Select(t => new Tag() { Name = t })));
+            this.CreateMap<ArticleEditDto, Article>()
+                .ForMember(dest => dest.Tags, opt => opt.MapFrom(src => src.Tags.Distinct().Select(t => new Tag() { Name = t })));
         }
     }
 }

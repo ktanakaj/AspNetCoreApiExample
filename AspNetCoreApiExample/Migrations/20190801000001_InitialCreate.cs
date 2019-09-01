@@ -1,4 +1,4 @@
-﻿﻿// ================================================================================================
+﻿// ================================================================================================
 // <summary>
 //      初期DBマイグレーションスクリプトクラスソース</summary>
 //
@@ -220,6 +220,24 @@ namespace Honememo.AspNetCoreApiExample.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.CreateTable(
+                name: "Tags",
+                columns: table => new
+                {
+                    ArticleId = table.Column<int>(nullable: false),
+                    Name = table.Column<string>(maxLength: 191, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Tags", x => new { x.ArticleId, x.Name });
+                    table.ForeignKey(
+                        name: "FK_Tags_Articles_ArticleId",
+                        column: x => x.ArticleId,
+                        principalTable: "Articles",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
             migrationBuilder.CreateIndex(
                 name: "IX_Articles_BlogId",
                 table: "Articles",
@@ -275,9 +293,6 @@ namespace Honememo.AspNetCoreApiExample.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "Articles");
-
-            migrationBuilder.DropTable(
                 name: "AspNetRoleClaims");
 
             migrationBuilder.DropTable(
@@ -293,10 +308,16 @@ namespace Honememo.AspNetCoreApiExample.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "Blogs");
+                name: "Tags");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
+                name: "Articles");
+
+            migrationBuilder.DropTable(
+                name: "Blogs");
 
             migrationBuilder.DropTable(
                 name: "AspNetUsers");

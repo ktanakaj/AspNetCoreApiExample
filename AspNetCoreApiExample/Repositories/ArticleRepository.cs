@@ -53,7 +53,7 @@ namespace Honememo.AspNetCoreApiExample.Repositories
         /// <returns>ブログ記事。</returns>
         public async Task<IList<Article>> FindAll()
         {
-            return await this.context.Articles.ToListAsync();
+            return await this.context.Articles.Include(a => a.Tags).ToListAsync();
         }
 
         /// <summary>
@@ -63,7 +63,7 @@ namespace Honememo.AspNetCoreApiExample.Repositories
         /// <returns>ブログ記事。</returns>
         public async Task<IList<Article>> FindByBlogId(int blogId)
         {
-            return await this.context.Articles.Where(a => a.BlogId == blogId).ToListAsync();
+            return await this.context.Articles.Include(a => a.Tags).Where(a => a.BlogId == blogId).ToListAsync();
         }
 
         /// <summary>
@@ -73,7 +73,7 @@ namespace Honememo.AspNetCoreApiExample.Repositories
         /// <returns>ブログ記事。</returns>
         public Task<Article> Find(int id)
         {
-            return this.context.Articles.FindAsync(id);
+            return this.context.Articles.Include(a => a.Tags).FirstAsync(a => a.Id == id);
         }
 
         /// <summary>

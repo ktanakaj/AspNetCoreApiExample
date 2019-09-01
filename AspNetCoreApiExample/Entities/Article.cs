@@ -11,6 +11,7 @@
 namespace Honememo.AspNetCoreApiExample.Entities
 {
     using System;
+    using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
 
     /// <summary>
@@ -53,14 +54,14 @@ namespace Honememo.AspNetCoreApiExample.Entities
         /// </summary>
         public DateTimeOffset? UpdatedAt { get; set; }
 
-        ///// <summary>
-        ///// ブログ記事タグ。
-        ///// </summary>
-        // public string[] Tags { get; set; }
-
         /// <summary>
         /// ブログ。
         /// </summary>
         public Blog Blog { get; set; }
+
+        /// <summary>
+        /// ブログ記事タグ。
+        /// </summary>
+        public ICollection<Tag> Tags { get; set; }
     }
 }
