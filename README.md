@@ -1,5 +1,5 @@
 # ASP.NET Core Web APIサンプルアプリ
-[ASP.NET Core](https://docs.microsoft.com/ja-jp/aspnet/core/?view=aspnetcore-2.1)のAPI開発勉強用に作成したサンプルアプリです。
+[ASP.NET Core](https://docs.microsoft.com/ja-jp/aspnet/core/?view=aspnetcore-2.2)のAPI開発勉強用に作成したサンプルアプリです。
 
 ごくごく簡単なブログを想定したAPI。アプリ構成や開発環境的な部分がメインです。
 

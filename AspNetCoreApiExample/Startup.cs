@@ -80,7 +80,7 @@ namespace Honememo.AspNetCoreApiExample
                 opt.UseLoggerFactory(services.BuildServiceProvider().GetService<ILoggerFactory>());
                 this.ApplyDbConfig(opt, this.Configuration.GetSection("Database"));
             });
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             // 認証設定
             services.AddIdentity<User, IdentityRole<int>>()

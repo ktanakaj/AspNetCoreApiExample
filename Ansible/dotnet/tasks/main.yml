@@ -2,5 +2,5 @@
 - name: Register .NET repository
   yum: name={{ dotnetsource }} state=present
 
-- name: Install .NET Core 2.1
-  yum: name=dotnet-sdk-2.1 state=latest
+- name: Install .NET Core 2.2
+  yum: name=dotnet-sdk-2.2 state=latest
