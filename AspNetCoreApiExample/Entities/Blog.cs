@@ -13,12 +13,15 @@ namespace Honememo.AspNetCoreApiExample.Entities
     using System;
     using System.Collections.Generic;
     using System.ComponentModel.DataAnnotations;
+    using Microsoft.EntityFrameworkCore;
 
     /// <summary>
     /// ブログエンティティクラス。
     /// </summary>
     public class Blog : IHasTimestamp
     {
+        #region プロパティ
+
         /// <summary>
         /// ブログID。
         /// </summary>
@@ -55,5 +58,24 @@ namespace Honememo.AspNetCoreApiExample.Entities
         /// ブログの記事。
         /// </summary>
         public ICollection<Article> Articles { get; set; }
+
+        #endregion
+
+        #region メソッド
+
+        /// <summary>
+        /// モデル構築時に呼ばれる処理。
+        /// </summary>
+        /// <param name="modelBuilder">モデルビルダー。</param>
+        public static void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            // インデックスを設定
+            modelBuilder.Entity<Blog>()
+                .HasIndex(b => b.Name);
+            modelBuilder.Entity<Blog>()
+                .HasIndex(b => b.CreatedAt);
+        }
+
+        #endregion
     }
 }

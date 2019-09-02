@@ -54,7 +54,7 @@ namespace Honememo.AspNetCoreApiExample.Repositories
         /// <returns>ユーザー。</returns>
         public async Task<IList<User>> FindAll()
         {
-            return await this.userManager.Users.ToListAsync();
+            return await this.userManager.Users.OrderBy(u => u.NormalizedUserName).ToListAsync();
         }
 
         /// <summary>

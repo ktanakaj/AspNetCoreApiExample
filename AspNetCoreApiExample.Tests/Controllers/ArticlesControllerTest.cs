@@ -119,6 +119,35 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
         }
 
         /// <summary>
+        /// ブログ記事一覧を取得のテスト（タグ指定）。
+        /// </summary>
+        [Fact]
+        public async void TestGetArticlesByTag()
+        {
+            var response = await this.client.GetAsync("/api/articles?tag=お知らせ");
+            var responseString = await response.Content.ReadAsStringAsync();
+            Assert.True(response.IsSuccessStatusCode, responseString);
+
+            var array = JsonConvert.DeserializeObject<IEnumerable<ArticleDto>>(responseString);
+
+            // ※ 取れるブログ記事は不確定のため、データがあるかのみテスト
+            Assert.NotEmpty(array);
+
+            var article = array.First();
+            Assert.True(article.Id > 0);
+            Assert.True(!string.IsNullOrEmpty(article.Subject));
+            Assert.True(!string.IsNullOrEmpty(article.Body));
+            Assert.True(article.BlogId > 0);
+            Assert.NotEmpty(article.Tags);
+
+            // 指定されたタグを持つブログのみが取れること
+            foreach (var a in array)
+            {
+                Assert.Contains("お知らせ", a.Tags);
+            }
+        }
+
+        /// <summary>
         /// 指定されたブログ記事を取得のテスト。
         /// </summary>
         [Fact]

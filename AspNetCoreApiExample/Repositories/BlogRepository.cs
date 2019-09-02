@@ -12,6 +12,7 @@ namespace Honememo.AspNetCoreApiExample.Repositories
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.EntityFrameworkCore;
     using Honememo.AspNetCoreApiExample.Entities;
@@ -52,7 +53,7 @@ namespace Honememo.AspNetCoreApiExample.Repositories
         /// <returns>ブログ。</returns>
         public async Task<IList<Blog>> FindAll()
         {
-            return await this.context.Blogs.ToListAsync();
+            return await this.context.Blogs.OrderBy(b => b.Name).ThenBy(b => b.UserId).ToListAsync();
         }
 
         /// <summary>

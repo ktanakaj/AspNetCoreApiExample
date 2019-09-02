@@ -53,12 +53,12 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         /// <summary>
         /// ブログ記事一覧を取得する。
         /// </summary>
-        /// <param name="blogId">ブログID。</param>
+        /// <param name="query">検索条件。</param>
         /// <returns>ブログ記事一覧。</returns>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<ArticleDto>>> GetArticles([FromQuery] int blogId)
+        public async Task<ActionResult<IEnumerable<ArticleDto>>> GetArticles([FromQuery] ArticleSearchDto query)
         {
-            return (await this.articleService.FindArticles(blogId)).ToList();
+            return (await this.articleService.FindArticles(query)).ToList();
         }
 
         /// <summary>

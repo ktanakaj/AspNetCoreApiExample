@@ -12,6 +12,7 @@ namespace Honememo.AspNetCoreApiExample.Repositories
 {
     using System;
     using System.Linq;
+    using System.Reflection;
     using System.Threading;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Identity;
@@ -104,8 +105,20 @@ namespace Honememo.AspNetCoreApiExample.Repositories
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            // 個別のEntityにOnModelCreatingがある場合、実行する
+            var param = new object[] { modelBuilder };
+            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            {
+                var method = entityType.ClrType.GetMethod("OnModelCreating", BindingFlags.Static | BindingFlags.Public);
+                if (method != null)
+                {
+                    method.Invoke(null, param);
+                }
+            }
+
+            // その他このクラスで定義している処理を実行
             this.ConfigureIdentityEntities(modelBuilder);
-            Tag.OnModelCreating(modelBuilder);
         }
 
         /// <summary>
@@ -116,13 +129,7 @@ namespace Honememo.AspNetCoreApiExample.Repositories
         {
             // ASP.NET Core Identityが自動生成するEntityがMySQLのutf8mb4の
             // 文字数制限でエラーになるので、定義を上書きする。
-            modelBuilder.Entity<User>(entity =>
-            {
-                entity.Property(m => m.Email).HasMaxLength(191);
-                entity.Property(m => m.NormalizedEmail).HasMaxLength(191);
-                entity.Property(m => m.NormalizedUserName).HasMaxLength(191);
-                entity.Property(m => m.UserName).HasMaxLength(191);
-            });
+            // （Userはクラスがあるのでその中で対応。）
             modelBuilder.Entity<IdentityRole<int>>(entity =>
             {
                 entity.Property(m => m.Name).HasMaxLength(191);

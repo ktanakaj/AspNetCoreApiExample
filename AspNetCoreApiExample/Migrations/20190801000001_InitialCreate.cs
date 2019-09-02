@@ -244,6 +244,16 @@ namespace Honememo.AspNetCoreApiExample.Migrations
                 column: "BlogId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Articles_CreatedAt",
+                table: "Articles",
+                column: "CreatedAt");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Articles_Subject",
+                table: "Articles",
+                column: "Subject");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_AspNetRoleClaims_RoleId",
                 table: "AspNetRoleClaims",
                 column: "RoleId");
@@ -270,6 +280,16 @@ namespace Honememo.AspNetCoreApiExample.Migrations
                 column: "RoleId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_AspNetUsers_CreatedAt",
+                table: "AspNetUsers",
+                column: "CreatedAt");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AspNetUsers_LastLogin",
+                table: "AspNetUsers",
+                column: "LastLogin");
+
+            migrationBuilder.CreateIndex(
                 name: "EmailIndex",
                 table: "AspNetUsers",
                 column: "NormalizedEmail");
@@ -281,9 +301,24 @@ namespace Honememo.AspNetCoreApiExample.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_Blogs_CreatedAt",
+                table: "Blogs",
+                column: "CreatedAt");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Blogs_Name",
+                table: "Blogs",
+                column: "Name");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Blogs_UserId",
                 table: "Blogs",
                 column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Tags_Name_ArticleId",
+                table: "Tags",
+                columns: new[] { "Name", "ArticleId" });
         }
 
         /// <summary>

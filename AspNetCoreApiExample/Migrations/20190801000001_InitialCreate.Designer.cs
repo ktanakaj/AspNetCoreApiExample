@@ -46,6 +46,10 @@ namespace Honememo.AspNetCoreApiExample.Migrations
 
                     b.HasIndex("BlogId");
 
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("Subject");
+
                     b.ToTable("Articles");
                 });
 
@@ -66,6 +70,10 @@ namespace Honememo.AspNetCoreApiExample.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("Name");
+
                     b.HasIndex("UserId");
 
                     b.ToTable("Blogs");
@@ -79,6 +87,8 @@ namespace Honememo.AspNetCoreApiExample.Migrations
                         .HasMaxLength(191);
 
                     b.HasKey("ArticleId", "Name");
+
+                    b.HasIndex("Name", "ArticleId");
 
                     b.ToTable("Tags");
                 });
@@ -128,6 +138,10 @@ namespace Honememo.AspNetCoreApiExample.Migrations
                         .HasMaxLength(191);
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt");
+
+                    b.HasIndex("LastLogin");
 
                     b.HasIndex("NormalizedEmail")
                         .HasName("EmailIndex");

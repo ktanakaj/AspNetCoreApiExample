@@ -15,6 +15,7 @@ namespace Honememo.AspNetCoreApiExample.Repositories
     using System.Linq;
     using System.Threading.Tasks;
     using Microsoft.EntityFrameworkCore;
+    using Honememo.AspNetCoreApiExample.Dto;
     using Honememo.AspNetCoreApiExample.Entities;
     using Honememo.AspNetCoreApiExample.Exceptions;
 
@@ -48,22 +49,49 @@ namespace Honememo.AspNetCoreApiExample.Repositories
         #region 参照系メソッド
 
         /// <summary>
-        /// ブログ記事を全て取得する。
+        /// ブログ記事を取得する。
         /// </summary>
+        /// <param name="param">検索条件。</param>
         /// <returns>ブログ記事。</returns>
-        public async Task<IList<Article>> FindAll()
+        public async Task<IList<Article>> FindAll(ArticleSearchDto param)
         {
-            return await this.context.Articles.Include(a => a.Tags).ToListAsync();
-        }
+            // 検索条件がある場合はそれを使用して検索する
+            IQueryable<Article> query = this.context.Articles.Include(a => a.Tags);
+            if (param.BlogId > 0)
+            {
+                query = query.Where(a => a.BlogId == param.BlogId);
+            }
 
-        /// <summary>
-        /// ブログ内のブログ記事を取得する。
-        /// </summary>
-        /// <param name="blogId">ブログID。</param>
-        /// <returns>ブログ記事。</returns>
-        public async Task<IList<Article>> FindByBlogId(int blogId)
-        {
-            return await this.context.Articles.Include(a => a.Tags).Where(a => a.BlogId == blogId).ToListAsync();
+            if (!string.IsNullOrWhiteSpace(param.Tag))
+            {
+                query = query.Where(a => a.Tags.Any(t => t.Name == param.Tag));
+            }
+
+            if (param.StartAt != null)
+            {
+                query = query.Where(a => a.CreatedAt >= param.StartAt);
+            }
+
+            if (param.EndAt != null)
+            {
+                query = query.Where(a => a.CreatedAt <= param.EndAt);
+            }
+
+            // 新しい順にソート
+            query = query.OrderByDescending(a => a.CreatedAt).ThenByDescending(a => a.Id);
+
+            // ページング条件がある場合は適用
+            if (param.Skip > 0)
+            {
+                query = query.Skip(param.Skip);
+            }
+
+            if (param.Take > 0)
+            {
+                query = query.Take(param.Take);
+            }
+
+            return await query.ToListAsync();
         }
 
         /// <summary>

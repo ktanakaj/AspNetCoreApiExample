@@ -51,9 +51,11 @@ namespace Honememo.AspNetCoreApiExample.Entities
         /// <param name="modelBuilder">モデルビルダー。</param>
         public static void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // 複合主キーを設定
+            // 複合主キーとインデックスを設定
             modelBuilder.Entity<Tag>()
                 .HasKey(t => new { t.ArticleId, t.Name });
+            modelBuilder.Entity<Tag>()
+                .HasIndex(t => new { t.Name, t.ArticleId });
         }
 
         #endregion

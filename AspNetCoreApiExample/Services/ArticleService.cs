@@ -64,21 +64,11 @@ namespace Honememo.AspNetCoreApiExample.Services
         /// <summary>
         /// ブログ記事一覧を取得する。
         /// </summary>
-        /// <param name="blogId">ブログID。</param>
+        /// <param name="param">検索条件。</param>
         /// <returns>ブログ記事一覧。</returns>
-        public async Task<IEnumerable<ArticleDto>> FindArticles(int blogId)
+        public async Task<IEnumerable<ArticleDto>> FindArticles(ArticleSearchDto param)
         {
-            IList<Article> results;
-            if (blogId > 0)
-            {
-                results = await this.articleRepository.FindByBlogId(blogId);
-            }
-            else
-            {
-                results = await this.articleRepository.FindAll();
-            }
-
-            return this.mapper.Map<IEnumerable<ArticleDto>>(results);
+            return this.mapper.Map<IEnumerable<ArticleDto>>(await this.articleRepository.FindAll(param));
         }
 
         /// <summary>
