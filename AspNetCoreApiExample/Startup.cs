@@ -19,6 +19,7 @@ namespace Honememo.AspNetCoreApiExample
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
+    using Microsoft.EntityFrameworkCore.Diagnostics;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
@@ -97,7 +98,7 @@ namespace Honememo.AspNetCoreApiExample
             });
 
             // DI設定
-            services.AddScoped<IUnitOfWork, AppDbContext>();
+            services.AddScoped<IUnitOfWork>(x => x.GetRequiredService<AppDbContext>());
             services.Scan(scan => scan
                 .FromCallingAssembly()
                     .AddClasses(classes => classes.Where(type => type.Name.EndsWith("Repository") || type.Name.EndsWith("Service")))
@@ -165,6 +166,7 @@ namespace Honememo.AspNetCoreApiExample
                     break;
                 default:
                     builder.UseInMemoryDatabase("AppDB");
+                    builder.ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
                     break;
             }
 

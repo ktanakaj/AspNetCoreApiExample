@@ -32,6 +32,11 @@ namespace Honememo.AspNetCoreApiExample.Services
         private readonly IMapper mapper;
 
         /// <summary>
+        /// DB処理単位集約用インスタンス。
+        /// </summary>
+        private readonly IUnitOfWork unitOfWork;
+
+        /// <summary>
         /// ユーザーリポジトリ。
         /// </summary>
         private readonly UserRepository userRepository;
@@ -44,10 +49,12 @@ namespace Honememo.AspNetCoreApiExample.Services
         /// リポジトリ等をDIしてサービスを生成する。
         /// </summary>
         /// <param name="mapper">AutoMapperインスタンス。</param>
+        /// <param name="unitOfWork">DB処理単位集約用インスタンス。</param>
         /// <param name="userRepository">ユーザーリポジトリ。</param>
-        public UserService(IMapper mapper, UserRepository userRepository)
+        public UserService(IMapper mapper, IUnitOfWork unitOfWork, UserRepository userRepository)
         {
             this.mapper = mapper;
+            this.unitOfWork = unitOfWork;
             this.userRepository = userRepository;
         }
 
@@ -83,10 +90,12 @@ namespace Honememo.AspNetCoreApiExample.Services
         /// <exception cref="BadRequestException">入力値が不正な場合。</exception>
         public async Task<User> CreateUser(UserNewDto param)
         {
-            // FIXME: CreateBy()は本当はトランザクションが必要。
-            //        しかしIUnitOfWorkの仕組みでは機能せず？
-            //        TransactionScopeなら行けるようだが、ライブラリが未対応なので対応待ち。
-            return await this.userRepository.CreateBy(param.UserName, param.Password);
+            using (var transaction = this.unitOfWork.BeginTransaction())
+            {
+                var user = await this.userRepository.CreateBy(param.UserName, param.Password);
+                transaction.Commit();
+                return user;
+            }
         }
 
         /// <summary>
