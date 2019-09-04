@@ -11,6 +11,8 @@
 */obj
 */*.csproj.user
 !.gitkeep
+Properties/
 Backup/
 UpgradeLog.htm
 StyleCop.Cache
+!AspNetCoreApiExample/Properties/launchSettings.json
