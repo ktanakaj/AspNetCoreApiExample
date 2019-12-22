@@ -15,15 +15,14 @@ namespace Honememo.AspNetCoreApiExample
     using System.Reflection;
     using AutoMapper;
     using Microsoft.AspNetCore.Builder;
-    using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Identity;
-    using Microsoft.AspNetCore.Mvc;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Diagnostics;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
-    using Swashbuckle.AspNetCore.Swagger;
+    using Microsoft.OpenApi.Models;
     using Honememo.AspNetCoreApiExample.Dto;
     using Honememo.AspNetCoreApiExample.Entities;
     using Honememo.AspNetCoreApiExample.Middlewares;
@@ -70,17 +69,18 @@ namespace Honememo.AspNetCoreApiExample
             {
                 mc.AddProfile(new MappingProfile());
             });
-
             services.AddSingleton(mappingConfig.CreateMapper());
 
             // DB設定
-            services.AddDbContextPool<AppDbContext>(opt =>
+            services.AddDbContextPool<AppDbContext>((provider, options) =>
             {
-                opt.EnableSensitiveDataLogging();
-                opt.UseLoggerFactory(services.BuildServiceProvider().GetService<ILoggerFactory>());
-                this.ApplyDbConfig(opt, this.Configuration.GetSection("Database"));
+                options.EnableSensitiveDataLogging();
+                options.UseLoggerFactory(provider.GetService<ILoggerFactory>());
+                this.ApplyDbConfig(options, this.Configuration.GetSection("Database"));
             });
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+
+            // MVCサービス設定
+            services.AddControllers();
 
             // 認証設定
             services.AddIdentity<User, IdentityRole<int>>()
@@ -110,7 +110,7 @@ namespace Honememo.AspNetCoreApiExample
             {
                 var asm = Assembly.GetExecutingAssembly();
                 var product = asm.GetCustomAttribute(typeof(AssemblyProductAttribute)) as AssemblyProductAttribute;
-                c.SwaggerDoc("v1", new Info { Title = product.Product, Version = asm.GetName().Version.ToString() });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = product.Product, Version = asm.GetName().Version.ToString() });
                 var xmlFile = $"{asm.GetName().Name}.xml";
                 var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
                 c.IncludeXmlComments(xmlPath);
@@ -123,7 +123,7 @@ namespace Honememo.AspNetCoreApiExample
         /// <param name="app">アプリケーションビルダー。</param>
         /// <param name="env">ホスト環境。</param>
         /// <remarks>初期化されたインスタンスなどを元に、アプリ起動前の設定を行う。</remarks>
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostEnvironment env)
         {
             if (env.IsDevelopment())
             {
@@ -139,11 +139,16 @@ namespace Honememo.AspNetCoreApiExample
                 });
             }
 
+            app.UseRouting();
             app.UseAuthentication();
+            app.UseAuthorization();
             app.UseMiddleware(typeof(EnableBufferingMiddleware));
             app.UseMiddleware(typeof(AccessLogMiddleware));
             app.UseMiddleware(typeof(ErrorHandlingMiddleware));
-            app.UseMvc();
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
         }
 
         #endregion

@@ -132,7 +132,7 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
         public async void TestPutBlog()
         {
             var now = DateTimeOffset.UtcNow;
-            var blog = new Blog() { Id = 2001, Name = "Blog for PutBlog", UserId = this.userId };
+            var blog = new Blog() { Name = "Blog for PutBlog", UserId = this.userId };
             var db = this.factory.CreateDbContext();
             db.Blogs.Add(blog);
             db.SaveChanges();
@@ -154,7 +154,7 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
         [Fact]
         public async void TestDeleteBlog()
         {
-            var blog = new Blog() { Id = 2002, Name = "Blog for DeleteBlog", UserId = this.userId };
+            var blog = new Blog() { Name = "Blog for DeleteBlog", UserId = this.userId };
             var db = this.factory.CreateDbContext();
             db.Blogs.Add(blog);
             db.SaveChanges();

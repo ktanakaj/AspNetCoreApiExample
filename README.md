@@ -1,5 +1,5 @@
 # ASP.NET Core Web APIサンプルアプリ
-[ASP.NET Core](https://docs.microsoft.com/ja-jp/aspnet/core/?view=aspnetcore-2.2)のAPI開発勉強用に作成したサンプルアプリです。
+[ASP.NET Core](https://docs.microsoft.com/ja-jp/aspnet/core/?view=aspnetcore-3.1)のAPI開発勉強用に作成したサンプルアプリです。
 
 ごくごく簡単なブログを想定したAPI。アプリ構成や開発環境的な部分がメインです。
 
@@ -10,8 +10,8 @@
 
 ### 開発環境
 * Visual Studio 2019 Community - 統合開発環境
-* Vagrant 2.2.4 - 仮想環境管理
-    * VirtualBox 5.2.x - 仮想環境
+* Vagrant 2.2.x - 仮想環境管理
+    * VirtualBox 6.x - 仮想環境
     * vagrant-vbguest - Vagrantプラグイン
 
 ## 開発環境構築

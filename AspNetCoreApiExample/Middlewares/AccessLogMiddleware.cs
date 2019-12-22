@@ -15,9 +15,9 @@ namespace Honememo.AspNetCoreApiExample.Middlewares
     using System.Security.Claims;
     using System.Text.RegularExpressions;
     using System.Threading.Tasks;
-    using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Http;
     using Microsoft.AspNetCore.Http.Extensions;
+    using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
 
     /// <summary>
@@ -36,7 +36,7 @@ namespace Honememo.AspNetCoreApiExample.Middlewares
         /// <summary>
         /// 環境情報。
         /// </summary>
-        private readonly IHostingEnvironment env;
+        private readonly IHostEnvironment env;
 
         /// <summary>
         /// ロガー。
@@ -53,7 +53,7 @@ namespace Honememo.AspNetCoreApiExample.Middlewares
         /// <param name="next">次の処理のデリゲート。</param>
         /// <param name="env">環境情報。</param>
         /// <param name="logger">ロガー。</param>
-        public AccessLogMiddleware(RequestDelegate next, IHostingEnvironment env, ILogger<AccessLogMiddleware> logger)
+        public AccessLogMiddleware(RequestDelegate next, IHostEnvironment env, ILogger<AccessLogMiddleware> logger)
         {
             this.next = next;
             this.env = env;
@@ -78,7 +78,7 @@ namespace Honememo.AspNetCoreApiExample.Middlewares
             }
             finally
             {
-                this.Log(context, starttime);
+                await this.Log(context, starttime);
             }
         }
 
@@ -91,7 +91,8 @@ namespace Honememo.AspNetCoreApiExample.Middlewares
         /// </summary>
         /// <param name="context">HTTPコンテキスト。</param>
         /// <param name="starttime">処理開始時間。</param>
-        private void Log(HttpContext context, DateTimeOffset starttime)
+        /// <returns>処理状態。</returns>
+        private async Task Log(HttpContext context, DateTimeOffset starttime)
         {
             // ※ EnableBufferingMiddlewareでリクエストボディは再読み込み可、
             //    かつレスポンスボディはMemoryStreamとなっている前提。
@@ -100,7 +101,7 @@ namespace Honememo.AspNetCoreApiExample.Middlewares
                 var req = context.Request;
                 var res = context.Response;
                 res.Body.Position = 0;
-                string resBody = new StreamReader(res.Body).ReadToEnd();
+                string resBody = await new StreamReader(res.Body).ReadToEndAsync();
 
                 // ※ 以下、CombinedLogに+αのデバッグ情報を載せて出力。
                 //    適当にデバッグ用途メインに決めたものなので、
@@ -130,7 +131,7 @@ namespace Honememo.AspNetCoreApiExample.Middlewares
                 if (this.env.IsDevelopment())
                 {
                     req.Body.Position = 0;
-                    string reqBody = new StreamReader(req.Body).ReadToEnd();
+                    string reqBody = await new StreamReader(req.Body).ReadToEndAsync();
                     if (req.ContentType != null && req.ContentType.Contains("json"))
                     {
                         reqBody = this.HidePasswordLog(reqBody);

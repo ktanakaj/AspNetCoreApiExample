@@ -12,9 +12,9 @@ namespace Honememo.AspNetCoreApiExample
 {
     using System;
     using System.IO;
-    using Microsoft.AspNetCore;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.Hosting;
     using Serilog;
 
     /// <summary>
@@ -35,7 +35,7 @@ namespace Honememo.AspNetCoreApiExample
                 .CreateLogger();
             try
             {
-                CreateWebHostBuilder(args).Build().Run();
+                CreateHostBuilder(args).Build().Run();
             }
             catch (Exception exception)
             {
@@ -48,17 +48,20 @@ namespace Honememo.AspNetCoreApiExample
         }
 
         /// <summary>
-        /// Webホストビルダーを生成する。
+        /// ホストビルダーを生成する。
         /// </summary>
         /// <param name="args">コマンドラインから指定された起動オプション。</param>
         /// <returns>生成したWebホストビルダー。</returns>
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
-            WebHost.CreateDefaultBuilder(args)
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
                 .ConfigureAppConfiguration((hostingContext, config) =>
                 {
                     ApplyAppConfig(config);
                 })
-                .UseStartup<Startup>()
+                .ConfigureWebHostDefaults(webBuilder =>
+                {
+                    webBuilder.UseStartup<Startup>();
+                })
                 .UseSerilog();
 
         /// <summary>

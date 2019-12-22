@@ -207,7 +207,7 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
         public async void TestPutArticle()
         {
             var now = DateTimeOffset.UtcNow;
-            var article = new Article() { Id = 20001, Subject = "Article for PutArticle", Body = "PutArticle Body", BlogId = 1000, Tags = new List<Tag>() { new Tag() { Name = "Blog" }, new Tag() { Name = "変更前" } } };
+            var article = new Article() { Subject = "Article for PutArticle", Body = "PutArticle Body", BlogId = 1000, Tags = new List<Tag>() { new Tag() { Name = "Blog" }, new Tag() { Name = "変更前" } } };
             var db = this.factory.CreateDbContext();
             db.Articles.Add(article);
             db.SaveChanges();
@@ -236,7 +236,7 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
         [Fact]
         public async void TestDeleteArticle()
         {
-            var article = new Article() { Id = 20002, Subject = "Article for DeleteArticle", Body = "DeleteArticle Body", BlogId = 1000, Tags = new List<Tag>() { new Tag() { Name = "Blog" } } };
+            var article = new Article() { Subject = "Article for DeleteArticle", Body = "DeleteArticle Body", BlogId = 1000, Tags = new List<Tag>() { new Tag() { Name = "Blog" } } };
             var db = this.factory.CreateDbContext();
             db.Articles.Add(article);
             db.SaveChanges();

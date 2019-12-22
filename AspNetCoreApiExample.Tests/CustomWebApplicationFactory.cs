@@ -11,14 +11,15 @@
 namespace Honememo.AspNetCoreApiExample.Tests
 {
     using System;
+    using System.Linq;
     using System.Net.Http;
+    using System.Text.Json;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Mvc.Testing;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Diagnostics;
     using Microsoft.EntityFrameworkCore.Storage;
     using Microsoft.Extensions.DependencyInjection;
-    using Newtonsoft.Json.Linq;
     using Honememo.AspNetCoreApiExample.Dto;
     using Honememo.AspNetCoreApiExample.Repositories;
 
@@ -99,7 +100,10 @@ namespace Honememo.AspNetCoreApiExample.Tests
                 throw new Exception(responseString);
             }
 
-            return (client, (int)JObject.Parse(responseString)["id"]);
+            using (var doc = JsonDocument.Parse(responseString))
+            {
+                return (client, doc.RootElement.GetProperty("id").GetInt32());
+            }
         }
 
         /// <summary>
@@ -126,7 +130,10 @@ namespace Honememo.AspNetCoreApiExample.Tests
                 throw new Exception(responseString);
             }
 
-            return (client, (int)JObject.Parse(responseString)["id"]);
+            using (var doc = JsonDocument.Parse(responseString))
+            {
+                return (client, doc.RootElement.GetProperty("id").GetInt32());
+            }
         }
 
         #endregion
@@ -142,6 +149,12 @@ namespace Honememo.AspNetCoreApiExample.Tests
             builder.ConfigureServices(services =>
             {
                 // DBをインメモリDBに置き換え
+                var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
+                if (descriptor != null)
+                {
+                    services.Remove(descriptor);
+                }
+
                 services.AddDbContextPool<AppDbContext>(options =>
                 {
                     options.UseInMemoryDatabase(this.appDbName, InMemoryDatabaseRoot);

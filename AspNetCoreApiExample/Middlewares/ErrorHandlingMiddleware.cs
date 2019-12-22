@@ -12,11 +12,12 @@ namespace Honememo.AspNetCoreApiExample.Middlewares
 {
     using System;
     using System.Net;
+    using System.Text.Encodings.Web;
+    using System.Text.Json;
+    using System.Text.Unicode;
     using System.Threading.Tasks;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Logging;
-    using Newtonsoft.Json;
-    using Newtonsoft.Json.Serialization;
     using Honememo.AspNetCoreApiExample.Exceptions;
 
     /// <summary>
@@ -124,11 +125,12 @@ namespace Honememo.AspNetCoreApiExample.Middlewares
             }
 
             // レスポンスを生成
-            var result = JsonConvert.SerializeObject(
+            var result = JsonSerializer.Serialize(
                 new { error = err },
-                new JsonSerializerSettings
+                new JsonSerializerOptions
                 {
-                    ContractResolver = new CamelCasePropertyNamesContractResolver()
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                    Encoder = JavaScriptEncoder.Create(UnicodeRanges.All),
                 });
 
             context.Response.ContentType = "application/json";

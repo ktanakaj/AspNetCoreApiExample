@@ -25,11 +25,14 @@
       dest: "{{ app_svr_service_dest }}"
       force: yes
     notify: Restart Application
+  - name: Stop the web app service before build
+    service: name={{ app_svr_service_name }} state=stopped
+    notify: Restart Application
 
 - block:
   - name: Build the web application
     shell: dotnet publish -c {{ build_configuration }} chdir={{ app_svr_dir }}
     notify: Restart Application
   - name: Create the web application db tables
-    shell: dotnet ef database update chdir={{ app_svr_dir }}
+    shell: bash -lc "dotnet ef database update" chdir={{ app_svr_dir }}
   become: false

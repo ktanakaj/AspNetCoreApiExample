@@ -61,9 +61,9 @@ namespace Honememo.AspNetCoreApiExample.Repositories
         /// </summary>
         /// <param name="id">ブログID。</param>
         /// <returns>ブログ。</returns>
-        public Task<Blog> Find(int id)
+        public async Task<Blog> Find(int id)
         {
-            return this.context.Blogs.FindAsync(id);
+            return await this.context.Blogs.FindAsync(id);
         }
 
         /// <summary>
