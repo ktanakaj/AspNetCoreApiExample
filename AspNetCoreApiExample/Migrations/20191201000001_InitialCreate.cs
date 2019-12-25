@@ -2,7 +2,7 @@
 // <summary>
 //      初期DBマイグレーションスクリプトクラスソース</summary>
 //
-// <copyright file="20190801000001_InitialCreate.cs">
+// <copyright file="20191201000001_InitialCreate.cs">
 //      Copyright (C) 2019 Koichi Tanaka. All rights reserved.</copyright>
 // <author>
 //      Koichi Tanaka</author>

@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Honememo.AspNetCoreApiExample.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20190801000001_InitialCreate")]
+    [Migration("20191201000001_InitialCreate")]
     partial class InitialCreate
     {
         /// <summary>
@@ -20,27 +20,33 @@ namespace Honememo.AspNetCoreApiExample.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "2.1.11-servicing-32099")
+                .HasAnnotation("ProductVersion", "3.1.0")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             modelBuilder.Entity("Honememo.AspNetCoreApiExample.Entities.Article", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
 
-                    b.Property<int>("BlogId");
+                    b.Property<int>("BlogId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Body")
                         .IsRequired()
+                        .HasColumnType("longtext CHARACTER SET utf8mb4")
                         .HasMaxLength(65535);
 
-                    b.Property<DateTimeOffset?>("CreatedAt");
+                    b.Property<DateTimeOffset?>("CreatedAt")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Subject")
                         .IsRequired()
+                        .HasColumnType("varchar(191) CHARACTER SET utf8mb4")
                         .HasMaxLength(191);
 
-                    b.Property<DateTimeOffset?>("UpdatedAt");
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
 
                     b.HasKey("Id");
 
@@ -56,17 +62,22 @@ namespace Honememo.AspNetCoreApiExample.Migrations
             modelBuilder.Entity("Honememo.AspNetCoreApiExample.Entities.Blog", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
 
-                    b.Property<DateTimeOffset?>("CreatedAt");
+                    b.Property<DateTimeOffset?>("CreatedAt")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Name")
                         .IsRequired()
+                        .HasColumnType("varchar(191) CHARACTER SET utf8mb4")
                         .HasMaxLength(191);
 
-                    b.Property<DateTimeOffset?>("UpdatedAt");
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
 
-                    b.Property<int>("UserId");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -81,9 +92,11 @@ namespace Honememo.AspNetCoreApiExample.Migrations
 
             modelBuilder.Entity("Honememo.AspNetCoreApiExample.Entities.Tag", b =>
                 {
-                    b.Property<int>("ArticleId");
+                    b.Property<int>("ArticleId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
+                        .HasColumnType("varchar(191) CHARACTER SET utf8mb4")
                         .HasMaxLength(191);
 
                     b.HasKey("ArticleId", "Name");
@@ -96,45 +109,63 @@ namespace Honememo.AspNetCoreApiExample.Migrations
             modelBuilder.Entity("Honememo.AspNetCoreApiExample.Entities.User", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
 
-                    b.Property<int>("AccessFailedCount");
+                    b.Property<int>("AccessFailedCount")
+                        .HasColumnType("int");
 
                     b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken();
+                        .IsConcurrencyToken()
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
 
-                    b.Property<DateTimeOffset?>("CreatedAt");
+                    b.Property<DateTimeOffset?>("CreatedAt")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("Email")
+                        .HasColumnType("varchar(191) CHARACTER SET utf8mb4")
                         .HasMaxLength(191);
 
-                    b.Property<bool>("EmailConfirmed");
+                    b.Property<bool>("EmailConfirmed")
+                        .HasColumnType("tinyint(1)");
 
-                    b.Property<DateTimeOffset?>("LastLogin");
+                    b.Property<DateTimeOffset?>("LastLogin")
+                        .HasColumnType("datetime(6)");
 
-                    b.Property<bool>("LockoutEnabled");
+                    b.Property<bool>("LockoutEnabled")
+                        .HasColumnType("tinyint(1)");
 
-                    b.Property<DateTimeOffset?>("LockoutEnd");
+                    b.Property<DateTimeOffset?>("LockoutEnd")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("NormalizedEmail")
+                        .HasColumnType("varchar(191) CHARACTER SET utf8mb4")
                         .HasMaxLength(191);
 
                     b.Property<string>("NormalizedUserName")
+                        .HasColumnType("varchar(191) CHARACTER SET utf8mb4")
                         .HasMaxLength(191);
 
-                    b.Property<string>("PasswordHash");
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
 
-                    b.Property<string>("PhoneNumber");
+                    b.Property<string>("PhoneNumber")
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
 
-                    b.Property<bool>("PhoneNumberConfirmed");
+                    b.Property<bool>("PhoneNumberConfirmed")
+                        .HasColumnType("tinyint(1)");
 
-                    b.Property<string>("SecurityStamp");
+                    b.Property<string>("SecurityStamp")
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
 
-                    b.Property<bool>("TwoFactorEnabled");
+                    b.Property<bool>("TwoFactorEnabled")
+                        .HasColumnType("tinyint(1)");
 
-                    b.Property<DateTimeOffset?>("UpdatedAt");
+                    b.Property<DateTimeOffset?>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
 
                     b.Property<string>("UserName")
+                        .HasColumnType("varchar(191) CHARACTER SET utf8mb4")
                         .HasMaxLength(191);
 
                     b.HasKey("Id");
@@ -156,15 +187,19 @@ namespace Honememo.AspNetCoreApiExample.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole<int>", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
 
                     b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken();
+                        .IsConcurrencyToken()
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
 
                     b.Property<string>("Name")
+                        .HasColumnType("varchar(191) CHARACTER SET utf8mb4")
                         .HasMaxLength(191);
 
                     b.Property<string>("NormalizedName")
+                        .HasColumnType("varchar(191) CHARACTER SET utf8mb4")
                         .HasMaxLength(191);
 
                     b.HasKey("Id");
@@ -179,13 +214,17 @@ namespace Honememo.AspNetCoreApiExample.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
 
-                    b.Property<string>("ClaimType");
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
 
-                    b.Property<string>("ClaimValue");
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
 
-                    b.Property<int>("RoleId");
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -197,13 +236,17 @@ namespace Honememo.AspNetCoreApiExample.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
                 {
                     b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
 
-                    b.Property<string>("ClaimType");
+                    b.Property<string>("ClaimType")
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
 
-                    b.Property<string>("ClaimValue");
+                    b.Property<string>("ClaimValue")
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
 
-                    b.Property<int>("UserId");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 
@@ -215,14 +258,18 @@ namespace Honememo.AspNetCoreApiExample.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<int>", b =>
                 {
                     b.Property<string>("LoginProvider")
+                        .HasColumnType("varchar(191) CHARACTER SET utf8mb4")
                         .HasMaxLength(191);
 
                     b.Property<string>("ProviderKey")
+                        .HasColumnType("varchar(191) CHARACTER SET utf8mb4")
                         .HasMaxLength(191);
 
-                    b.Property<string>("ProviderDisplayName");
+                    b.Property<string>("ProviderDisplayName")
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
 
-                    b.Property<int>("UserId");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
                     b.HasKey("LoginProvider", "ProviderKey");
 
@@ -233,9 +280,11 @@ namespace Honememo.AspNetCoreApiExample.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<int>", b =>
                 {
-                    b.Property<int>("UserId");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
-                    b.Property<int>("RoleId");
+                    b.Property<int>("RoleId")
+                        .HasColumnType("int");
 
                     b.HasKey("UserId", "RoleId");
 
@@ -246,15 +295,19 @@ namespace Honememo.AspNetCoreApiExample.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
                 {
-                    b.Property<int>("UserId");
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
 
                     b.Property<string>("LoginProvider")
+                        .HasColumnType("varchar(191) CHARACTER SET utf8mb4")
                         .HasMaxLength(191);
 
                     b.Property<string>("Name")
+                        .HasColumnType("varchar(191) CHARACTER SET utf8mb4")
                         .HasMaxLength(191);
 
-                    b.Property<string>("Value");
+                    b.Property<string>("Value")
+                        .HasColumnType("longtext CHARACTER SET utf8mb4");
 
                     b.HasKey("UserId", "LoginProvider", "Name");
 
@@ -266,7 +319,8 @@ namespace Honememo.AspNetCoreApiExample.Migrations
                     b.HasOne("Honememo.AspNetCoreApiExample.Entities.Blog", "Blog")
                         .WithMany("Articles")
                         .HasForeignKey("BlogId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Honememo.AspNetCoreApiExample.Entities.Blog", b =>
@@ -274,7 +328,8 @@ namespace Honememo.AspNetCoreApiExample.Migrations
                     b.HasOne("Honememo.AspNetCoreApiExample.Entities.User", "User")
                         .WithMany("Blogs")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Honememo.AspNetCoreApiExample.Entities.Tag", b =>
@@ -282,52 +337,59 @@ namespace Honememo.AspNetCoreApiExample.Migrations
                     b.HasOne("Honememo.AspNetCoreApiExample.Entities.Article", "Article")
                         .WithMany("Tags")
                         .HasForeignKey("ArticleId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<int>")
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<int>", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
                 {
-                    b.HasOne("Honememo.AspNetCoreApiExample.Entities.User")
+                    b.HasOne("Honememo.AspNetCoreApiExample.Entities.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<int>", b =>
                 {
-                    b.HasOne("Honememo.AspNetCoreApiExample.Entities.User")
+                    b.HasOne("Honememo.AspNetCoreApiExample.Entities.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<int>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<int>")
+                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole<int>", null)
                         .WithMany()
                         .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
-                    b.HasOne("Honememo.AspNetCoreApiExample.Entities.User")
+                    b.HasOne("Honememo.AspNetCoreApiExample.Entities.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
                 {
-                    b.HasOne("Honememo.AspNetCoreApiExample.Entities.User")
+                    b.HasOne("Honememo.AspNetCoreApiExample.Entities.User", null)
                         .WithMany()
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }
