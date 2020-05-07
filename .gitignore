@@ -7,10 +7,11 @@
 *.bak
 *.log
 *.suo
-*/bin
-*/obj
 */*.csproj.user
 !.gitkeep
+[Bb]in/
+[Oo]bj/
+[Ll]og/
 Properties/
 Backup/
 UpgradeLog.htm
