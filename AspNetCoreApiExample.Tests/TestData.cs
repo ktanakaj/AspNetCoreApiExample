@@ -49,24 +49,17 @@ namespace Honememo.AspNetCoreApiExample.Tests
         {
             return new List<User>()
             {
-                // ハッシュ化前のパスワードは全員"PASSWORD"
                 new User()
                 {
                     Id = 100,
                     UserName = "Taro",
-                    NormalizedUserName = "TARO",
-                    PasswordHash = "AQAAAAEAACcQAAAAELHYhJQlwFRMpSdYMcf6IKSV1ooi979/BOHd8/wNn07b/K2x4WBjreAz4qErGiEt5w==",
-                    SecurityStamp = "7MSORXMIMFO4PO6TD6TSG5UD6ESXO7MU",
-                    ConcurrencyStamp = "4f05fd65-7e0a-41d5-80fd-818ee04b86cf",
+                    Password = "PASSWORD",
                 },
                 new User()
                 {
                     Id = 101,
                     UserName = "Jiro",
-                    NormalizedUserName = "JIRO",
-                    PasswordHash = "AQAAAAEAACcQAAAAEFYWfmdbctdoW3AIDjecLAXTkBx/phWVpTg/YECeHpfF0H1JMN4rg8OsROElIFA4Uw==",
-                    SecurityStamp = "LO25XWTLMLC2YZYIHLO4HG7G7MOESIBK",
-                    ConcurrencyStamp = "ac1aeab2-d936-4d55-ba06-dd77c4337afc",
+                    Password = "PASSWORD",
                 },
             };
         }

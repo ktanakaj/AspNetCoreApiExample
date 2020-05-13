@@ -12,14 +12,16 @@ namespace Honememo.AspNetCoreApiExample
 {
     using System;
     using System.IO;
+    using System.Net;
     using System.Reflection;
+    using System.Threading.Tasks;
     using AutoMapper;
     using Honememo.AspNetCoreApiExample.Dto;
-    using Honememo.AspNetCoreApiExample.Entities;
     using Honememo.AspNetCoreApiExample.Middlewares;
     using Honememo.AspNetCoreApiExample.Repositories;
+    using Microsoft.AspNetCore.Authentication;
+    using Microsoft.AspNetCore.Authentication.Cookies;
     using Microsoft.AspNetCore.Builder;
-    using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Diagnostics;
     using Microsoft.Extensions.Configuration;
@@ -83,10 +85,12 @@ namespace Honememo.AspNetCoreApiExample
             services.AddControllers();
 
             // 認証設定
-            services.AddIdentity<User, IdentityRole<int>>()
-                .AddEntityFrameworkStores<AppDbContext>()
-                .AddDefaultTokenProviders();
-            services.Configure<IdentityOptions>(options => this.Configuration.Bind("Identity", options));
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(options =>
+                {
+                    options.Events.OnRedirectToAccessDenied = ReplaceRedirector(HttpStatusCode.Forbidden);
+                    options.Events.OnRedirectToLogin = ReplaceRedirector(HttpStatusCode.Unauthorized);
+                });
 
             // DI設定
             services.AddScoped<IUnitOfWork>(x => x.GetRequiredService<AppDbContext>());
@@ -167,6 +171,20 @@ namespace Honememo.AspNetCoreApiExample
             }
 
             return builder;
+        }
+
+        /// <summary>
+        /// 認証のリダイレクトをHTTPステータスコードに差し替える。
+        /// </summary>
+        /// <param name="statusCode">返すHTTPステータスコード。</param>
+        /// <returns>差し替え用のファンクション。</returns>
+        private static Func<RedirectContext<CookieAuthenticationOptions>, Task> ReplaceRedirector(HttpStatusCode statusCode)
+        {
+            return context =>
+            {
+                context.Response.StatusCode = (int)statusCode;
+                return Task.CompletedTask;
+            };
         }
 
         #endregion

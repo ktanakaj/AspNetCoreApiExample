@@ -121,7 +121,7 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
             var dbuser = this.factory.CreateDbContext().Users.Find(json.Id);
             Assert.NotNull(dbuser);
             Assert.Equal(body.UserName, dbuser.UserName);
-            Assert.NotNull(dbuser.PasswordHash);
+            Assert.NotNull(dbuser.Password);
             Assert.Equal(json.LastLogin, dbuser.LastLogin);
             Assert.Equal(json.CreatedAt, dbuser.CreatedAt);
             Assert.Equal(json.UpdatedAt, dbuser.UpdatedAt);
@@ -188,7 +188,7 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
 
             var dbuser = this.factory.CreateDbContext().Users.Find(this.userId);
             Assert.NotNull(dbuser);
-            Assert.NotNull(dbuser.PasswordHash);
+            Assert.NotNull(dbuser.Password);
             Assert.True(dbuser.UpdatedAt > now);
 
             // TODO: パスワードハッシュが正しいものであるかも確認する

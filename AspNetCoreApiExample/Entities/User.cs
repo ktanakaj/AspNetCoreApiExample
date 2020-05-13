@@ -12,15 +12,34 @@ namespace Honememo.AspNetCoreApiExample.Entities
 {
     using System;
     using System.Collections.Generic;
-    using Microsoft.AspNetCore.Identity;
+    using System.ComponentModel.DataAnnotations;
     using Microsoft.EntityFrameworkCore;
 
     /// <summary>
     /// ユーザーエンティティクラス。
     /// </summary>
-    public class User : IdentityUser<int>, IHasTimestamp
+    public class User : IHasTimestamp
     {
         #region プロパティ
+
+        /// <summary>
+        /// ユーザーID。
+        /// </summary>
+        public int Id { get; set; }
+
+        /// <summary>
+        /// ユーザー名。
+        /// </summary>
+        [Required]
+        [MaxLength(191)]
+        public string UserName { get; set; }
+
+        /// <summary>
+        /// パスワード。
+        /// </summary>
+        /// <remarks>※ サンプルなので一旦平文。本来はハッシュ化した値を格納する。</remarks>
+        [MaxLength(191)]
+        public string Password { get; set; }
 
         /// <summary>
         /// 最終ログイン日時。
@@ -52,16 +71,9 @@ namespace Honememo.AspNetCoreApiExample.Entities
         /// <param name="modelBuilder">モデルビルダー。</param>
         public static void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // 親クラスの列がMySQLのutf8mb4の文字数制限でエラーになるので、定義を上書き
-            modelBuilder.Entity<User>(entity =>
-            {
-                entity.Property(u => u.Email).HasMaxLength(191);
-                entity.Property(u => u.NormalizedEmail).HasMaxLength(191);
-                entity.Property(u => u.NormalizedUserName).HasMaxLength(191);
-                entity.Property(u => u.UserName).HasMaxLength(191);
-            });
-
             // インデックスを設定
+            modelBuilder.Entity<User>()
+                .HasIndex(u => u.UserName).IsUnique();
             modelBuilder.Entity<User>()
                 .HasIndex(u => u.LastLogin);
             modelBuilder.Entity<User>()

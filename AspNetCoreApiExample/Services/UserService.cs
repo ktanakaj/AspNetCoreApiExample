@@ -32,11 +32,6 @@ namespace Honememo.AspNetCoreApiExample.Services
         private readonly IMapper mapper;
 
         /// <summary>
-        /// DB処理単位集約用インスタンス。
-        /// </summary>
-        private readonly IUnitOfWork unitOfWork;
-
-        /// <summary>
         /// ユーザーリポジトリ。
         /// </summary>
         private readonly UserRepository userRepository;
@@ -49,12 +44,10 @@ namespace Honememo.AspNetCoreApiExample.Services
         /// リポジトリ等を使用するサービスを生成する。
         /// </summary>
         /// <param name="mapper">AutoMapperインスタンス。</param>
-        /// <param name="unitOfWork">DB処理単位集約用インスタンス。</param>
         /// <param name="userRepository">ユーザーリポジトリ。</param>
-        public UserService(IMapper mapper, IUnitOfWork unitOfWork, UserRepository userRepository)
+        public UserService(IMapper mapper, UserRepository userRepository)
         {
             this.mapper = mapper;
-            this.unitOfWork = unitOfWork;
             this.userRepository = userRepository;
         }
 
@@ -88,14 +81,16 @@ namespace Honememo.AspNetCoreApiExample.Services
         /// <param name="param">ユーザー登録情報。</param>
         /// <returns>登録したユーザー。</returns>
         /// <exception cref="BadRequestException">入力値が不正な場合。</exception>
-        public async Task<User> CreateUser(UserNewDto param)
+        public async Task<UserDto> CreateUser(UserNewDto param)
         {
-            using (var transaction = this.unitOfWork.BeginTransaction())
+            if (await this.userRepository.FindByName(param.UserName) != null)
             {
-                var user = await this.userRepository.CreateBy(param.UserName, param.Password);
-                transaction.Commit();
-                return user;
+                throw new BadRequestException($"name={param.UserName} already exists");
             }
+
+            var user = this.mapper.Map<User>(param);
+            user.LastLogin = DateTimeOffset.UtcNow;
+            return this.mapper.Map<UserDto>(await this.userRepository.Create(user));
         }
 
         /// <summary>
@@ -108,8 +103,33 @@ namespace Honememo.AspNetCoreApiExample.Services
         /// <exception cref="BadRequestException">入力値が不正な場合。</exception>
         public async Task UpdateUser(int userId, UserEditDto param)
         {
-            // ※ 現状ユーザー名の変更のみ対応
-            await this.userRepository.ChangeUserName(userId, param.UserName);
+            var user = await this.userRepository.FindOrFail(userId);
+            var userByName = await this.userRepository.FindByName(param.UserName);
+            if (userByName != null && userByName.Id != user.Id)
+            {
+                throw new BadRequestException($"name={param.UserName} already exists");
+            }
+
+            await this.userRepository.Update(this.mapper.Map(param, user));
+        }
+
+        /// <summary>
+        /// ログインする。
+        /// </summary>
+        /// <param name="name">ユーザー名。</param>
+        /// <param name="password">パスワード。</param>
+        /// <returns>ユーザー情報。</returns>
+        /// <exception cref="BadRequestException">ユーザーが存在しないまたはパスワードが一致しない場合。</exception>
+        public async Task<UserDto> Login(string name, string password)
+        {
+            var user = await this.userRepository.FindByName(name);
+            if (user == null || user.Password != password)
+            {
+                throw new BadRequestException("name or password is not correct");
+            }
+
+            user.LastLogin = DateTimeOffset.UtcNow;
+            return this.mapper.Map<UserDto>(await this.userRepository.Update(user));
         }
 
         /// <summary>
@@ -122,25 +142,14 @@ namespace Honememo.AspNetCoreApiExample.Services
         /// <exception cref="BadRequestException">パスワードが変更条件を満たさない場合。</exception>
         public async Task ChangePassword(int userId, ChangePasswordDto param)
         {
-            await this.userRepository.ChangePassword(userId, param.CurrentPassword, param.NewPassword);
-        }
-
-        /// <summary>
-        /// ログイン用にユーザーを取得&amp;更新する。
-        /// </summary>
-        /// <param name="name">ユーザー名。</param>
-        /// <returns>ユーザー情報。</returns>
-        /// <exception cref="NotFoundException">ユーザーが存在しない場合。</exception>
-        public async Task<UserDto> FindAndUpdateForLogin(string name)
-        {
-            var user = await this.userRepository.FindByName(name);
-            if (user == null)
+            var user = await this.userRepository.FindOrFail(userId);
+            if (user == null || user.Password != param.CurrentPassword)
             {
-                throw new NotFoundException($"name={name} is not found");
+                throw new BadRequestException("current password is not correct");
             }
 
-            user.LastLogin = DateTimeOffset.UtcNow;
-            return this.mapper.Map<UserDto>(await this.userRepository.Update(user));
+            user.Password = param.NewPassword;
+            await this.userRepository.Update(user);
         }
 
         #endregion

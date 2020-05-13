@@ -16,15 +16,13 @@ namespace Honememo.AspNetCoreApiExample.Repositories
     using System.Threading;
     using System.Threading.Tasks;
     using Honememo.AspNetCoreApiExample.Entities;
-    using Microsoft.AspNetCore.Identity;
-    using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Storage;
 
     /// <summary>
     /// アプリケーションDBコンテキストクラス。
     /// </summary>
-    public class AppDbContext : IdentityDbContext<User, IdentityRole<int>, int>, IUnitOfWork
+    public class AppDbContext : DbContext, IUnitOfWork
     {
         #region コンストラクタ
 
@@ -40,6 +38,11 @@ namespace Honememo.AspNetCoreApiExample.Repositories
         #endregion
 
         #region プロパティ
+
+        /// <summary>
+        /// ユーザーテーブル。
+        /// </summary>
+        public DbSet<User> Users { get; set; }
 
         /// <summary>
         /// ブログテーブル。
@@ -116,35 +119,6 @@ namespace Honememo.AspNetCoreApiExample.Repositories
                     method.Invoke(null, param);
                 }
             }
-
-            // その他このクラスで定義している処理を実行
-            this.ConfigureIdentityEntities(modelBuilder);
-        }
-
-        /// <summary>
-        /// ASP.NET Core IdentityのEntityの設定を行う。
-        /// </summary>
-        /// <param name="modelBuilder">モデルビルダー。</param>
-        private void ConfigureIdentityEntities(ModelBuilder modelBuilder)
-        {
-            // ASP.NET Core Identityが自動生成するEntityがMySQLのutf8mb4の
-            // 文字数制限でエラーになるので、定義を上書きする。
-            // （Userはクラスがあるのでその中で対応。）
-            modelBuilder.Entity<IdentityRole<int>>(entity =>
-            {
-                entity.Property(m => m.Name).HasMaxLength(191);
-                entity.Property(m => m.NormalizedName).HasMaxLength(191);
-            });
-            modelBuilder.Entity<IdentityUserLogin<int>>(entity =>
-            {
-                entity.Property(m => m.LoginProvider).HasMaxLength(191);
-                entity.Property(m => m.ProviderKey).HasMaxLength(191);
-            });
-            modelBuilder.Entity<IdentityUserToken<int>>(entity =>
-            {
-                entity.Property(m => m.LoginProvider).HasMaxLength(191);
-                entity.Property(m => m.Name).HasMaxLength(191);
-            });
         }
 
         /// <summary>

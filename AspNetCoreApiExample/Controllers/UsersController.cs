@@ -12,14 +12,13 @@ namespace Honememo.AspNetCoreApiExample.Controllers
 {
     using System.Collections.Generic;
     using System.Linq;
+    using System.Security.Claims;
     using System.Threading.Tasks;
-    using AutoMapper;
     using Honememo.AspNetCoreApiExample.Dto;
-    using Honememo.AspNetCoreApiExample.Entities;
-    using Honememo.AspNetCoreApiExample.Exceptions;
     using Honememo.AspNetCoreApiExample.Services;
+    using Microsoft.AspNetCore.Authentication;
+    using Microsoft.AspNetCore.Authentication.Cookies;
     using Microsoft.AspNetCore.Authorization;
-    using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Mvc;
 
     /// <summary>
@@ -33,16 +32,6 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         #region メンバー変数
 
         /// <summary>
-        /// AutoMapperインスタンス。
-        /// </summary>
-        private readonly IMapper mapper;
-
-        /// <summary>
-        /// サインインマネージャー。
-        /// </summary>
-        private readonly SignInManager<User> signInManager;
-
-        /// <summary>
         /// ユーザーサービス。
         /// </summary>
         private readonly UserService userService;
@@ -54,13 +43,9 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         /// <summary>
         /// サービス等を使用するコントローラを生成する。
         /// </summary>
-        /// <param name="mapper">AutoMapperインスタンス。</param>
-        /// <param name="signInManager">サインインマネージャー。</param>
         /// <param name="userService">ユーザーサービス。</param>
-        public UsersController(IMapper mapper, SignInManager<User> signInManager, UserService userService)
+        public UsersController(UserService userService)
         {
-            this.mapper = mapper;
-            this.signInManager = signInManager;
             this.userService = userService;
         }
 
@@ -103,8 +88,8 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         {
             // ユーザーを登録し、ログイン中の状態にする
             var user = await this.userService.CreateUser(body);
-            await this.signInManager.SignInAsync(user, false);
-            return this.CreatedAtAction(nameof(this.GetUser), new { id = user.Id }, this.mapper.Map<UserDto>(user));
+            await this.SignInAsync(user);
+            return this.CreatedAtAction(nameof(this.GetUser), new { id = user.Id }, user);
         }
 
         /// <summary>
@@ -117,14 +102,9 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         [ProducesResponseType(400)]
         public async Task<ActionResult<UserDto>> Login(LoginDto body)
         {
-            var result = await this.signInManager.PasswordSignInAsync(body.UserName, body.Password, false, false);
-            if (!result.Succeeded)
-            {
-                throw new BadRequestException("name or password is not valid");
-            }
-
-            // ※ この時点では this.User は空で使用できない
-            return await this.userService.FindAndUpdateForLogin(body.UserName);
+            var user = await this.userService.Login(body.UserName, body.Password);
+            await this.SignInAsync(user);
+            return user;
         }
 
         /// <summary>
@@ -136,7 +116,7 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         [ProducesResponseType(200)]
         public async Task<IActionResult> Logout()
         {
-            await this.signInManager.SignOutAsync();
+            await this.HttpContext.SignOutAsync();
             return this.Ok();
         }
 
@@ -168,6 +148,27 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         {
             await this.userService.ChangePassword(this.UserId, body);
             return this.NoContent();
+        }
+
+        #endregion
+
+        #region その他のメソッド
+
+        /// <summary>
+        /// 指定されたユーザーでサインインする。
+        /// </summary>
+        /// <param name="user">サインインするユーザー。</param>
+        /// <returns>処理状態。</returns>
+        private async Task SignInAsync(UserDto user)
+        {
+            // Cookie認証でサインインする
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            };
+            await this.HttpContext.SignInAsync(
+                CookieAuthenticationDefaults.AuthenticationScheme,
+                new ClaimsPrincipal(new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme)));
         }
 
         #endregion
