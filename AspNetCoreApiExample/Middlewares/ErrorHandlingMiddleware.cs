@@ -84,7 +84,7 @@ namespace Honememo.AspNetCoreApiExample.Middlewares
         /// <param name="context">HTTPコンテキスト。</param>
         /// <param name="exception">発生した例外。</param>
         /// <returns>処理状態。</returns>
-        private Task OnException(HttpContext context, Exception exception)
+        private async Task OnException(HttpContext context, Exception exception)
         {
             // 例外を元にエラー情報を返す（デフォルトは汎用の500エラー）
             // TODO: エラーメッセージは本番環境ではそのまま返さないようにする
@@ -124,7 +124,12 @@ namespace Honememo.AspNetCoreApiExample.Middlewares
                 this.logger.LogDebug(0, exception, string.Empty);
             }
 
-            // レスポンスを生成
+            // レスポンス未出力の場合、エラーレスポンスを出力する
+            if (context.Response.HasStarted)
+            {
+                return;
+            }
+
             var result = JsonSerializer.Serialize(
                 new { error = err },
                 new JsonSerializerOptions
@@ -135,7 +140,7 @@ namespace Honememo.AspNetCoreApiExample.Middlewares
 
             context.Response.ContentType = "application/json";
             context.Response.StatusCode = (int)status;
-            return context.Response.WriteAsync(result);
+            await context.Response.WriteAsync(result);
         }
 
         #endregion
