@@ -33,7 +33,7 @@ namespace Honememo.AspNetCoreApiExample.Tests
         /// <summary>
         /// インメモリDBのルート。
         /// </summary>
-        public static readonly InMemoryDatabaseRoot InMemoryDatabaseRoot = new InMemoryDatabaseRoot();
+        private static readonly InMemoryDatabaseRoot InMemoryDatabaseRoot = new InMemoryDatabaseRoot();
 
         #endregion
 
