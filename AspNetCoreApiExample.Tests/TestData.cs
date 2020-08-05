@@ -21,7 +21,7 @@ namespace Honememo.AspNetCoreApiExample.Tests
     /// 汎用のテストデータの登録用です。
     /// 個別のテストに特化したデータが必要な場合は、各テスト内で自前で登録してください。
     /// </remarks>
-    public class TestData
+    public static class TestData
     {
         #region 公開メソッド
 
