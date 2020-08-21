@@ -1,23 +1,9 @@
-# マイグレーションを実行するイメージを構築
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS build
-# dotnet-efをインストール、パスを通す
-RUN dotnet tool install -g dotnet-ef --version 3.1.0
-ENV PATH $PATH:/root/.dotnet/tools
-# 起動チェック用コマンドをインストール
-RUN apt-get update -yq && apt-get install -yq wait-for-it
+# MySQLクライアントの入ったSQL実行用イメージを作成
+FROM centos:8 AS runtime
+RUN yum install mysql -y
+ADD https://github.com/vishnubob/wait-for-it/raw/master/wait-for-it.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/wait-for-it.sh
 
-# ローカルファイルをコンテナ内にコピー&依存関係解決
-WORKDIR /src
-COPY ["AspNetCoreApiExample/AspNetCoreApiExample.csproj", "AspNetCoreApiExample/"]
-RUN dotnet restore "AspNetCoreApiExample/AspNetCoreApiExample.csproj"
-# 残りをコピー
-COPY . .
-
-# アプリをビルド
-WORKDIR "/src/AspNetCoreApiExample"
-RUN dotnet build
-
-# マイグレーションを実行する
-FROM build AS runtime
-WORKDIR /src
-ENTRYPOINT ["./Docker/migration/migration.sh"]
+# 環境変数で指定されたDBにマイグレーションSQLを実行する
+COPY AspNetCoreApiExample/Migrations/idempotent.sql /sql/
+ENTRYPOINT wait-for-it.sh $DB_HOST:${DB_PORT:-3306} -- mysql -h $DB_HOST -P ${DB_PORT:-3306} -u $DB_USER -p$DB_PASSWORD $DB_NAME < /sql/idempotent.sql

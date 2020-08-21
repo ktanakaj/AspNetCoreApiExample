@@ -7,12 +7,19 @@ services:
       EXAMPLEAPP_DATABASE__CONNECTIONSTRING: "server=exampledb-container; port=3306; user=blog_usr; password=blog001; database=blog_db"
   examplemigration:
     environment:
-      ASPNETCORE_ENVIRONMENT: Development
-      EXAMPLEAPP_DATABASE__CONNECTIONSTRING: "server=exampledb-container; port=3306; user=blog_usr; password=blog001; database=blog_db"
+      DB_HOST: exampledb
+      DB_NAME: blog_db
+      DB_USER: blog_usr
+      DB_PASSWORD: blog001
   examplenginx:
     ports:
       - 80:80
   exampledb:
+    environment:
+      MYSQL_ROOT_PASSWORD: root001
+      MYSQL_DATABASE: blog_db
+      MYSQL_USER: blog_usr
+      MYSQL_PASSWORD: blog001
     ports:
       - 3306:3306
   examplefluentd:

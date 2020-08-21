@@ -25,7 +25,6 @@ services:
     depends_on:
       - exampledb
       - examplefluentd
-    entrypoint: wait-for-it exampledb:3306 -- /src/Docker/migration/migration.sh
     logging:
       driver: "fluentd"
       options:
@@ -51,11 +50,6 @@ services:
   exampledb:
     image: mysql:8
     container_name: exampledb-container
-    environment:
-      MYSQL_ROOT_PASSWORD: root001
-      MYSQL_DATABASE: blog_db
-      MYSQL_USER: blog_usr
-      MYSQL_PASSWORD: blog001
     volumes:
       - ./Docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
       - example-mysql:/var/lib/mysql
