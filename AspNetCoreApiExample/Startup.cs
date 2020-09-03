@@ -86,16 +86,7 @@ namespace Honememo.AspNetCoreApiExample
             services.AddIdentity<User, IdentityRole<int>>()
                 .AddEntityFrameworkStores<AppDbContext>()
                 .AddDefaultTokenProviders();
-            services.Configure<IdentityOptions>(options =>
-            {
-                // パスワード強度の設定
-                options.Password.RequireDigit = false;
-                options.Password.RequireLowercase = false;
-                options.Password.RequireNonAlphanumeric = false;
-                options.Password.RequireUppercase = false;
-                options.Password.RequiredLength = 1;
-                options.Password.RequiredUniqueChars = 1;
-            });
+            services.Configure<IdentityOptions>(options => this.Configuration.Bind("Identity", options));
 
             // DI設定
             services.AddScoped<IUnitOfWork>(x => x.GetRequiredService<AppDbContext>());
