@@ -77,7 +77,7 @@ namespace Honememo.AspNetCoreApiExample.Repositories
             var blog = await this.Find(id);
             if (blog == null)
             {
-                throw new NotFoundException($"id = {id} is not found");
+                throw new NotFoundException($"id={id} is not found");
             }
 
             return blog;

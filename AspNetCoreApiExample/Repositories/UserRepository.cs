@@ -88,7 +88,7 @@ namespace Honememo.AspNetCoreApiExample.Repositories
             var user = await this.Find(id);
             if (user == null)
             {
-                throw new NotFoundException($"id = {id} is not found");
+                throw new NotFoundException($"id={id} is not found");
             }
 
             return user;

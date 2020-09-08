@@ -136,7 +136,7 @@ namespace Honememo.AspNetCoreApiExample.Services
             var user = await this.userRepository.FindByName(name);
             if (user == null)
             {
-                throw new NotFoundException($"name = {name} is not found");
+                throw new NotFoundException($"name={name} is not found");
             }
 
             user.LastLogin = DateTimeOffset.UtcNow;

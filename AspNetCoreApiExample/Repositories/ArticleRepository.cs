@@ -115,7 +115,7 @@ namespace Honememo.AspNetCoreApiExample.Repositories
             var article = await this.Find(id);
             if (article == null)
             {
-                throw new NotFoundException($"id = {id} is not found");
+                throw new NotFoundException($"id={id} is not found");
             }
 
             return article;
