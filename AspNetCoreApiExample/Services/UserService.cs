@@ -46,7 +46,7 @@ namespace Honememo.AspNetCoreApiExample.Services
         #region コンストラクタ
 
         /// <summary>
-        /// リポジトリ等をDIしてサービスを生成する。
+        /// リポジトリ等を使用するサービスを生成する。
         /// </summary>
         /// <param name="mapper">AutoMapperインスタンス。</param>
         /// <param name="unitOfWork">DB処理単位集約用インスタンス。</param>

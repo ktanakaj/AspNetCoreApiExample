@@ -52,7 +52,7 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         #region コンストラクタ
 
         /// <summary>
-        /// サービス等をDIしてコントローラを生成する。
+        /// サービス等を使用するコントローラを生成する。
         /// </summary>
         /// <param name="mapper">AutoMapperインスタンス。</param>
         /// <param name="signInManager">サインインマネージャー。</param>

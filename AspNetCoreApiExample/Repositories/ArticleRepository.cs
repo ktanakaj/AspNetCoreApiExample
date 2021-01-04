@@ -36,7 +36,7 @@ namespace Honememo.AspNetCoreApiExample.Repositories
         #region コンストラクタ
 
         /// <summary>
-        /// コンテキストをDIしてリポジトリを生成する。
+        /// コンテキストを使用するリポジトリを生成する。
         /// </summary>
         /// <param name="context">アプリケーションDBコンテキスト。</param>
         public ArticleRepository(AppDbContext context)

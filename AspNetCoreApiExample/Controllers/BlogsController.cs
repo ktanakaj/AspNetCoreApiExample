@@ -38,7 +38,7 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         #region コンストラクタ
 
         /// <summary>
-        /// サービスをDIしてコントローラを生成する。
+        /// サービスを使用するコントローラを生成する。
         /// </summary>
         /// <param name="blogService">ブログサービス。</param>
         public BlogsController(BlogService blogService)

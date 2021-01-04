@@ -36,7 +36,7 @@ namespace Honememo.AspNetCoreApiExample.Repositories
         #region コンストラクタ
 
         /// <summary>
-        /// ユーザーマネージャーをDIしてリポジトリを生成する。
+        /// ユーザーマネージャーを使用するリポジトリを生成する。
         /// </summary>
         /// <param name="userManager">ユーザーマネージャー。</param>
         public UserRepository(UserManager<User> userManager)
