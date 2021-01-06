@@ -16,9 +16,9 @@ namespace Honememo.AspNetCoreApiExample.Middlewares
     using System.Text.Json;
     using System.Text.Unicode;
     using System.Threading.Tasks;
+    using Honememo.AspNetCoreApiExample.Exceptions;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Logging;
-    using Honememo.AspNetCoreApiExample.Exceptions;
 
     /// <summary>
     /// エラー処理ミドルウェアクラス。

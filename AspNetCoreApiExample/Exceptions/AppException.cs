@@ -25,7 +25,8 @@ namespace Honememo.AspNetCoreApiExample.Exceptions
         /// <param name="message">エラーメッセージ。</param>
         /// <param name="code">エラーコード。</param>
         /// <param name="data">エラーの追加情報。</param>
-        public AppException(string message, string code, System.Collections.IDictionary data = null) : this(message, code, data, null)
+        public AppException(string message, string code, System.Collections.IDictionary data = null)
+            : this(message, code, data, null)
         {
         }
 
@@ -35,7 +36,8 @@ namespace Honememo.AspNetCoreApiExample.Exceptions
         /// <param name="message">エラーメッセージ。</param>
         /// <param name="code">エラーコード。</param>
         /// <param name="innerException">発生元の例外。</param>
-        public AppException(string message, string code, Exception innerException) : this(message, code, null, innerException)
+        public AppException(string message, string code, Exception innerException)
+            : this(message, code, null, innerException)
         {
         }
 
@@ -46,7 +48,8 @@ namespace Honememo.AspNetCoreApiExample.Exceptions
         /// <param name="code">エラーコード。</param>
         /// <param name="data">エラーの追加情報。</param>
         /// <param name="innerException">発生元の例外。</param>
-        public AppException(string message, string code, System.Collections.IDictionary data, Exception innerException) : base(message, innerException)
+        public AppException(string message, string code, System.Collections.IDictionary data, Exception innerException)
+            : base(message, innerException)
         {
             this.Code = code;
             this.Data = data;

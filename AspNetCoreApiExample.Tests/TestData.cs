@@ -81,11 +81,11 @@ namespace Honememo.AspNetCoreApiExample.Tests
             {
                 new Blog()
                 {
-                    Id = 1000, UserId = 100, Name = "Taro's Blog"
+                    Id = 1000, UserId = 100, Name = "Taro's Blog",
                 },
                 new Blog()
                 {
-                    Id = 1010, UserId = 101, Name = "Jiro's Blog"
+                    Id = 1010, UserId = 101, Name = "Jiro's Blog",
                 },
             };
         }
@@ -104,7 +104,7 @@ namespace Honememo.AspNetCoreApiExample.Tests
                     BlogId = 1000,
                     Subject = "初めまして",
                     Body = "初めまして、太郎です。ブログにようこそ。",
-                    Tags = new List<Tag>() { new Tag() { Name = "Blog" }, new Tag() { Name = "お知らせ" } }
+                    Tags = new List<Tag>() { new Tag() { Name = "Blog" }, new Tag() { Name = "お知らせ" } },
                 },
                 new Article()
                 {
@@ -112,7 +112,7 @@ namespace Honememo.AspNetCoreApiExample.Tests
                     BlogId = 1010,
                     Subject = "次郎です",
                     Body = "次郎のブログです。",
-                    Tags = new List<Tag>() { new Tag() { Name = "Blog" } }
+                    Tags = new List<Tag>() { new Tag() { Name = "Blog" } },
                 },
             };
         }

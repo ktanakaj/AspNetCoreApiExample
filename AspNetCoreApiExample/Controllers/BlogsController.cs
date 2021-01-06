@@ -13,10 +13,10 @@ namespace Honememo.AspNetCoreApiExample.Controllers
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using Microsoft.AspNetCore.Authorization;
-    using Microsoft.AspNetCore.Mvc;
     using Honememo.AspNetCoreApiExample.Dto;
     using Honememo.AspNetCoreApiExample.Services;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Mvc;
 
     /// <summary>
     /// ブログコントローラクラス。

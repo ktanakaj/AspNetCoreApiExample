@@ -19,7 +19,8 @@ namespace Honememo.AspNetCoreApiExample.Exceptions
         /// 渡されたエラーメッセージで権限無しの例外を生成する。
         /// </summary>
         /// <param name="message">エラーメッセージ。</param>
-        public ForbiddenException(string message) : base(message, "FORBIDDEN")
+        public ForbiddenException(string message)
+            : base(message, "FORBIDDEN")
         {
         }
     }

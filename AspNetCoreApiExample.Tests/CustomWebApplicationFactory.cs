@@ -14,14 +14,14 @@ namespace Honememo.AspNetCoreApiExample.Tests
     using System.Linq;
     using System.Net.Http;
     using System.Text.Json;
+    using Honememo.AspNetCoreApiExample.Dto;
+    using Honememo.AspNetCoreApiExample.Repositories;
     using Microsoft.AspNetCore.Hosting;
     using Microsoft.AspNetCore.Mvc.Testing;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Diagnostics;
     using Microsoft.EntityFrameworkCore.Storage;
     using Microsoft.Extensions.DependencyInjection;
-    using Honememo.AspNetCoreApiExample.Dto;
-    using Honememo.AspNetCoreApiExample.Repositories;
 
     /// <summary>
     /// アプリ独自の設定を入れたWebアプリケーションファクトリクラス。

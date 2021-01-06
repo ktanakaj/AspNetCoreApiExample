@@ -14,10 +14,10 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
     using System.Collections.Generic;
     using System.Linq;
     using System.Net.Http;
-    using Newtonsoft.Json;
-    using Xunit;
     using Honememo.AspNetCoreApiExample.Dto;
     using Honememo.AspNetCoreApiExample.Entities;
+    using Newtonsoft.Json;
+    using Xunit;
 
     /// <summary>
     /// ブログコントローラのテストクラス。

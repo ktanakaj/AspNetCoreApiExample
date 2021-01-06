@@ -15,11 +15,11 @@ namespace Honememo.AspNetCoreApiExample.Repositories
     using System.Reflection;
     using System.Threading;
     using System.Threading.Tasks;
+    using Honememo.AspNetCoreApiExample.Entities;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore;
     using Microsoft.EntityFrameworkCore.Storage;
-    using Honememo.AspNetCoreApiExample.Entities;
 
     /// <summary>
     /// アプリケーションDBコンテキストクラス。
@@ -152,7 +152,7 @@ namespace Honememo.AspNetCoreApiExample.Repositories
         /// </summary>
         private void TouchChangedEntities()
         {
-            var entities = ChangeTracker.Entries()
+            var entities = this.ChangeTracker.Entries()
                 .Where(x => x.Entity is IHasTimestamp && (x.State == EntityState.Added || x.State == EntityState.Modified));
 
             var now = DateTimeOffset.UtcNow;

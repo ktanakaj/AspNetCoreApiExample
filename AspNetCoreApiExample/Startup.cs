@@ -14,6 +14,10 @@ namespace Honememo.AspNetCoreApiExample
     using System.IO;
     using System.Reflection;
     using AutoMapper;
+    using Honememo.AspNetCoreApiExample.Dto;
+    using Honememo.AspNetCoreApiExample.Entities;
+    using Honememo.AspNetCoreApiExample.Middlewares;
+    using Honememo.AspNetCoreApiExample.Repositories;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
@@ -23,10 +27,6 @@ namespace Honememo.AspNetCoreApiExample
     using Microsoft.Extensions.Hosting;
     using Microsoft.Extensions.Logging;
     using Microsoft.OpenApi.Models;
-    using Honememo.AspNetCoreApiExample.Dto;
-    using Honememo.AspNetCoreApiExample.Entities;
-    using Honememo.AspNetCoreApiExample.Middlewares;
-    using Honememo.AspNetCoreApiExample.Repositories;
 
     /// <summary>
     /// Webアプリケーション初期設定用のクラスです。
