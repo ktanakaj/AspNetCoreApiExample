@@ -28,16 +28,12 @@ namespace Honememo.AspNetCoreApiExample.Tests
     /// </summary>
     public class CustomWebApplicationFactory : WebApplicationFactory<Startup>
     {
-        #region 静的変数
+        #region 定数
 
         /// <summary>
         /// インメモリDBのルート。
         /// </summary>
-        private static readonly InMemoryDatabaseRoot InMemoryDatabaseRoot = new InMemoryDatabaseRoot();
-
-        #endregion
-
-        #region メンバー変数
+        private readonly InMemoryDatabaseRoot inMemoryDatabaseRoot = new InMemoryDatabaseRoot();
 
         /// <summary>
         /// WebアプリのインメモリDB名。
@@ -53,17 +49,8 @@ namespace Honememo.AspNetCoreApiExample.Tests
         /// </summary>
         public CustomWebApplicationFactory()
         {
-            // 現状の造りだと、Factoryが作られるたび(?)に
-            // テストデータの登録処理も動き、ID重複などが起こるため、
-            // DB名にGUIDを付けて処理ごとに一意にする。
-            // （一度しか作らないようにする手もあるが、そうするとパラレルで動かせなくなるので）
-            this.appDbName += Guid.NewGuid();
-
             // テスト用の環境変数を登録
-            if (string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")))
-            {
-                Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Testing");
-            }
+            Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", "Testing");
         }
 
         #endregion
@@ -77,7 +64,7 @@ namespace Honememo.AspNetCoreApiExample.Tests
         public AppDbContext CreateDbContext()
         {
             var builder = new DbContextOptionsBuilder<AppDbContext>();
-            builder.UseInMemoryDatabase(this.appDbName, InMemoryDatabaseRoot);
+            builder.UseInMemoryDatabase(this.appDbName, this.inMemoryDatabaseRoot);
             builder.ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
             return new AppDbContext(builder.Options);
         }
@@ -157,7 +144,7 @@ namespace Honememo.AspNetCoreApiExample.Tests
 
                 services.AddDbContextPool<AppDbContext>(options =>
                 {
-                    options.UseInMemoryDatabase(this.appDbName, InMemoryDatabaseRoot);
+                    options.UseInMemoryDatabase(this.appDbName, this.inMemoryDatabaseRoot);
                     options.ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
                 });
 
