@@ -117,11 +117,11 @@ namespace Honememo.AspNetCoreApiExample.Middlewares
             // TODO: エラーマスタ定義するなら、ログレベルもマスタに持たせる
             if ((int)status >= 500)
             {
-                this.logger.LogError(0, exception, string.Empty);
+                this.logger.LogError(exception, string.Empty);
             }
             else
             {
-                this.logger.LogDebug(0, exception, string.Empty);
+                this.logger.LogDebug(exception, string.Empty);
             }
 
             // レスポンス未出力の場合、エラーレスポンスを出力する

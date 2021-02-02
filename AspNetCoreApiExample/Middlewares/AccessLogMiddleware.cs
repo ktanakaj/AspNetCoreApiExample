@@ -162,7 +162,7 @@ namespace Honememo.AspNetCoreApiExample.Middlewares
             }
             catch (Exception e)
             {
-                this.logger.LogError(0, e, "Access log failed");
+                this.logger.LogError(e, "Access log failed");
             }
         }
 
