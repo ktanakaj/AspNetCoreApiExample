@@ -14,6 +14,8 @@
     * VirtualBox 6.x - 仮想環境
     * vagrant-vbguest - Vagrantプラグイン
 
+※ VirtualBoxの他、Hyper-Vでも動作します。
+
 ## 開発環境構築
 ### VM環境での開発
 実環境に近いVM環境で動かす場合は、`vagrant up` で環境を構築してください。  
