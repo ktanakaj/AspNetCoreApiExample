@@ -101,7 +101,7 @@ namespace Honememo.AspNetCoreApiExample.Repositories
         /// <returns>ブログ記事。</returns>
         public Task<Article> Find(int id)
         {
-            return this.context.Articles.Include(a => a.Tags).FirstAsync(a => a.Id == id);
+            return this.context.Articles.Include(a => a.Tags).FirstOrDefaultAsync(a => a.Id == id);
         }
 
         /// <summary>

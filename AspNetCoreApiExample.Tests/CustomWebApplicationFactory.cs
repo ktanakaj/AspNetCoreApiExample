@@ -63,10 +63,7 @@ namespace Honememo.AspNetCoreApiExample.Tests
         /// <returns>DBコンテキスト。</returns>
         public AppDbContext CreateDbContext()
         {
-            var builder = new DbContextOptionsBuilder<AppDbContext>();
-            builder.UseInMemoryDatabase(this.appDbName, this.inMemoryDatabaseRoot);
-            builder.ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
-            return new AppDbContext(builder.Options);
+            return new AppDbContext(this.ApplyTestDbConfig(new DbContextOptionsBuilder<AppDbContext>(), this.appDbName).Options);
         }
 
         /// <summary>
@@ -142,11 +139,7 @@ namespace Honememo.AspNetCoreApiExample.Tests
                     services.Remove(descriptor);
                 }
 
-                services.AddDbContextPool<AppDbContext>(options =>
-                {
-                    options.UseInMemoryDatabase(this.appDbName, this.inMemoryDatabaseRoot);
-                    options.ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
-                });
+                services.AddDbContextPool<AppDbContext>(options => this.ApplyTestDbConfig(options, this.appDbName));
 
                 // データベースに汎用のテストデータを登録
                 var sp = services.BuildServiceProvider();
@@ -157,6 +150,24 @@ namespace Honememo.AspNetCoreApiExample.Tests
                     TestData.InitializeDbForTests(db);
                 }
             });
+        }
+
+        #endregion
+
+        #region 内部メソッド
+
+        /// <summary>
+        /// DBオプションビルダーにテスト用のDB設定値を適用する。
+        /// </summary>
+        /// <param name="builder">ビルダー。</param>
+        /// <param name="dbname">DB名。</param>
+        /// <returns>メソッドチェーン用のビルダー。</returns>
+        private T ApplyTestDbConfig<T>(T builder, string dbname)
+            where T : DbContextOptionsBuilder
+        {
+            builder.UseInMemoryDatabase(dbname, this.inMemoryDatabaseRoot);
+            builder.ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
+            return builder;
         }
 
         #endregion
