@@ -14,10 +14,10 @@ namespace Honememo.AspNetCoreApiExample.Repositories
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using Microsoft.EntityFrameworkCore;
     using Honememo.AspNetCoreApiExample.Dto;
     using Honememo.AspNetCoreApiExample.Entities;
     using Honememo.AspNetCoreApiExample.Exceptions;
+    using Microsoft.EntityFrameworkCore;
 
     /// <summary>
     /// ブログ記事リポジトリクラス。
@@ -36,7 +36,7 @@ namespace Honememo.AspNetCoreApiExample.Repositories
         #region コンストラクタ
 
         /// <summary>
-        /// コンテキストをDIしてリポジトリを生成する。
+        /// コンテキストを使用するリポジトリを生成する。
         /// </summary>
         /// <param name="context">アプリケーションDBコンテキスト。</param>
         public ArticleRepository(AppDbContext context)
@@ -101,7 +101,7 @@ namespace Honememo.AspNetCoreApiExample.Repositories
         /// <returns>ブログ記事。</returns>
         public Task<Article> Find(int id)
         {
-            return this.context.Articles.Include(a => a.Tags).FirstAsync(a => a.Id == id);
+            return this.context.Articles.Include(a => a.Tags).FirstOrDefaultAsync(a => a.Id == id);
         }
 
         /// <summary>
@@ -115,7 +115,7 @@ namespace Honememo.AspNetCoreApiExample.Repositories
             var article = await this.Find(id);
             if (article == null)
             {
-                throw new NotFoundException($"id = {id} is not found");
+                throw new NotFoundException($"id={id} is not found");
             }
 
             return article;

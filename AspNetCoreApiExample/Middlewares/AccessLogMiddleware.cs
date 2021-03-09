@@ -109,7 +109,7 @@ namespace Honememo.AspNetCoreApiExample.Middlewares
 
                 // 基本のアクセスログ
                 // TODO: プロトコル（HTTP/1.1みたいな奴）を取る方法が不明なためスキーマで代用している
-                string log = context.Connection.RemoteIpAddress.ToString() + " - - \"" + req.Method
+                string log = context.Connection.RemoteIpAddress?.ToString() + " - - \"" + req.Method
                     + " " + req.GetDisplayUrl() + " " + req.Scheme.ToUpper() + "\" " + res.StatusCode
                     + " " + resBody.Length + " \""
                     + (req.Headers.ContainsKey("Referer") ? req.Headers["Referer"].ToString() : string.Empty) + "\" \""
@@ -162,7 +162,7 @@ namespace Honememo.AspNetCoreApiExample.Middlewares
             }
             catch (Exception e)
             {
-                this.logger.LogError(0, e, "Access log failed");
+                this.logger.LogError(e, "Access log failed");
             }
         }
 

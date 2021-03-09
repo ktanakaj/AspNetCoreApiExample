@@ -14,9 +14,9 @@ namespace Honememo.AspNetCoreApiExample.Repositories
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using Microsoft.EntityFrameworkCore;
     using Honememo.AspNetCoreApiExample.Entities;
     using Honememo.AspNetCoreApiExample.Exceptions;
+    using Microsoft.EntityFrameworkCore;
 
     /// <summary>
     /// ブログリポジトリクラス。
@@ -35,7 +35,7 @@ namespace Honememo.AspNetCoreApiExample.Repositories
         #region コンストラクタ
 
         /// <summary>
-        /// コンテキストをDIしてリポジトリを生成する。
+        /// コンテキストを使用するリポジトリを生成する。
         /// </summary>
         /// <param name="context">アプリケーションDBコンテキスト。</param>
         public BlogRepository(AppDbContext context)
@@ -77,7 +77,7 @@ namespace Honememo.AspNetCoreApiExample.Repositories
             var blog = await this.Find(id);
             if (blog == null)
             {
-                throw new NotFoundException($"id = {id} is not found");
+                throw new NotFoundException($"id={id} is not found");
             }
 
             return blog;

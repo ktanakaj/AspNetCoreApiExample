@@ -10,7 +10,7 @@
   * nginx 1.17.x
 
 ### 開発環境
-* [Docker Desktop 2.1](https://hub.docker.com/editions/community/docker-ce-desktop-windows) - 仮想環境
+* [Docker Desktop 2.3](https://hub.docker.com/editions/community/docker-ce-desktop-windows) - 仮想環境
 * [Visual Studio 2019 Community](https://docs.microsoft.com/ja-jp/visualstudio/ide/?view=vs-2019) - 統合開発環境
 * [Entity Framework Core Tools](https://docs.microsoft.com/ja-jp/ef/core/miscellaneous/cli/dotnet) - DBコマンド実行用
 

@@ -22,7 +22,8 @@ namespace Honememo.AspNetCoreApiExample.Exceptions
         /// </summary>
         /// <param name="message">エラーメッセージ。</param>
         /// <param name="data">エラーの追加情報。</param>
-        public NotFoundException(string message, System.Collections.IDictionary data = null) : base(message, "NOT_FOUND", data)
+        public NotFoundException(string message, System.Collections.IDictionary data = null)
+            : base(message, "NOT_FOUND", data)
         {
         }
     }

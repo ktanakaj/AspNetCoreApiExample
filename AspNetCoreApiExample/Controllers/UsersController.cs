@@ -14,13 +14,13 @@ namespace Honememo.AspNetCoreApiExample.Controllers
     using System.Linq;
     using System.Threading.Tasks;
     using AutoMapper;
-    using Microsoft.AspNetCore.Authorization;
-    using Microsoft.AspNetCore.Mvc;
-    using Microsoft.AspNetCore.Identity;
     using Honememo.AspNetCoreApiExample.Dto;
     using Honememo.AspNetCoreApiExample.Entities;
     using Honememo.AspNetCoreApiExample.Exceptions;
     using Honememo.AspNetCoreApiExample.Services;
+    using Microsoft.AspNetCore.Authorization;
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.AspNetCore.Mvc;
 
     /// <summary>
     /// ユーザーコントローラクラス。
@@ -52,7 +52,7 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         #region コンストラクタ
 
         /// <summary>
-        /// サービス等をDIしてコントローラを生成する。
+        /// サービス等を使用するコントローラを生成する。
         /// </summary>
         /// <param name="mapper">AutoMapperインスタンス。</param>
         /// <param name="signInManager">サインインマネージャー。</param>

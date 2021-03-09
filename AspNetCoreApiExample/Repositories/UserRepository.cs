@@ -14,10 +14,10 @@ namespace Honememo.AspNetCoreApiExample.Repositories
     using System.Collections.Generic;
     using System.Linq;
     using System.Threading.Tasks;
-    using Microsoft.AspNetCore.Identity;
-    using Microsoft.EntityFrameworkCore;
     using Honememo.AspNetCoreApiExample.Entities;
     using Honememo.AspNetCoreApiExample.Exceptions;
+    using Microsoft.AspNetCore.Identity;
+    using Microsoft.EntityFrameworkCore;
 
     /// <summary>
     /// ユーザーリポジトリクラス。
@@ -36,7 +36,7 @@ namespace Honememo.AspNetCoreApiExample.Repositories
         #region コンストラクタ
 
         /// <summary>
-        /// ユーザーマネージャーをDIしてリポジトリを生成する。
+        /// ユーザーマネージャーを使用するリポジトリを生成する。
         /// </summary>
         /// <param name="userManager">ユーザーマネージャー。</param>
         public UserRepository(UserManager<User> userManager)
@@ -88,7 +88,7 @@ namespace Honememo.AspNetCoreApiExample.Repositories
             var user = await this.Find(id);
             if (user == null)
             {
-                throw new NotFoundException($"id = {id} is not found");
+                throw new NotFoundException($"id={id} is not found");
             }
 
             return user;
@@ -111,7 +111,7 @@ namespace Honememo.AspNetCoreApiExample.Repositories
             var user = new User()
             {
                 UserName = name,
-                LastLogin = DateTimeOffset.UtcNow
+                LastLogin = DateTimeOffset.UtcNow,
             };
             this.ThrowBadRequestExceptionIfResultIsNotSucceeded(
                 await this.userManager.CreateAsync(user));
@@ -188,7 +188,8 @@ namespace Honememo.AspNetCoreApiExample.Repositories
         /// </summary>
         /// <typeparam name="T">例外クラス。</typeparam>
         /// <param name="result">チェックする戻り値。</param>
-        private void ThrowExceptionIfResultIsNotSucceeded<T>(IdentityResult result) where T : Exception, new()
+        private void ThrowExceptionIfResultIsNotSucceeded<T>(IdentityResult result)
+            where T : Exception, new()
         {
             if (!result.Succeeded)
             {

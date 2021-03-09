@@ -14,9 +14,9 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
     using System.Collections.Generic;
     using System.Linq;
     using System.Net.Http;
+    using Honememo.AspNetCoreApiExample.Dto;
     using Newtonsoft.Json;
     using Xunit;
-    using Honememo.AspNetCoreApiExample.Dto;
 
     /// <summary>
     /// ユーザーコントローラのテストクラス。

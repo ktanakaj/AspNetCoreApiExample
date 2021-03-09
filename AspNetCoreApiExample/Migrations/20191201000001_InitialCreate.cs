@@ -33,7 +33,7 @@ namespace Honememo.AspNetCoreApiExample.Migrations
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     Name = table.Column<string>(maxLength: 191, nullable: true),
                     NormalizedName = table.Column<string>(maxLength: 191, nullable: true),
-                    ConcurrencyStamp = table.Column<string>(nullable: true)
+                    ConcurrencyStamp = table.Column<string>(nullable: true),
                 },
                 constraints: table =>
                 {
@@ -62,7 +62,7 @@ namespace Honememo.AspNetCoreApiExample.Migrations
                     AccessFailedCount = table.Column<int>(nullable: false),
                     LastLogin = table.Column<DateTimeOffset>(nullable: true),
                     CreatedAt = table.Column<DateTimeOffset>(nullable: true),
-                    UpdatedAt = table.Column<DateTimeOffset>(nullable: true)
+                    UpdatedAt = table.Column<DateTimeOffset>(nullable: true),
                 },
                 constraints: table =>
                 {
@@ -77,7 +77,7 @@ namespace Honememo.AspNetCoreApiExample.Migrations
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     RoleId = table.Column<int>(nullable: false),
                     ClaimType = table.Column<string>(nullable: true),
-                    ClaimValue = table.Column<string>(nullable: true)
+                    ClaimValue = table.Column<string>(nullable: true),
                 },
                 constraints: table =>
                 {
@@ -98,7 +98,7 @@ namespace Honememo.AspNetCoreApiExample.Migrations
                         .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                     UserId = table.Column<int>(nullable: false),
                     ClaimType = table.Column<string>(nullable: true),
-                    ClaimValue = table.Column<string>(nullable: true)
+                    ClaimValue = table.Column<string>(nullable: true),
                 },
                 constraints: table =>
                 {
@@ -118,7 +118,7 @@ namespace Honememo.AspNetCoreApiExample.Migrations
                     LoginProvider = table.Column<string>(maxLength: 191, nullable: false),
                     ProviderKey = table.Column<string>(maxLength: 191, nullable: false),
                     ProviderDisplayName = table.Column<string>(nullable: true),
-                    UserId = table.Column<int>(nullable: false)
+                    UserId = table.Column<int>(nullable: false),
                 },
                 constraints: table =>
                 {
@@ -136,7 +136,7 @@ namespace Honememo.AspNetCoreApiExample.Migrations
                 columns: table => new
                 {
                     UserId = table.Column<int>(nullable: false),
-                    RoleId = table.Column<int>(nullable: false)
+                    RoleId = table.Column<int>(nullable: false),
                 },
                 constraints: table =>
                 {
@@ -162,7 +162,7 @@ namespace Honememo.AspNetCoreApiExample.Migrations
                     UserId = table.Column<int>(nullable: false),
                     LoginProvider = table.Column<string>(maxLength: 191, nullable: false),
                     Name = table.Column<string>(maxLength: 191, nullable: false),
-                    Value = table.Column<string>(nullable: true)
+                    Value = table.Column<string>(nullable: true),
                 },
                 constraints: table =>
                 {
@@ -184,7 +184,7 @@ namespace Honememo.AspNetCoreApiExample.Migrations
                     Name = table.Column<string>(maxLength: 191, nullable: false),
                     UserId = table.Column<int>(nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(nullable: true),
-                    UpdatedAt = table.Column<DateTimeOffset>(nullable: true)
+                    UpdatedAt = table.Column<DateTimeOffset>(nullable: true),
                 },
                 constraints: table =>
                 {
@@ -207,7 +207,7 @@ namespace Honememo.AspNetCoreApiExample.Migrations
                     Subject = table.Column<string>(maxLength: 191, nullable: false),
                     Body = table.Column<string>(maxLength: 65535, nullable: false),
                     CreatedAt = table.Column<DateTimeOffset>(nullable: true),
-                    UpdatedAt = table.Column<DateTimeOffset>(nullable: true)
+                    UpdatedAt = table.Column<DateTimeOffset>(nullable: true),
                 },
                 constraints: table =>
                 {
@@ -225,7 +225,7 @@ namespace Honememo.AspNetCoreApiExample.Migrations
                 columns: table => new
                 {
                     ArticleId = table.Column<int>(nullable: false),
-                    Name = table.Column<string>(maxLength: 191, nullable: false)
+                    Name = table.Column<string>(maxLength: 191, nullable: false),
                 },
                 constraints: table =>
                 {
