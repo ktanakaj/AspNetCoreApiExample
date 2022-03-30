@@ -92,7 +92,7 @@ namespace Honememo.AspNetCoreApiExample.Middlewares
         /// <param name="context">HTTPコンテキスト。</param>
         /// <param name="starttime">処理開始時間。</param>
         /// <returns>処理状態。</returns>
-        private async Task Log(HttpContext context, DateTimeOffset starttime)
+        private async Task Log(HttpContext context, DateTimeOffset? starttime)
         {
             // ※ EnableBufferingMiddlewareでリクエストボディは再読み込み可、
             //    かつレスポンスボディはMemoryStreamとなっている前提。
@@ -118,7 +118,7 @@ namespace Honememo.AspNetCoreApiExample.Middlewares
                 // 処理時間
                 if (starttime != null)
                 {
-                    log += " " + (DateTimeOffset.Now.ToUnixTimeMilliseconds() - starttime.ToUnixTimeMilliseconds()) + "ms";
+                    log += " " + (DateTimeOffset.Now.ToUnixTimeMilliseconds() - starttime.Value.ToUnixTimeMilliseconds()) + "ms";
                 }
 
                 // ユーザーID

@@ -60,6 +60,8 @@ services:
       options:
         tag: "docker.mysql"
         fluentd-async-connect: "true"
+    # マウントした設定ファイルが644でないとエラー（Windowsでは777）になるので、起動前にパーミッションを変える
+    entrypoint: "/bin/bash -c 'chmod 644 /etc/mysql/conf.d/* && docker-entrypoint.sh mysqld'"
     restart: always
   examplefluentd:
     container_name: examplefluentd-container

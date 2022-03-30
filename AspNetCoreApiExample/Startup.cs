@@ -3,7 +3,7 @@
 //      Webアプリケーション初期設定用クラスソース</summary>
 //
 // <copyright file="Startup.cs">
-//      Copyright (C) 2019 Koichi Tanaka. All rights reserved.</copyright>
+//      Copyright (C) 2022 Koichi Tanaka. All rights reserved.</copyright>
 // <author>
 //      Koichi Tanaka</author>
 // ================================================================================================
@@ -12,12 +12,16 @@ namespace Honememo.AspNetCoreApiExample
 {
     using System;
     using System.IO;
+    using System.Net;
     using System.Reflection;
+    using System.Threading.Tasks;
     using AutoMapper;
     using Honememo.AspNetCoreApiExample.Dto;
     using Honememo.AspNetCoreApiExample.Entities;
     using Honememo.AspNetCoreApiExample.Middlewares;
     using Honememo.AspNetCoreApiExample.Repositories;
+    using Microsoft.AspNetCore.Authentication;
+    using Microsoft.AspNetCore.Authentication.Cookies;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.EntityFrameworkCore;
@@ -87,6 +91,11 @@ namespace Honememo.AspNetCoreApiExample
                 .AddEntityFrameworkStores<AppDbContext>()
                 .AddDefaultTokenProviders();
             services.Configure<IdentityOptions>(options => this.Configuration.Bind("Identity", options));
+            services.ConfigureApplicationCookie(options =>
+            {
+                options.Events.OnRedirectToAccessDenied = ReplaceRedirector(HttpStatusCode.Forbidden);
+                options.Events.OnRedirectToLogin = ReplaceRedirector(HttpStatusCode.Unauthorized);
+            });
 
             // DI設定
             services.AddScoped<IUnitOfWork>(x => x.GetRequiredService<AppDbContext>());
@@ -133,9 +142,9 @@ namespace Honememo.AspNetCoreApiExample
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
-            app.UseMiddleware(typeof(EnableBufferingMiddleware));
-            app.UseMiddleware(typeof(AccessLogMiddleware));
-            app.UseMiddleware(typeof(ErrorHandlingMiddleware));
+            app.UseMiddleware<EnableBufferingMiddleware>();
+            app.UseMiddleware<AccessLogMiddleware>();
+            app.UseMiddleware<ErrorHandlingMiddleware>();
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
@@ -158,7 +167,7 @@ namespace Honememo.AspNetCoreApiExample
             switch (dbconf.GetValue<string>("Type")?.ToLower())
             {
                 case "mysql":
-                    builder.UseMySql(dbconf.GetValue<string>("ConnectionString"));
+                    builder.UseMySql(dbconf.GetValue<string>("ConnectionString"), ServerVersion.Parse("8.0.28-mysql"));
                     break;
                 default:
                     builder.UseInMemoryDatabase("AppDB");
@@ -167,6 +176,20 @@ namespace Honememo.AspNetCoreApiExample
             }
 
             return builder;
+        }
+
+        /// <summary>
+        /// 認証のリダイレクトをHTTPステータスコードに差し替える。
+        /// </summary>
+        /// <param name="statusCode">返すHTTPステータスコード。</param>
+        /// <returns>差し替え用のファンクション。</returns>
+        private static Func<RedirectContext<CookieAuthenticationOptions>, Task> ReplaceRedirector(HttpStatusCode statusCode)
+        {
+            return context =>
+            {
+                context.Response.StatusCode = (int)statusCode;
+                return Task.CompletedTask;
+            };
         }
 
         #endregion

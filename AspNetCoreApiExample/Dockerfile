@@ -1,8 +1,8 @@
 # アプリを動作させるイメージを構築
-FROM mcr.microsoft.com/dotnet/core/aspnet:3.1 AS base
+FROM mcr.microsoft.com/dotnet/aspnet:6.0 AS base
 
 # アプリをビルドするためのイメージを構築
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS build
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 
 # ローカルファイルをコンテナ内にコピー&依存関係解決
 WORKDIR /src

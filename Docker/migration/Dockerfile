@@ -1,6 +1,13 @@
 # MySQLクライアントの入ったSQL実行用イメージを作成
-FROM centos:8 AS runtime
-RUN yum install mysql -y
+FROM debian:11 AS runtime
+RUN apt-get update -yq && \
+    apt -y install wget lsb-release gnupg && \
+    wget -O /tmp/mysql-apt-config.deb https://dev.mysql.com/get/mysql-apt-config_0.8.22-1_all.deb && \
+    ( yes 4 | dpkg -i /tmp/mysql-apt-config.deb ) && \
+    apt-get update -yq && \
+    apt -y install mysql-client
+
+# DB起動チェック用のスクリプトもインストール
 ADD https://github.com/vishnubob/wait-for-it/raw/master/wait-for-it.sh /usr/local/bin/
 RUN chmod +x /usr/local/bin/wait-for-it.sh
 
