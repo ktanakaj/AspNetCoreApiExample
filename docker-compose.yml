@@ -6,17 +6,8 @@ services:
       context: .
       dockerfile: AspNetCoreApiExample/Dockerfile
     container_name: exampleapp-container
-    environment:
-      ASPNETCORE_URLS: http://+:5000
     depends_on:
       - exampledb
-      - examplefluentd
-    logging:
-      driver: "fluentd"
-      options:
-        tag: "docker.app"
-        fluentd-async-connect: "true"
-    restart: always
   examplemigration:
     build:
       context: .
@@ -24,28 +15,13 @@ services:
     container_name: examplemigration-container
     depends_on:
       - exampledb
-      - examplefluentd
-    logging:
-      driver: "fluentd"
-      options:
-        tag: "docker.migration"
-        fluentd-async-connect: "true"
   examplenginx:
     build:
       context: .
       dockerfile: ./Docker/nginx/Dockerfile
     container_name: examplenginx-container
-    environment:
-      NGINX_PORT: 80
-      BACKEND_SERVER: exampleapp:5000
     depends_on:
       - exampleapp
-      - examplefluentd
-    logging:
-      driver: "fluentd"
-      options:
-        tag: "docker.nginx"
-        fluentd-async-connect: "true"
     restart: always
   exampledb:
     image: mysql:8
@@ -53,21 +29,8 @@ services:
     volumes:
       - ./Docker/mysql/my.cnf:/etc/mysql/conf.d/my.cnf
       - example-mysql:/var/lib/mysql
-    depends_on:
-      - examplefluentd
-    logging:
-      driver: "fluentd"
-      options:
-        tag: "docker.mysql"
-        fluentd-async-connect: "true"
     # マウントした設定ファイルが644でないとエラー（Windowsでは777）になるので、起動前にパーミッションを変える
     entrypoint: "/bin/bash -c 'chmod 644 /etc/mysql/conf.d/* && docker-entrypoint.sh mysqld'"
-    restart: always
-  examplefluentd:
-    container_name: examplefluentd-container
-    build:
-      context: .
-      dockerfile: ./Docker/fluentd/Dockerfile
     restart: always
 volumes:
   example-mysql:

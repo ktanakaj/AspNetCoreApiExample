@@ -1,7 +1,0 @@
-# Visual Studioからのデバッグ実行時のみ有効な設定を記述する。
-version: '3.4'
-
-services:
-  examplefluentd:
-    volumes:
-      - "${TEMP}/AspNetCoreApiExample:/fluentd/log"

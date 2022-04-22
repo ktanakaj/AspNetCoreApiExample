@@ -23,8 +23,7 @@ IDE上からdocker-composeプロジェクトを選択して、デバッグ実行
 ※ テスト用のインメモリDBで良ければ、Visual Studio上からDocker無しの単体でも実行可能です。
 
 ## その他
-各種ログは標準出力に出力され、Fluentdコンテナにより集計されます。  
-（Visual Studioデバッグ実行時は `%TEMP%\AspNetCoreApiExample` 下に出力。）  
+各種ログは標準出力に出力されます。  
 システムログ、アクセスログ、SQLログを出力します。
 
 DBを参照する場合は、MySQL Workbench等でMySQLの標準ポートに接続してください（接続情報は `docker-compose.yml` 参照）。
