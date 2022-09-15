@@ -1,0 +1,34 @@
+# GitHub ActionsによるCI自動テスト設定。
+# masterブランチがpushされたタイミングで、Dockerコンテナを用いた自動テストを流す。
+# 高速化のため、Dockerビルドはキャッシュする。
+name: Test
+
+on:
+  push:
+    branches:
+      - master
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  test-and-lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      # build-push-actionで必要なDocker Buildxの有効化
+      - uses: docker/setup-buildx-action@v2
+
+      # Dockerビルド実行
+      - uses: docker/build-push-action@v3
+        with:
+          tags: test
+          file: Docker/test/Dockerfile
+          load: true
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Dockerで自動テスト実行
+      - run: docker run test
+        timeout-minutes: 2
