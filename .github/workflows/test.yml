@@ -1,34 +1,28 @@
-# GitHub ActionsによるCI自動テスト設定。
-# masterブランチがpushされたタイミングで、Dockerコンテナを用いた自動テストを流す。
-# 高速化のため、Dockerビルドはキャッシュする。
+# GitHub Actionsによる自動テスト設定。
+# masterブランチがpushまたはプルリク更新されたタイミングで自動テストを流す。
 name: Test
 
 on:
   push:
     branches:
       - master
-
-permissions:
-  id-token: write
-  contents: read
+  pull_request:
+    types: [opened, synchronize]
 
 jobs:
   test-and-lint:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      # build-push-actionで必要なDocker Buildxの有効化
-      - uses: docker/setup-buildx-action@v2
-
-      # Dockerビルド実行
-      - uses: docker/build-push-action@v3
+      - uses: actions/checkout@v3
+      - uses: actions/setup-dotnet@v2
         with:
-          tags: test
-          file: Docker/test/Dockerfile
-          load: true
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-      # Dockerで自動テスト実行
-      - run: docker run test
-        timeout-minutes: 2
+          dotnet-version: '6.x'
+      - uses: actions/cache@v3
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+      - run: dotnet restore ./AspNetCoreApiExample.sln
+      - run: dotnet test ./AspNetCoreApiExample.sln --no-restore
