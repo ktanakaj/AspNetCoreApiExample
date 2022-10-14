@@ -8,18 +8,14 @@
 //      Koichi Tanaka</author>
 // ================================================================================================
 
+using System.Net;
+using System.Text.Encodings.Web;
+using System.Text.Json;
+using System.Text.Unicode;
+using Honememo.AspNetCoreApiExample.Exceptions;
+
 namespace Honememo.AspNetCoreApiExample.Middlewares
 {
-    using System;
-    using System.Net;
-    using System.Text.Encodings.Web;
-    using System.Text.Json;
-    using System.Text.Unicode;
-    using System.Threading.Tasks;
-    using Honememo.AspNetCoreApiExample.Exceptions;
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.Extensions.Logging;
-
     /// <summary>
     /// エラー処理ミドルウェアクラス。
     /// </summary>
@@ -105,6 +101,9 @@ namespace Honememo.AspNetCoreApiExample.Middlewares
                 case "BAD_REQUEST":
                     status = HttpStatusCode.BadRequest;
                     break;
+                case "UNAUTHORIZED":
+                    status = HttpStatusCode.Unauthorized;
+                    break;
                 case "FORBIDDEN":
                     status = HttpStatusCode.Forbidden;
                     break;
@@ -155,17 +154,17 @@ namespace Honememo.AspNetCoreApiExample.Middlewares
             /// <summary>
             /// エラーコード。
             /// </summary>
-            public string Code { get; set; }
+            public string Code { get; set; } = string.Empty;
 
             /// <summary>
             /// エラーメッセージ。
             /// </summary>
-            public string Message { get; set; }
+            public string Message { get; set; } = string.Empty;
 
             /// <summary>
             /// 追加情報。
             /// </summary>
-            public object Data { get; set; }
+            public object? Data { get; set; }
         }
 
         #endregion

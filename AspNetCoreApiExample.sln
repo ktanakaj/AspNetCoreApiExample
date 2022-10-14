@@ -1,25 +1,22 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.1.32414.318
+VisualStudioVersion = 17.3.32929.385
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCoreApiExample", "AspNetCoreApiExample\AspNetCoreApiExample.csproj", "{4E3F6499-B299-4BF3-916B-AA73B38F7DB5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCoreApiExample", "AspNetCoreApiExample\AspNetCoreApiExample.csproj", "{7DEAEEA8-941F-4235-AEF2-6B39A5C5E72A}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{04ED459E-A9EF-4859-9605-C285921AF74A}"
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{BB5D688E-9892-4A42-89BE-0A24CD2139DB}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCoreApiExample.Tests", "AspNetCoreApiExample.Tests\AspNetCoreApiExample.Tests.csproj", "{A60D2B9A-2B4A-4B1D-99A3-7B222E6E5926}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ソリューション項目", "ソリューション項目", "{04217492-2A0F-4ACD-A065-E44AFDC509CC}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 		Docker\migration\Dockerfile = Docker\migration\Dockerfile
 		Docker\nginx\Dockerfile = Docker\nginx\Dockerfile
-		Docker\fluentd\fluent.conf = Docker\fluentd\fluent.conf
-		LICENSE = LICENSE
 		Docker\mysql\my.cnf = Docker\mysql\my.cnf
 		Docker\nginx\mysite.template = Docker\nginx\mysite.template
-		README.md = README.md
 	EndProjectSection
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AspNetCoreApiExample.Tests", "AspNetCoreApiExample.Tests\AspNetCoreApiExample.Tests.csproj", "{9359D913-52A0-4839-AFDF-6705A5555C7F}"
-EndProject
-Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{FC977755-94FD-409C-8814-352FC335D741}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -27,23 +24,23 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{4E3F6499-B299-4BF3-916B-AA73B38F7DB5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4E3F6499-B299-4BF3-916B-AA73B38F7DB5}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4E3F6499-B299-4BF3-916B-AA73B38F7DB5}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4E3F6499-B299-4BF3-916B-AA73B38F7DB5}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9359D913-52A0-4839-AFDF-6705A5555C7F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9359D913-52A0-4839-AFDF-6705A5555C7F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9359D913-52A0-4839-AFDF-6705A5555C7F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9359D913-52A0-4839-AFDF-6705A5555C7F}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FC977755-94FD-409C-8814-352FC335D741}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FC977755-94FD-409C-8814-352FC335D741}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FC977755-94FD-409C-8814-352FC335D741}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FC977755-94FD-409C-8814-352FC335D741}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7DEAEEA8-941F-4235-AEF2-6B39A5C5E72A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7DEAEEA8-941F-4235-AEF2-6B39A5C5E72A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7DEAEEA8-941F-4235-AEF2-6B39A5C5E72A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7DEAEEA8-941F-4235-AEF2-6B39A5C5E72A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BB5D688E-9892-4A42-89BE-0A24CD2139DB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BB5D688E-9892-4A42-89BE-0A24CD2139DB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BB5D688E-9892-4A42-89BE-0A24CD2139DB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BB5D688E-9892-4A42-89BE-0A24CD2139DB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A60D2B9A-2B4A-4B1D-99A3-7B222E6E5926}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A60D2B9A-2B4A-4B1D-99A3-7B222E6E5926}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A60D2B9A-2B4A-4B1D-99A3-7B222E6E5926}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A60D2B9A-2B4A-4B1D-99A3-7B222E6E5926}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {55DB194A-401D-4C7C-8DB8-2D7E268C85AD}
+		SolutionGuid = {5BCC5B9E-CCE2-4B15-84F9-2EDDEC6D703D}
 	EndGlobalSection
 EndGlobal

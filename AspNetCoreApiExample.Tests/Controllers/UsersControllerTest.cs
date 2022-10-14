@@ -8,17 +8,12 @@
 //      Koichi Tanaka</author>
 // ================================================================================================
 
+using System.Net.Http.Json;
+using Honememo.AspNetCoreApiExample.Dto;
+using Newtonsoft.Json;
+
 namespace Honememo.AspNetCoreApiExample.Tests.Controllers
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Net.Http;
-    using System.Net.Http.Json;
-    using Honememo.AspNetCoreApiExample.Dto;
-    using Newtonsoft.Json;
-    using Xunit;
-
     /// <summary>
     /// ユーザーコントローラのテストクラス。
     /// </summary>
@@ -51,7 +46,7 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
         #region コンストラクタ
 
         /// <summary>
-        /// WebアプリのファクトリーをDIしてテストインスタンスを生成する。
+        /// Webアプリのファクトリーを使用するテストインスタンスを生成する。
         /// </summary>
         /// <param name="factory">Webアプリファクトリー。</param>
         public UsersControllerTest(CustomWebApplicationFactory factory)
@@ -150,6 +145,7 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
             Assert.True(json.LastLogin > now);
 
             var dbuser = this.factory.CreateDbContext().Users.Find(json.Id);
+            Assert.NotNull(dbuser);
             Assert.Equal(json.LastLogin, dbuser.LastLogin);
 
             response = await this.client.PostAsync("/api/users/logout", null);

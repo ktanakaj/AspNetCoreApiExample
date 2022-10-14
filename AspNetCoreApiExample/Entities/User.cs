@@ -8,16 +8,16 @@
 //      Koichi Tanaka</author>
 // ================================================================================================
 
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+
 namespace Honememo.AspNetCoreApiExample.Entities
 {
-    using System;
-    using System.Collections.Generic;
-    using Microsoft.AspNetCore.Identity;
-    using Microsoft.EntityFrameworkCore;
-
     /// <summary>
     /// ユーザーエンティティクラス。
     /// </summary>
+    [Index(nameof(LastLogin))]
+    [Index(nameof(CreatedAt))]
     public class User : IdentityUser<int>, IHasTimestamp
     {
         #region プロパティ
@@ -40,33 +40,7 @@ namespace Honememo.AspNetCoreApiExample.Entities
         /// <summary>
         /// ユーザーのブログ。
         /// </summary>
-        public ICollection<Blog> Blogs { get; set; }
-
-        #endregion
-
-        #region メソッド
-
-        /// <summary>
-        /// モデル構築時に呼ばれる処理。
-        /// </summary>
-        /// <param name="modelBuilder">モデルビルダー。</param>
-        public static void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            // 親クラスの列がMySQLのutf8mb4の文字数制限でエラーになるので、定義を上書き
-            modelBuilder.Entity<User>(entity =>
-            {
-                entity.Property(u => u.Email).HasMaxLength(191);
-                entity.Property(u => u.NormalizedEmail).HasMaxLength(191);
-                entity.Property(u => u.NormalizedUserName).HasMaxLength(191);
-                entity.Property(u => u.UserName).HasMaxLength(191);
-            });
-
-            // インデックスを設定
-            modelBuilder.Entity<User>()
-                .HasIndex(u => u.LastLogin);
-            modelBuilder.Entity<User>()
-                .HasIndex(u => u.CreatedAt);
-        }
+        public ICollection<Blog> Blogs { get; set; } = null!;
 
         #endregion
     }

@@ -10,8 +10,6 @@
 
 namespace Honememo.AspNetCoreApiExample.Entities
 {
-    using System;
-
     /// <summary>
     /// タイムスタンプを持つエンティティのインタフェース。
     /// </summary>

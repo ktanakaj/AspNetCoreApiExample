@@ -8,10 +8,10 @@
 //      Koichi Tanaka</author>
 // ================================================================================================
 
+using System.ComponentModel.DataAnnotations;
+
 namespace Honememo.AspNetCoreApiExample.Dto
 {
-    using System.ComponentModel.DataAnnotations;
-
     /// <summary>
     /// ブログ登録/編集のリクエストパラメータ用のDTOクラス。
     /// </summary>
@@ -21,7 +21,7 @@ namespace Honememo.AspNetCoreApiExample.Dto
         /// ブログタイトル。
         /// </summary>
         [Required]
-        [MaxLength(191)]
-        public string Name { get; set; }
+        [MaxLength(255)]
+        public string Name { get; set; } = string.Empty;
     }
 }

@@ -8,12 +8,11 @@
 //      Koichi Tanaka</author>
 // ================================================================================================
 
+using Honememo.AspNetCoreApiExample.Entities;
+using Honememo.AspNetCoreApiExample.Repositories;
+
 namespace Honememo.AspNetCoreApiExample.Tests
 {
-    using System.Collections.Generic;
-    using Honememo.AspNetCoreApiExample.Entities;
-    using Honememo.AspNetCoreApiExample.Repositories;
-
     /// <summary>
     /// 統合テストのテストデータ生成クラス。
     /// </summary>

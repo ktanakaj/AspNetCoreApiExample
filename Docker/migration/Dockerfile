@@ -2,7 +2,7 @@
 FROM debian:11 AS runtime
 RUN apt-get update -yq && \
     apt -y install wget lsb-release gnupg && \
-    wget -O /tmp/mysql-apt-config.deb https://dev.mysql.com/get/mysql-apt-config_0.8.22-1_all.deb && \
+    wget -O /tmp/mysql-apt-config.deb https://dev.mysql.com/get/mysql-apt-config_0.8.23-1_all.deb && \
     ( yes 4 | dpkg -i /tmp/mysql-apt-config.deb ) && \
     apt-get update -yq && \
     apt -y install mysql-client

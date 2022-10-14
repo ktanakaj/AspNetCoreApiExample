@@ -8,16 +8,16 @@
 //      Koichi Tanaka</author>
 // ================================================================================================
 
+using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
+
 namespace Honememo.AspNetCoreApiExample.Entities
 {
-    using System;
-    using System.Collections.Generic;
-    using System.ComponentModel.DataAnnotations;
-    using Microsoft.EntityFrameworkCore;
-
     /// <summary>
     /// ブログエンティティクラス。
     /// </summary>
+    [Index(nameof(Name))]
+    [Index(nameof(CreatedAt))]
     public class Blog : IHasTimestamp
     {
         #region プロパティ
@@ -31,8 +31,8 @@ namespace Honememo.AspNetCoreApiExample.Entities
         /// ブログタイトル。
         /// </summary>
         [Required]
-        [MaxLength(191)]
-        public string Name { get; set; }
+        [MaxLength(255)]
+        public string Name { get; set; } = string.Empty;
 
         /// <summary>
         /// ブログ作者のユーザーID。
@@ -52,29 +52,12 @@ namespace Honememo.AspNetCoreApiExample.Entities
         /// <summary>
         /// ブログ作者のユーザー。
         /// </summary>
-        public User User { get; set; }
+        public User User { get; set; } = null!;
 
         /// <summary>
         /// ブログの記事。
         /// </summary>
-        public ICollection<Article> Articles { get; set; }
-
-        #endregion
-
-        #region メソッド
-
-        /// <summary>
-        /// モデル構築時に呼ばれる処理。
-        /// </summary>
-        /// <param name="modelBuilder">モデルビルダー。</param>
-        public static void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            // インデックスを設定
-            modelBuilder.Entity<Blog>()
-                .HasIndex(b => b.Name);
-            modelBuilder.Entity<Blog>()
-                .HasIndex(b => b.CreatedAt);
-        }
+        public ICollection<Article> Articles { get; set; } = null!;
 
         #endregion
     }

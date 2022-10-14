@@ -11,13 +11,16 @@ RUN dotnet restore "AspNetCoreApiExample/AspNetCoreApiExample.csproj"
 # 残りをコピー
 COPY . .
 
-# アプリを公開用にビルド
-FROM build AS publish
+# アプリをビルド
 WORKDIR "/src/AspNetCoreApiExample"
-RUN dotnet publish -c Release -o /app
+RUN dotnet build "AspNetCoreApiExample.csproj" -c Release -o /app/build
+
+# アプリを公開用に生成
+FROM build AS publish
+RUN dotnet publish "AspNetCoreApiExample.csproj" -c Release -o /app/publish /p:UseAppHost=false
 
 # ビルドしたアプリを実行用イメージに展開、起動する
-FROM base AS runtime
+FROM base AS final
 WORKDIR /app
-COPY --from=publish /app .
+COPY --from=publish /app/publish .
 ENTRYPOINT ["dotnet", "AspNetCoreApiExample.dll"]

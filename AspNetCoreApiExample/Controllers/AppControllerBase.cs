@@ -8,11 +8,12 @@
 //      Koichi Tanaka</author>
 // ================================================================================================
 
+using System.Security.Claims;
+using Honememo.AspNetCoreApiExample.Exceptions;
+using Microsoft.AspNetCore.Mvc;
+
 namespace Honememo.AspNetCoreApiExample.Controllers
 {
-    using System.Security.Claims;
-    using Microsoft.AspNetCore.Mvc;
-
     /// <summary>
     /// アプリコントローラ基底クラス。
     /// </summary>
@@ -27,7 +28,7 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         {
             get
             {
-                return int.Parse(this.User.FindFirst(ClaimTypes.NameIdentifier).Value);
+                return int.Parse(this.User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? throw new AppException("Unauthorized", "UNAUTHORIZED"));
             }
         }
 

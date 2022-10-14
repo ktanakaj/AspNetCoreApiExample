@@ -8,10 +8,10 @@
 //      Koichi Tanaka</author>
 // ================================================================================================
 
+using System.ComponentModel.DataAnnotations;
+
 namespace Honememo.AspNetCoreApiExample.Dto
 {
-    using System.ComponentModel.DataAnnotations;
-
     /// <summary>
     /// ブログ記事登録のリクエストパラメータ用のDTOクラス。
     /// </summary>

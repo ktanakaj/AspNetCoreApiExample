@@ -8,17 +8,13 @@
 //      Koichi Tanaka</author>
 // ================================================================================================
 
+using Honememo.AspNetCoreApiExample.Dto;
+using Honememo.AspNetCoreApiExample.Entities;
+using Honememo.AspNetCoreApiExample.Exceptions;
+using Microsoft.EntityFrameworkCore;
+
 namespace Honememo.AspNetCoreApiExample.Repositories
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading.Tasks;
-    using Honememo.AspNetCoreApiExample.Dto;
-    using Honememo.AspNetCoreApiExample.Entities;
-    using Honememo.AspNetCoreApiExample.Exceptions;
-    using Microsoft.EntityFrameworkCore;
-
     /// <summary>
     /// ブログ記事リポジトリクラス。
     /// </summary>
@@ -99,7 +95,7 @@ namespace Honememo.AspNetCoreApiExample.Repositories
         /// </summary>
         /// <param name="id">ブログ記事ID。</param>
         /// <returns>ブログ記事。</returns>
-        public Task<Article> Find(int id)
+        public Task<Article?> Find(int id)
         {
             return this.context.Articles.Include(a => a.Tags).FirstOrDefaultAsync(a => a.Id == id);
         }

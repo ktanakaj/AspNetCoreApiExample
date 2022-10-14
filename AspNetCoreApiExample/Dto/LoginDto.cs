@@ -8,10 +8,10 @@
 //      Koichi Tanaka</author>
 // ================================================================================================
 
+using System.ComponentModel.DataAnnotations;
+
 namespace Honememo.AspNetCoreApiExample.Dto
 {
-    using System.ComponentModel.DataAnnotations;
-
     /// <summary>
     /// ログインのリクエストパラメータDTOクラス。
     /// </summary>
@@ -21,13 +21,13 @@ namespace Honememo.AspNetCoreApiExample.Dto
         /// ユーザー名。
         /// </summary>
         [Required]
-        [MaxLength(191)]
-        public string UserName { get; set; }
+        [MaxLength(255)]
+        public string UserName { get; set; } = string.Empty;
 
         /// <summary>
         /// パスワード。
         /// </summary>
         [Required]
-        public string Password { get; set; }
+        public string Password { get; set; } = string.Empty;
     }
 }

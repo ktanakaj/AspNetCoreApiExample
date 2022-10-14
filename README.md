@@ -18,7 +18,7 @@
 Windows上でVisual Studioを用いて開発する場合は、Visual StudioとDocker Desktopが動く状態にした上で、  
 IDE上からdocker-composeプロジェクトを選択して、デバッグ実行なりで実行してください。  
 
-動作中のアプリには http://localhost/swagger/ でアクセス可能です。
+動作中のアプリには http://localhost:5000/swagger/ でアクセス可能です。
 
 ※ テスト用のインメモリDBで良ければ、Visual Studio上からDocker無しの単体でも実行可能です。
 

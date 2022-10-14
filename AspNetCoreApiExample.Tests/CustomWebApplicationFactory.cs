@@ -8,26 +8,23 @@
 //      Koichi Tanaka</author>
 // ================================================================================================
 
+using System.Net.Http.Json;
+using System.Text.Json.Nodes;
+using Honememo.AspNetCoreApiExample.Dto;
+using Honememo.AspNetCoreApiExample.Repositories;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.EntityFrameworkCore.Storage;
+using Microsoft.Extensions.DependencyInjection;
+
 namespace Honememo.AspNetCoreApiExample.Tests
 {
-    using System;
-    using System.Linq;
-    using System.Net.Http;
-    using System.Net.Http.Json;
-    using System.Text.Json;
-    using Honememo.AspNetCoreApiExample.Dto;
-    using Honememo.AspNetCoreApiExample.Repositories;
-    using Microsoft.AspNetCore.Hosting;
-    using Microsoft.AspNetCore.Mvc.Testing;
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.EntityFrameworkCore.Diagnostics;
-    using Microsoft.EntityFrameworkCore.Storage;
-    using Microsoft.Extensions.DependencyInjection;
-
     /// <summary>
     /// アプリ独自の設定を入れたWebアプリケーションファクトリクラス。
     /// </summary>
-    public class CustomWebApplicationFactory : WebApplicationFactory<Startup>
+    public class CustomWebApplicationFactory : WebApplicationFactory<Program>
     {
         #region 定数
 
@@ -73,7 +70,7 @@ namespace Honememo.AspNetCoreApiExample.Tests
         /// <param name="name">認証するユーザーの名前。未指定時はid=100のユーザー。</param>
         /// <param name="password">認証するユーザーのパスワード。〃。</param>
         /// <returns>HTTPクライアントと認証したユーザーのID。</returns>
-        public (HttpClient, int) CreateAuthedClient(string name = "Taro", string password = "PASSWORD")
+        public (HttpClient Client, int Id) CreateAuthedClient(string name = "Taro", string password = "PASSWORD")
         {
             // 指定された条件でログインして、そのセッションを持つHTTPクライアントを返す
             var client = this.CreateClient();
@@ -85,10 +82,8 @@ namespace Honememo.AspNetCoreApiExample.Tests
                 throw new Exception(responseString);
             }
 
-            using (var doc = JsonDocument.Parse(responseString))
-            {
-                return (client, doc.RootElement.GetProperty("id").GetInt32());
-            }
+            var node = JsonNode.Parse(responseString);
+            return (client, (int)(node?["id"] ?? throw new NotImplementedException("id is not found")));
         }
 
         /// <summary>
@@ -97,7 +92,7 @@ namespace Honememo.AspNetCoreApiExample.Tests
         /// <param name="name">新規ユーザーの名前。未指定時はランダム生成。</param>
         /// <param name="password">新規ユーザーのパスワード。</param>
         /// <returns>HTTPクライアントと新規ユーザーのID。</returns>
-        public (HttpClient, int) CreateNewUserClient(string name = null, string password = "TEST_PASSWORD")
+        public (HttpClient Client, int Id) CreateNewUserClient(string name = "", string password = "TEST_PASSWORD")
         {
             // 名前が被るとエラーになるので、未指定時は動的に設定
             if (string.IsNullOrEmpty(name))
@@ -115,10 +110,8 @@ namespace Honememo.AspNetCoreApiExample.Tests
                 throw new Exception(responseString);
             }
 
-            using (var doc = JsonDocument.Parse(responseString))
-            {
-                return (client, doc.RootElement.GetProperty("id").GetInt32());
-            }
+            var node = JsonNode.Parse(responseString);
+            return (client, (int)(node?["id"] ?? throw new NotImplementedException("id is not found")));
         }
 
         #endregion

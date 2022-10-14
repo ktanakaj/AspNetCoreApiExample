@@ -8,10 +8,10 @@
 //      Koichi Tanaka</author>
 // ================================================================================================
 
+using System.Collections.Generic;
+
 namespace Honememo.AspNetCoreApiExample.Exceptions
 {
-    using System;
-
     /// <summary>
     /// 汎用の業務エラー例外クラス。
     /// </summary>
@@ -25,7 +25,7 @@ namespace Honememo.AspNetCoreApiExample.Exceptions
         /// <param name="message">エラーメッセージ。</param>
         /// <param name="code">エラーコード。</param>
         /// <param name="data">エラーの追加情報。</param>
-        public AppException(string message, string code, System.Collections.IDictionary data = null)
+        public AppException(string message, string code, System.Collections.IDictionary? data = null)
             : this(message, code, data, null)
         {
         }
@@ -36,7 +36,7 @@ namespace Honememo.AspNetCoreApiExample.Exceptions
         /// <param name="message">エラーメッセージ。</param>
         /// <param name="code">エラーコード。</param>
         /// <param name="innerException">発生元の例外。</param>
-        public AppException(string message, string code, Exception innerException)
+        public AppException(string message, string code, Exception? innerException)
             : this(message, code, null, innerException)
         {
         }
@@ -48,11 +48,11 @@ namespace Honememo.AspNetCoreApiExample.Exceptions
         /// <param name="code">エラーコード。</param>
         /// <param name="data">エラーの追加情報。</param>
         /// <param name="innerException">発生元の例外。</param>
-        public AppException(string message, string code, System.Collections.IDictionary data, Exception innerException)
+        public AppException(string message, string code, System.Collections.IDictionary? data, Exception? innerException)
             : base(message, innerException)
         {
             this.Code = code;
-            this.Data = data;
+            this.Data = data ?? new Dictionary<string, object>();
         }
 
         #endregion

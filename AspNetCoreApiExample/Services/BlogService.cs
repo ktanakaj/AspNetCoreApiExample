@@ -8,16 +8,14 @@
 //      Koichi Tanaka</author>
 // ================================================================================================
 
+using AutoMapper;
+using Honememo.AspNetCoreApiExample.Dto;
+using Honememo.AspNetCoreApiExample.Entities;
+using Honememo.AspNetCoreApiExample.Exceptions;
+using Honememo.AspNetCoreApiExample.Repositories;
+
 namespace Honememo.AspNetCoreApiExample.Services
 {
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
-    using AutoMapper;
-    using Honememo.AspNetCoreApiExample.Dto;
-    using Honememo.AspNetCoreApiExample.Entities;
-    using Honememo.AspNetCoreApiExample.Exceptions;
-    using Honememo.AspNetCoreApiExample.Repositories;
-
     /// <summary>
     /// ブログサービスクラス。
     /// </summary>
@@ -46,8 +44,8 @@ namespace Honememo.AspNetCoreApiExample.Services
         /// <param name="blogRepository">ブログリポジトリ。</param>
         public BlogService(IMapper mapper, BlogRepository blogRepository)
         {
-            this.mapper = mapper;
-            this.blogRepository = blogRepository;
+            this.mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            this.blogRepository = blogRepository ?? throw new ArgumentNullException(nameof(blogRepository));
         }
 
         #endregion

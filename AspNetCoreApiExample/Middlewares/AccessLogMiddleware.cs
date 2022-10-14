@@ -8,18 +8,12 @@
 //      Koichi Tanaka</author>
 // ================================================================================================
 
+using System.Security.Claims;
+using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Http.Extensions;
+
 namespace Honememo.AspNetCoreApiExample.Middlewares
 {
-    using System;
-    using System.IO;
-    using System.Security.Claims;
-    using System.Text.RegularExpressions;
-    using System.Threading.Tasks;
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.AspNetCore.Http.Extensions;
-    using Microsoft.Extensions.Hosting;
-    using Microsoft.Extensions.Logging;
-
     /// <summary>
     /// アクセスログミドルウェアクラス。
     /// </summary>
@@ -101,7 +95,7 @@ namespace Honememo.AspNetCoreApiExample.Middlewares
                 var req = context.Request;
                 var res = context.Response;
                 res.Body.Position = 0;
-                string resBody = await new StreamReader(res.Body).ReadToEndAsync();
+                string? resBody = await new StreamReader(res.Body).ReadToEndAsync();
 
                 // ※ 以下、CombinedLogに+αのデバッグ情報を載せて出力。
                 //    適当にデバッグ用途メインに決めたものなので、
@@ -122,16 +116,16 @@ namespace Honememo.AspNetCoreApiExample.Middlewares
                 }
 
                 // ユーザーID
-                if (context.User.Identity.IsAuthenticated)
+                if (context.User.Identity != null && context.User.Identity.IsAuthenticated)
                 {
-                    log += " id=" + context.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+                    log += " id=" + context.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 }
 
                 // リクエストボディ/レスポンスボディ
                 if (this.env.IsDevelopment())
                 {
                     req.Body.Position = 0;
-                    string reqBody = await new StreamReader(req.Body).ReadToEndAsync();
+                    string? reqBody = await new StreamReader(req.Body).ReadToEndAsync();
                     if (req.ContentType != null && req.ContentType.Contains("json"))
                     {
                         reqBody = this.HidePasswordLog(reqBody);
@@ -171,7 +165,7 @@ namespace Honememo.AspNetCoreApiExample.Middlewares
         /// </summary>
         /// <param name="log">JSONログ文字列。</param>
         /// <returns>パスワードを置換したログ文字列。</returns>
-        private string HidePasswordLog(string log)
+        private string? HidePasswordLog(string? log)
         {
             // TODO: パスワードに"が含まれていると中途半端になるかも
             if (log == null)

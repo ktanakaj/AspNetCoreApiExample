@@ -8,19 +8,14 @@
 //      Koichi Tanaka</author>
 // ================================================================================================
 
+using System.Net.Http.Json;
+using Honememo.AspNetCoreApiExample.Dto;
+using Honememo.AspNetCoreApiExample.Entities;
+using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+
 namespace Honememo.AspNetCoreApiExample.Tests.Controllers
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Net.Http;
-    using System.Net.Http.Json;
-    using Honememo.AspNetCoreApiExample.Dto;
-    using Honememo.AspNetCoreApiExample.Entities;
-    using Microsoft.EntityFrameworkCore;
-    using Newtonsoft.Json;
-    using Xunit;
-
     /// <summary>
     /// ブログ記事コントローラのテストクラス。
     /// </summary>
@@ -53,7 +48,7 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
         #region コンストラクタ
 
         /// <summary>
-        /// WebアプリのファクトリーをDIしてテストインスタンスを生成する。
+        /// Webアプリのファクトリーを使用するテストインスタンスを生成する。
         /// </summary>
         /// <param name="factory">Webアプリファクトリー。</param>
         public ArticlesControllerTest(CustomWebApplicationFactory factory)

@@ -8,11 +8,11 @@
 //      Koichi Tanaka</author>
 // ================================================================================================
 
+using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
+
 namespace Honememo.AspNetCoreApiExample.Entities
 {
-    using System.ComponentModel.DataAnnotations;
-    using Microsoft.EntityFrameworkCore;
-
     /// <summary>
     /// タグエンティティクラス。
     /// </summary>
@@ -20,6 +20,7 @@ namespace Honememo.AspNetCoreApiExample.Entities
     /// <see cref="Article"/>のサブエンティティ。
     /// 記事のタグを表す。主キーは記事IDとタグ名。
     /// </remarks>
+    [Index(nameof(Name), nameof(ArticleId))]
     public class Tag
     {
         #region プロパティ
@@ -33,13 +34,13 @@ namespace Honememo.AspNetCoreApiExample.Entities
         /// タグ名。
         /// </summary>
         [Required]
-        [MaxLength(191)]
-        public string Name { get; set; }
+        [MaxLength(255)]
+        public string Name { get; set; } = string.Empty;
 
         /// <summary>
         /// タグ付けられた記事。
         /// </summary>
-        public Article Article { get; set; }
+        public Article Article { get; set; } = null!;
 
         #endregion
 
@@ -51,11 +52,9 @@ namespace Honememo.AspNetCoreApiExample.Entities
         /// <param name="modelBuilder">モデルビルダー。</param>
         public static void OnModelCreating(ModelBuilder modelBuilder)
         {
-            // 複合主キーとインデックスを設定
+            // 複合主キーを設定
             modelBuilder.Entity<Tag>()
                 .HasKey(t => new { t.ArticleId, t.Name });
-            modelBuilder.Entity<Tag>()
-                .HasIndex(t => new { t.Name, t.ArticleId });
         }
 
         #endregion

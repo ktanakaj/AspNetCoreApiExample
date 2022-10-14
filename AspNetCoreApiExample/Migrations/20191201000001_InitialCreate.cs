@@ -8,12 +8,11 @@
 //      Koichi Tanaka</author>
 // ================================================================================================
 
+using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
+
 namespace Honememo.AspNetCoreApiExample.Migrations
 {
-    using System;
-    using Microsoft.EntityFrameworkCore.Metadata;
-    using Microsoft.EntityFrameworkCore.Migrations;
-
     /// <summary>
     /// 初期DBマイグレーションスクリプトクラス。
     /// </summary>

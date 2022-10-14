@@ -8,19 +8,15 @@
 //      Koichi Tanaka</author>
 // ================================================================================================
 
+using System.Reflection;
+using Honememo.AspNetCoreApiExample.Entities;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
+
 namespace Honememo.AspNetCoreApiExample.Repositories
 {
-    using System;
-    using System.Linq;
-    using System.Reflection;
-    using System.Threading;
-    using System.Threading.Tasks;
-    using Honememo.AspNetCoreApiExample.Entities;
-    using Microsoft.AspNetCore.Identity;
-    using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.EntityFrameworkCore.Storage;
-
     /// <summary>
     /// アプリケーションDBコンテキストクラス。
     /// </summary>
@@ -44,17 +40,17 @@ namespace Honememo.AspNetCoreApiExample.Repositories
         /// <summary>
         /// ブログテーブル。
         /// </summary>
-        public DbSet<Blog> Blogs { get; set; }
+        public DbSet<Blog> Blogs => this.Set<Blog>();
 
         /// <summary>
         /// ブログ記事テーブル。
         /// </summary>
-        public DbSet<Article> Articles { get; set; }
+        public DbSet<Article> Articles => this.Set<Article>();
 
         /// <summary>
         /// ブログ記事のタグテーブル。
         /// </summary>
-        public DbSet<Tag> Tags { get; set; }
+        public DbSet<Tag> Tags => this.Set<Tag>();
 
         #endregion
 
@@ -116,35 +112,6 @@ namespace Honememo.AspNetCoreApiExample.Repositories
                     method.Invoke(null, param);
                 }
             }
-
-            // その他このクラスで定義している処理を実行
-            this.ConfigureIdentityEntities(modelBuilder);
-        }
-
-        /// <summary>
-        /// ASP.NET Core IdentityのEntityの設定を行う。
-        /// </summary>
-        /// <param name="modelBuilder">モデルビルダー。</param>
-        private void ConfigureIdentityEntities(ModelBuilder modelBuilder)
-        {
-            // ASP.NET Core Identityが自動生成するEntityがMySQLのutf8mb4の
-            // 文字数制限でエラーになるので、定義を上書きする。
-            // （Userはクラスがあるのでその中で対応。）
-            modelBuilder.Entity<IdentityRole<int>>(entity =>
-            {
-                entity.Property(m => m.Name).HasMaxLength(191);
-                entity.Property(m => m.NormalizedName).HasMaxLength(191);
-            });
-            modelBuilder.Entity<IdentityUserLogin<int>>(entity =>
-            {
-                entity.Property(m => m.LoginProvider).HasMaxLength(191);
-                entity.Property(m => m.ProviderKey).HasMaxLength(191);
-            });
-            modelBuilder.Entity<IdentityUserToken<int>>(entity =>
-            {
-                entity.Property(m => m.LoginProvider).HasMaxLength(191);
-                entity.Property(m => m.Name).HasMaxLength(191);
-            });
         }
 
         /// <summary>

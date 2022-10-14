@@ -8,12 +8,11 @@
 //      Koichi Tanaka</author>
 // ================================================================================================
 
+using System.ComponentModel.DataAnnotations;
+using Honememo.AspNetCoreApiExample.Entities;
+
 namespace Honememo.AspNetCoreApiExample.Dto
 {
-    using System;
-    using System.ComponentModel.DataAnnotations;
-    using Honememo.AspNetCoreApiExample.Entities;
-
     /// <summary>
     /// ブログ記事DTOクラス。
     /// </summary>

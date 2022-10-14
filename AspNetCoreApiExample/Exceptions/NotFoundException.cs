@@ -10,8 +10,6 @@
 
 namespace Honememo.AspNetCoreApiExample.Exceptions
 {
-    using System;
-
     /// <summary>
     /// データ未存在の例外クラス。
     /// </summary>
@@ -22,7 +20,7 @@ namespace Honememo.AspNetCoreApiExample.Exceptions
         /// </summary>
         /// <param name="message">エラーメッセージ。</param>
         /// <param name="data">エラーの追加情報。</param>
-        public NotFoundException(string message, System.Collections.IDictionary data = null)
+        public NotFoundException(string message, System.Collections.IDictionary? data = null)
             : base(message, "NOT_FOUND", data)
         {
         }

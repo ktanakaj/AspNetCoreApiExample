@@ -8,11 +8,10 @@
 //      Koichi Tanaka</author>
 // ================================================================================================
 
+using System.ComponentModel.DataAnnotations;
+
 namespace Honememo.AspNetCoreApiExample.Dto
 {
-    using System;
-    using System.ComponentModel.DataAnnotations;
-
     /// <summary>
     /// ブログ記事検索のリクエストパラメータ用のDTOクラス。
     /// </summary>
@@ -26,7 +25,7 @@ namespace Honememo.AspNetCoreApiExample.Dto
         /// <summary>
         /// タグ。
         /// </summary>
-        public string Tag { get; set; }
+        public string? Tag { get; set; }
 
         /// <summary>
         /// 投稿日時期間開始。

@@ -8,16 +8,13 @@
 //      Koichi Tanaka</author>
 // ================================================================================================
 
+using Honememo.AspNetCoreApiExample.Dto;
+using Honememo.AspNetCoreApiExample.Services;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+
 namespace Honememo.AspNetCoreApiExample.Controllers
 {
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading.Tasks;
-    using Honememo.AspNetCoreApiExample.Dto;
-    using Honememo.AspNetCoreApiExample.Services;
-    using Microsoft.AspNetCore.Authorization;
-    using Microsoft.AspNetCore.Mvc;
-
     /// <summary>
     /// ブログ記事コントローラクラス。
     /// </summary>

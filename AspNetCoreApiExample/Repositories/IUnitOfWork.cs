@@ -8,10 +8,10 @@
 //      Koichi Tanaka</author>
 // ================================================================================================
 
+using Microsoft.EntityFrameworkCore.Storage;
+
 namespace Honememo.AspNetCoreApiExample.Repositories
 {
-    using Microsoft.EntityFrameworkCore.Storage;
-
     /// <summary>
     /// DB処理単位集約用インタフェース。
     /// </summary>

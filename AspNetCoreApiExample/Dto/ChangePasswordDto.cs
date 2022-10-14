@@ -8,10 +8,10 @@
 //      Koichi Tanaka</author>
 // ================================================================================================
 
+using System.ComponentModel.DataAnnotations;
+
 namespace Honememo.AspNetCoreApiExample.Dto
 {
-    using System.ComponentModel.DataAnnotations;
-
     /// <summary>
     /// パスワード変更のリクエストパラメータDTOクラス。
     /// </summary>
@@ -21,12 +21,12 @@ namespace Honememo.AspNetCoreApiExample.Dto
         /// 現在のパスワード。
         /// </summary>
         [Required]
-        public string CurrentPassword { get; set; }
+        public string CurrentPassword { get; set; } = string.Empty;
 
         /// <summary>
         /// 新しいパスワード。
         /// </summary>
         [Required]
-        public string NewPassword { get; set; }
+        public string NewPassword { get; set; } = string.Empty;
     }
 }

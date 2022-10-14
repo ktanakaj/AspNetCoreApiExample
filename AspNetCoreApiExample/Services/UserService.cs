@@ -8,17 +8,14 @@
 //      Koichi Tanaka</author>
 // ================================================================================================
 
+using AutoMapper;
+using Honememo.AspNetCoreApiExample.Dto;
+using Honememo.AspNetCoreApiExample.Entities;
+using Honememo.AspNetCoreApiExample.Exceptions;
+using Honememo.AspNetCoreApiExample.Repositories;
+
 namespace Honememo.AspNetCoreApiExample.Services
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
-    using AutoMapper;
-    using Honememo.AspNetCoreApiExample.Dto;
-    using Honememo.AspNetCoreApiExample.Entities;
-    using Honememo.AspNetCoreApiExample.Exceptions;
-    using Honememo.AspNetCoreApiExample.Repositories;
-
     /// <summary>
     /// ユーザーサービスクラス。
     /// </summary>
@@ -53,9 +50,9 @@ namespace Honememo.AspNetCoreApiExample.Services
         /// <param name="userRepository">ユーザーリポジトリ。</param>
         public UserService(IMapper mapper, IUnitOfWork unitOfWork, UserRepository userRepository)
         {
-            this.mapper = mapper;
-            this.unitOfWork = unitOfWork;
-            this.userRepository = userRepository;
+            this.mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            this.unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
+            this.userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
         }
 
         #endregion

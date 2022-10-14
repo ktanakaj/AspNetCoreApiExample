@@ -8,17 +8,13 @@
 //      Koichi Tanaka</author>
 // ================================================================================================
 
+using Honememo.AspNetCoreApiExample.Entities;
+using Honememo.AspNetCoreApiExample.Exceptions;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+
 namespace Honememo.AspNetCoreApiExample.Repositories
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Threading.Tasks;
-    using Honememo.AspNetCoreApiExample.Entities;
-    using Honememo.AspNetCoreApiExample.Exceptions;
-    using Microsoft.AspNetCore.Identity;
-    using Microsoft.EntityFrameworkCore;
-
     /// <summary>
     /// ユーザーリポジトリクラス。
     /// </summary>
@@ -189,11 +185,13 @@ namespace Honememo.AspNetCoreApiExample.Repositories
         /// <typeparam name="T">例外クラス。</typeparam>
         /// <param name="result">チェックする戻り値。</param>
         private void ThrowExceptionIfResultIsNotSucceeded<T>(IdentityResult result)
-            where T : Exception, new()
+            where T : notnull, Exception, new()
         {
             if (!result.Succeeded)
             {
-                throw (T)Activator.CreateInstance(typeof(T), string.Join(", ", result.Errors.Select(e => e.Description)));
+#nullable disable // FIXME: nullable直すの面倒なので一旦除外
+                throw (T)Activator.CreateInstance(typeof(T), string.Join(", ", result.Errors?.Select(e => e.Description)));
+#nullable restore
             }
         }
 

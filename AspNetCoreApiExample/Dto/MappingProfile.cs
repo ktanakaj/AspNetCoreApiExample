@@ -8,12 +8,11 @@
 //      Koichi Tanaka</author>
 // ================================================================================================
 
+using AutoMapper;
+using Honememo.AspNetCoreApiExample.Entities;
+
 namespace Honememo.AspNetCoreApiExample.Dto
 {
-    using System.Linq;
-    using AutoMapper;
-    using Honememo.AspNetCoreApiExample.Entities;
-
     /// <summary>
     /// AutoMapperマッピングプロファイルクラス。
     /// </summary>
