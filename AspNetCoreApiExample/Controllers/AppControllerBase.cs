@@ -28,7 +28,7 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         {
             get
             {
-                return int.Parse(this.User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? throw new AppException("Unauthorized", "UNAUTHORIZED"));
+                return int.Parse(this.User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? throw new Exception("Unauthorized"));
             }
         }
 

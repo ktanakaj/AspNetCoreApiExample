@@ -11,8 +11,10 @@
 using System.Net;
 using System.Reflection;
 using AutoMapper;
+using Hellang.Middleware.ProblemDetails;
 using Honememo.AspNetCoreApiExample.Dto;
 using Honememo.AspNetCoreApiExample.Entities;
+using Honememo.AspNetCoreApiExample.Exceptions;
 using Honememo.AspNetCoreApiExample.Middlewares;
 using Honememo.AspNetCoreApiExample.Repositories;
 using Microsoft.AspNetCore.Authentication;
@@ -46,6 +48,12 @@ builder.Services.AddDbContextPool<AppDbContext>((provider, options) =>
 
 // コントローラの設定
 builder.Services.AddControllers();
+builder.Services.AddProblemDetails(options =>
+{
+    options.MapToStatusCode<BadRequestException>((int)HttpStatusCode.BadRequest);
+    options.MapToStatusCode<ForbiddenException>((int)HttpStatusCode.Forbidden);
+    options.MapToStatusCode<NotFoundException>((int)HttpStatusCode.NotFound);
+});
 
 // 認証設定
 builder.Services.AddIdentity<User, IdentityRole<int>>()
@@ -89,10 +97,12 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+// エラーレスポンスの設定
+app.UseProblemDetails();
+
 // ミドルウェアの設定
 app.UseMiddleware<EnableBufferingMiddleware>();
 app.UseMiddleware<AccessLogMiddleware>();
-app.UseMiddleware<ErrorHandlingMiddleware>();
 app.UseAuthentication();
 app.UseAuthorization();
 
