@@ -31,6 +31,13 @@ ThreadPool.SetMinThreads(300, minCompletionPortThread);
 // Webアプリを初期化する
 var builder = WebApplication.CreateBuilder(args);
 
+// ロガー設定
+builder.Host.ConfigureLogging(logging =>
+{
+    logging.ClearProviders();
+    logging.AddConsole();
+});
+
 // 設定ファイルの参照追加
 ApplyAppConfig(builder.Configuration);
 
@@ -97,12 +104,10 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// エラーレスポンスの設定
-app.UseProblemDetails();
-
 // ミドルウェアの設定
 app.UseMiddleware<EnableBufferingMiddleware>();
 app.UseMiddleware<AccessLogMiddleware>();
+app.UseProblemDetails();
 app.UseAuthentication();
 app.UseAuthorization();
 

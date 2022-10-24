@@ -3,7 +3,7 @@
 //      リクエスト/レスポンスバッファリングミドルウェアクラスソース</summary>
 //
 // <copyright file="EnableBufferingMiddleware.cs">
-//      Copyright (C) 2019 Koichi Tanaka. All rights reserved.</copyright>
+//      Copyright (C) 2022 Koichi Tanaka. All rights reserved.</copyright>
 // <author>
 //      Koichi Tanaka</author>
 // ================================================================================================
@@ -15,6 +15,7 @@ namespace Honememo.AspNetCoreApiExample.Middlewares
     /// </summary>
     /// <remarks>
     /// リクエストのEnableBuffering有効化と、レスポンスボディの<see cref="MemoryStream"/>への差し替えを行う。
+    /// 特定のAPIだけバッファリングを行いたくない場合は、<see cref="DisableBufferingAttribute"/>で除外もできます。
     /// </remarks>
     public class EnableBufferingMiddleware
     {
@@ -35,7 +36,33 @@ namespace Honememo.AspNetCoreApiExample.Middlewares
         /// <param name="next">次の処理のデリゲート。</param>
         public EnableBufferingMiddleware(RequestDelegate next)
         {
-            this.next = next;
+            this.next = next ?? throw new ArgumentNullException(nameof(next));
+        }
+
+        #endregion
+
+        #region 実装支援用メソッド
+
+        /// <summary>
+        /// このHTTPコンテキストでリクエストのバッファリングが有効か？
+        /// </summary>
+        /// <param name="context">HTTPコンテキスト。</param>
+        /// <returns>有効な場合true。</returns>
+        public static bool IsRequestBufferingEnabled(HttpContext context)
+        {
+            var disablingAttr = context.GetEndpoint()?.Metadata.GetMetadata<DisableBufferingAttribute>();
+            return disablingAttr == null || !disablingAttr.IsRequestDisabled();
+        }
+
+        /// <summary>
+        /// このHTTPコンテキストでレスポンスのバッファリングが有効か？
+        /// </summary>
+        /// <param name="context">HTTPコンテキスト。</param>
+        /// <returns>有効な場合true。</returns>
+        public static bool IsResponseBufferingEnabled(HttpContext context)
+        {
+            var disablingAttr = context.GetEndpoint()?.Metadata.GetMetadata<DisableBufferingAttribute>();
+            return disablingAttr == null || !disablingAttr.IsResponseDisabled();
         }
 
         #endregion
@@ -49,17 +76,23 @@ namespace Honememo.AspNetCoreApiExample.Middlewares
         /// <returns>処理状態。</returns>
         public async Task Invoke(HttpContext context)
         {
-            // リクエストのバッファリングを有効化。
-            context.Request.EnableBuffering();
+            // ※ APIにバッファリング無効が指定されている場合、随時除外する
 
-            // レスポンスは設定だけではできないので、本来のレスポンスのストリームを
-            // 一時的にメモリストリームに差し替えることでバッファリングする。
-            var responseStream = context.Response.Body;
-            try
+            // リクエストのバッファリング
+            if (IsRequestBufferingEnabled(context))
             {
-                using (var memoryStream = new MemoryStream())
+                context.Request.EnableBuffering();
+            }
+
+            // レスポンスのバッファリング
+            if (IsResponseBufferingEnabled(context))
+            {
+                // レスポンスは設定だけではできないので、本来のレスポンスのストリームを
+                // 一時的にメモリストリームに差し替えることでバッファリングする。
+                var responseStream = context.Response.Body;
+                try
                 {
-                    // メモリストリームで処理を実行
+                    using var memoryStream = new MemoryStream();
                     context.Response.Body = memoryStream;
                     await this.next(context);
 
@@ -67,11 +100,15 @@ namespace Honememo.AspNetCoreApiExample.Middlewares
                     memoryStream.Position = 0;
                     await memoryStream.CopyToAsync(responseStream);
                 }
+                finally
+                {
+                    // レスポンスを本物に戻す
+                    context.Response.Body = responseStream;
+                }
             }
-            finally
+            else
             {
-                // レスポンスを本物に戻す
-                context.Response.Body = responseStream;
+                await this.next(context);
             }
         }
 
