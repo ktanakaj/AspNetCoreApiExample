@@ -3,7 +3,7 @@
 //      タグエンティティクラスソース</summary>
 //
 // <copyright file="Tag.cs">
-//      Copyright (C) 2019 Koichi Tanaka. All rights reserved.</copyright>
+//      Copyright (C) 2022 Koichi Tanaka. All rights reserved.</copyright>
 // <author>
 //      Koichi Tanaka</author>
 // ================================================================================================
@@ -23,7 +23,7 @@ namespace Honememo.AspNetCoreApiExample.Entities
     [Index(nameof(Name), nameof(ArticleId))]
     public class Tag
     {
-        #region プロパティ
+        #region DB列のプロパティ
 
         /// <summary>
         /// タグ付けられた記事ID。
@@ -36,6 +36,10 @@ namespace Honememo.AspNetCoreApiExample.Entities
         [Required]
         [MaxLength(255)]
         public string Name { get; set; } = string.Empty;
+
+        #endregion
+
+        #region リレーションプロパティ
 
         /// <summary>
         /// タグ付けられた記事。
@@ -53,8 +57,7 @@ namespace Honememo.AspNetCoreApiExample.Entities
         public static void OnModelCreating(ModelBuilder modelBuilder)
         {
             // 複合主キーを設定
-            modelBuilder.Entity<Tag>()
-                .HasKey(t => new { t.ArticleId, t.Name });
+            modelBuilder.Entity<Tag>().HasKey(t => new { t.ArticleId, t.Name });
         }
 
         #endregion

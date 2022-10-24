@@ -3,7 +3,7 @@
 //      アプリケーションDBコンテキストクラスソース</summary>
 //
 // <copyright file="AppDbContext.cs">
-//      Copyright (C) 2019 Koichi Tanaka. All rights reserved.</copyright>
+//      Copyright (C) 2022 Koichi Tanaka. All rights reserved.</copyright>
 // <author>
 //      Koichi Tanaka</author>
 // ================================================================================================
@@ -119,18 +119,17 @@ namespace Honememo.AspNetCoreApiExample.Repositories
         /// </summary>
         private void TouchChangedEntities()
         {
-            var entities = this.ChangeTracker.Entries()
-                .Where(x => x.Entity is IHasTimestamp && (x.State == EntityState.Added || x.State == EntityState.Modified));
-
             var now = DateTimeOffset.UtcNow;
-            foreach (var entity in entities)
+            foreach (var entity in this.ChangeTracker.Entries()
+                .Where(x => x.Entity is IHasCreatedAt e && x.State == EntityState.Added && e.CreatedAt == default))
             {
-                if (entity.State == EntityState.Added)
-                {
-                    ((IHasTimestamp)entity.Entity).CreatedAt = now;
-                }
+                ((IHasCreatedAt)entity.Entity).CreatedAt = now;
+            }
 
-                ((IHasTimestamp)entity.Entity).UpdatedAt = now;
+            foreach (var entity in this.ChangeTracker.Entries()
+                .Where(x => x.Entity is IHasUpdatedAt && (x.State == EntityState.Added || x.State == EntityState.Modified)))
+            {
+                ((IHasUpdatedAt)entity.Entity).UpdatedAt = now;
             }
         }
 

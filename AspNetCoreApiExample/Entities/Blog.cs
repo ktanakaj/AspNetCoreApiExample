@@ -3,7 +3,7 @@
 //      ブログエンティティクラスソース</summary>
 //
 // <copyright file="Blog.cs">
-//      Copyright (C) 2019 Koichi Tanaka. All rights reserved.</copyright>
+//      Copyright (C) 2022 Koichi Tanaka. All rights reserved.</copyright>
 // <author>
 //      Koichi Tanaka</author>
 // ================================================================================================
@@ -18,9 +18,9 @@ namespace Honememo.AspNetCoreApiExample.Entities
     /// </summary>
     [Index(nameof(Name))]
     [Index(nameof(CreatedAt))]
-    public class Blog : IHasTimestamp
+    public class Blog : IHasId<int>, IHasCreatedAt, IHasUpdatedAt
     {
-        #region プロパティ
+        #region DB列のプロパティ
 
         /// <summary>
         /// ブログID。
@@ -42,12 +42,16 @@ namespace Honememo.AspNetCoreApiExample.Entities
         /// <summary>
         /// 登録日時。
         /// </summary>
-        public DateTimeOffset? CreatedAt { get; set; }
+        public DateTimeOffset CreatedAt { get; set; }
 
         /// <summary>
         /// 更新日時。
         /// </summary>
-        public DateTimeOffset? UpdatedAt { get; set; }
+        public DateTimeOffset UpdatedAt { get; set; }
+
+        #endregion
+
+        #region リレーションプロパティ
 
         /// <summary>
         /// ブログ作者のユーザー。

@@ -3,7 +3,7 @@
 //      ユーザーエンティティクラスソース</summary>
 //
 // <copyright file="User.cs">
-//      Copyright (C) 2019 Koichi Tanaka. All rights reserved.</copyright>
+//      Copyright (C) 2022 Koichi Tanaka. All rights reserved.</copyright>
 // <author>
 //      Koichi Tanaka</author>
 // ================================================================================================
@@ -18,9 +18,9 @@ namespace Honememo.AspNetCoreApiExample.Entities
     /// </summary>
     [Index(nameof(LastLogin))]
     [Index(nameof(CreatedAt))]
-    public class User : IdentityUser<int>, IHasTimestamp
+    public class User : IdentityUser<int>, IHasId<int>, IHasCreatedAt, IHasUpdatedAt
     {
-        #region プロパティ
+        #region DB列のプロパティ
 
         /// <summary>
         /// 最終ログイン日時。
@@ -30,12 +30,16 @@ namespace Honememo.AspNetCoreApiExample.Entities
         /// <summary>
         /// 登録日時。
         /// </summary>
-        public DateTimeOffset? CreatedAt { get; set; }
+        public DateTimeOffset CreatedAt { get; set; }
 
         /// <summary>
         /// 更新日時。
         /// </summary>
-        public DateTimeOffset? UpdatedAt { get; set; }
+        public DateTimeOffset UpdatedAt { get; set; }
+
+        #endregion
+
+        #region リレーションプロパティ
 
         /// <summary>
         /// ユーザーのブログ。
