@@ -1,0 +1,28 @@
+# GitHub Actionsによる自動テスト設定。
+# masterブランチがpushまたはプルリク更新されたタイミングで自動テストを流す。
+name: Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  test-and-lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-dotnet@v2
+        with:
+          dotnet-version: '6.x'
+      - uses: actions/cache@v3
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+      - run: dotnet restore ./AspNetCoreApiExample.sln
+      - run: dotnet test ./AspNetCoreApiExample.sln --no-restore
