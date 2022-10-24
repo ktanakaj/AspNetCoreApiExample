@@ -3,7 +3,7 @@
 //      ブログ記事コントローラクラスソース</summary>
 //
 // <copyright file="ArticlesController.cs">
-//      Copyright (C) 2019 Koichi Tanaka. All rights reserved.</copyright>
+//      Copyright (C) 2022 Koichi Tanaka. All rights reserved.</copyright>
 // <author>
 //      Koichi Tanaka</author>
 // ================================================================================================
@@ -40,7 +40,7 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         /// <param name="articleService">ブログ記事サービス。</param>
         public ArticlesController(ArticleService articleService)
         {
-            this.articleService = articleService;
+            this.articleService = articleService ?? throw new ArgumentNullException(nameof(articleService));
         }
 
         #endregion

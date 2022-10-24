@@ -3,7 +3,7 @@
 //      ユーザーコントローラクラスソース</summary>
 //
 // <copyright file="UsersController.cs">
-//      Copyright (C) 2019 Koichi Tanaka. All rights reserved.</copyright>
+//      Copyright (C) 2022 Koichi Tanaka. All rights reserved.</copyright>
 // <author>
 //      Koichi Tanaka</author>
 // ================================================================================================
@@ -56,9 +56,9 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         /// <param name="userService">ユーザーサービス。</param>
         public UsersController(IMapper mapper, SignInManager<User> signInManager, UserService userService)
         {
-            this.mapper = mapper;
-            this.signInManager = signInManager;
-            this.userService = userService;
+            this.mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
+            this.signInManager = signInManager ?? throw new ArgumentNullException(nameof(signInManager));
+            this.userService = userService ?? throw new ArgumentNullException(nameof(userService));
         }
 
         #endregion

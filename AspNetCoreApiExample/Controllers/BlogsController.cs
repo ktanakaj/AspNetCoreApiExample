@@ -3,7 +3,7 @@
 //      ブログコントローラクラスソース</summary>
 //
 // <copyright file="BlogsController.cs">
-//      Copyright (C) 2019 Koichi Tanaka. All rights reserved.</copyright>
+//      Copyright (C) 2022 Koichi Tanaka. All rights reserved.</copyright>
 // <author>
 //      Koichi Tanaka</author>
 // ================================================================================================
@@ -40,7 +40,7 @@ namespace Honememo.AspNetCoreApiExample.Controllers
         /// <param name="blogService">ブログサービス。</param>
         public BlogsController(BlogService blogService)
         {
-            this.blogService = blogService;
+            this.blogService = blogService ?? throw new ArgumentNullException(nameof(blogService));
         }
 
         #endregion
