@@ -3,7 +3,7 @@
 //      ブログコントローラテストクラスソース</summary>
 //
 // <copyright file="BlogsControllerTest.cs">
-//      Copyright (C) 2019 Koichi Tanaka. All rights reserved.</copyright>
+//      Copyright (C) 2022 Koichi Tanaka. All rights reserved.</copyright>
 // <author>
 //      Koichi Tanaka</author>
 // ================================================================================================
@@ -11,39 +11,14 @@
 using System.Net.Http.Json;
 using Honememo.AspNetCoreApiExample.Dto;
 using Honememo.AspNetCoreApiExample.Entities;
-using Newtonsoft.Json;
 
 namespace Honememo.AspNetCoreApiExample.Tests.Controllers
 {
     /// <summary>
     /// ブログコントローラのテストクラス。
     /// </summary>
-    public class BlogsControllerTest : IClassFixture<CustomWebApplicationFactory>
+    public class BlogsControllerTest : ControllerTestBase
     {
-        #region メンバー変数
-
-        /// <summary>
-        /// Webアプリのファクトリー。
-        /// </summary>
-        private readonly CustomWebApplicationFactory factory;
-
-        /// <summary>
-        /// Webアプリテスト用のHTTPクライアント。
-        /// </summary>
-        private readonly HttpClient client;
-
-        /// <summary>
-        /// Webアプリテスト用の認証済HTTPクライアント。
-        /// </summary>
-        private readonly HttpClient authedClient;
-
-        /// <summary>
-        /// 認証済HTTPクライアントのユーザーID。
-        /// </summary>
-        private readonly int userId;
-
-        #endregion
-
         #region コンストラクタ
 
         /// <summary>
@@ -51,10 +26,8 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
         /// </summary>
         /// <param name="factory">Webアプリファクトリー。</param>
         public BlogsControllerTest(CustomWebApplicationFactory factory)
+            : base(factory)
         {
-            this.factory = factory;
-            this.client = factory.CreateClient();
-            (this.authedClient, this.userId) = factory.CreateAuthedClient();
         }
 
         #endregion
@@ -67,13 +40,13 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
         [Fact]
         public async void TestGetBlogs()
         {
-            var response = await this.client.GetAsync("/api/blogs");
-            var responseString = await response.Content.ReadAsStringAsync();
-            Assert.True(response.IsSuccessStatusCode, responseString);
+            var response = await this.Client.GetAsync("/api/blogs");
+            await AssertResponse(response);
 
-            var array = JsonConvert.DeserializeObject<IEnumerable<BlogDto>>(responseString);
+            var array = await GetResponseBody<IEnumerable<BlogDto>>(response);
 
             // ※ 取れるブログは不確定のため、データがあるかのみテスト
+            Assert.NotNull(array);
             Assert.NotEmpty(array);
 
             var blog = array.First();
@@ -87,11 +60,11 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
         [Fact]
         public async void TestGetBlog()
         {
-            var response = await this.client.GetAsync("/api/blogs/1000");
-            var responseString = await response.Content.ReadAsStringAsync();
-            Assert.True(response.IsSuccessStatusCode, responseString);
+            var response = await this.Client.GetAsync("/api/blogs/1000");
+            await AssertResponse(response);
 
-            var json = JsonConvert.DeserializeObject<BlogDto>(responseString);
+            var json = await GetResponseBody<BlogDto>(response);
+            Assert.NotNull(json);
             Assert.Equal(1000, json.Id);
             Assert.Equal("Taro's Blog", json.Name);
         }
@@ -104,17 +77,17 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
         {
             var now = DateTimeOffset.UtcNow;
             var body = new BlogEditDto() { Name = "New Blog" };
-            var response = await this.authedClient.PostAsJsonAsync("/api/blogs", body);
-            var responseString = await response.Content.ReadAsStringAsync();
-            Assert.True(response.IsSuccessStatusCode, responseString);
+            var response = await this.AuthedClient.PostAsJsonAsync("/api/blogs", body);
+            await AssertResponse(response);
 
-            var json = JsonConvert.DeserializeObject<BlogDto>(responseString);
+            var json = await GetResponseBody<BlogDto>(response);
+            Assert.NotNull(json);
             Assert.True(json.Id > 0);
             Assert.Equal(body.Name, json.Name);
             Assert.True(json.CreatedAt > now);
             Assert.True(json.UpdatedAt > now);
 
-            var dbblog = this.factory.CreateDbContext().Blogs.Find(json.Id);
+            var dbblog = this.Factory.CreateDbContext().Blogs.Find(json.Id);
             Assert.NotNull(dbblog);
             Assert.Equal(body.Name, dbblog.Name);
             Assert.Equal(json.CreatedAt, dbblog.CreatedAt);
@@ -128,17 +101,16 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
         public async void TestPutBlog()
         {
             var now = DateTimeOffset.UtcNow;
-            var blog = new Blog() { Name = "Blog for PutBlog", UserId = this.userId };
-            var db = this.factory.CreateDbContext();
+            var blog = new Blog() { Name = "Blog for PutBlog", UserId = this.UserId };
+            var db = this.Factory.CreateDbContext();
             db.Blogs.Add(blog);
             db.SaveChanges();
 
             var body = new BlogEditDto() { Name = "Updated Blog" };
-            var response = await this.authedClient.PutAsJsonAsync($"/api/blogs/{blog.Id}", body);
-            var responseString = await response.Content.ReadAsStringAsync();
-            Assert.True(response.IsSuccessStatusCode, responseString);
+            var response = await this.AuthedClient.PutAsJsonAsync($"/api/blogs/{blog.Id}", body);
+            await AssertResponse(response);
 
-            var dbblog = this.factory.CreateDbContext().Blogs.Find(blog.Id);
+            var dbblog = this.Factory.CreateDbContext().Blogs.Find(blog.Id);
             Assert.NotNull(dbblog);
             Assert.Equal(body.Name, dbblog.Name);
             Assert.True(dbblog.UpdatedAt > now);
@@ -150,16 +122,15 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
         [Fact]
         public async void TestDeleteBlog()
         {
-            var blog = new Blog() { Name = "Blog for DeleteBlog", UserId = this.userId };
-            var db = this.factory.CreateDbContext();
+            var blog = new Blog() { Name = "Blog for DeleteBlog", UserId = this.UserId };
+            var db = this.Factory.CreateDbContext();
             db.Blogs.Add(blog);
             db.SaveChanges();
 
-            var response = await this.authedClient.DeleteAsync($"/api/blogs/{blog.Id}");
-            var responseString = await response.Content.ReadAsStringAsync();
-            Assert.True(response.IsSuccessStatusCode, responseString);
+            var response = await this.AuthedClient.DeleteAsync($"/api/blogs/{blog.Id}");
+            await AssertResponse(response);
 
-            Assert.Null(this.factory.CreateDbContext().Blogs.Find(blog.Id));
+            Assert.Null(this.Factory.CreateDbContext().Blogs.Find(blog.Id));
         }
 
         #endregion

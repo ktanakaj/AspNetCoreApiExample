@@ -3,46 +3,21 @@
 //      ユーザーコントローラテストクラスソース</summary>
 //
 // <copyright file="UsersControllerTest.cs">
-//      Copyright (C) 2019 Koichi Tanaka. All rights reserved.</copyright>
+//      Copyright (C) 2022 Koichi Tanaka. All rights reserved.</copyright>
 // <author>
 //      Koichi Tanaka</author>
 // ================================================================================================
 
 using System.Net.Http.Json;
 using Honememo.AspNetCoreApiExample.Dto;
-using Newtonsoft.Json;
 
 namespace Honememo.AspNetCoreApiExample.Tests.Controllers
 {
     /// <summary>
     /// ユーザーコントローラのテストクラス。
     /// </summary>
-    public class UsersControllerTest : IClassFixture<CustomWebApplicationFactory>
+    public class UsersControllerTest : ControllerTestBase
     {
-        #region メンバー変数
-
-        /// <summary>
-        /// Webアプリのファクトリー。
-        /// </summary>
-        private readonly CustomWebApplicationFactory factory;
-
-        /// <summary>
-        /// Webアプリテスト用のHTTPクライアント。
-        /// </summary>
-        private readonly HttpClient client;
-
-        /// <summary>
-        /// Webアプリテスト用の認証済HTTPクライアント。
-        /// </summary>
-        private readonly HttpClient authedClient;
-
-        /// <summary>
-        /// 認証済HTTPクライアントのユーザーID。
-        /// </summary>
-        private readonly int userId;
-
-        #endregion
-
         #region コンストラクタ
 
         /// <summary>
@@ -50,10 +25,10 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
         /// </summary>
         /// <param name="factory">Webアプリファクトリー。</param>
         public UsersControllerTest(CustomWebApplicationFactory factory)
+            : base(factory)
         {
-            this.factory = factory;
-            this.client = factory.CreateClient();
-            (this.authedClient, this.userId) = factory.CreateNewUserClient();
+            // ユーザー情報を書き換えるテストがあるので、新規ユーザーのクライアントを使用
+            (this.AuthedClient, this.UserId) = factory.CreateNewUserClient();
         }
 
         #endregion
@@ -66,13 +41,13 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
         [Fact]
         public async void TestGetUsers()
         {
-            var response = await this.client.GetAsync("/api/users");
-            var responseString = await response.Content.ReadAsStringAsync();
-            Assert.True(response.IsSuccessStatusCode, responseString);
+            var response = await this.Client.GetAsync("/api/users");
+            await AssertResponse(response);
 
-            var array = JsonConvert.DeserializeObject<IEnumerable<UserDto>>(responseString);
+            var array = await GetResponseBody<IEnumerable<UserDto>>(response);
 
             // ※ 取れるユーザーは不確定のため、データがあるかのみテスト
+            Assert.NotNull(array);
             Assert.NotEmpty(array);
 
             var user = array.First();
@@ -86,11 +61,11 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
         [Fact]
         public async void TestGetUser()
         {
-            var response = await this.client.GetAsync("/api/users/100");
-            var responseString = await response.Content.ReadAsStringAsync();
-            Assert.True(response.IsSuccessStatusCode, responseString);
+            var response = await this.Client.GetAsync("/api/users/100");
+            await AssertResponse(response);
 
-            var json = JsonConvert.DeserializeObject<UserDto>(responseString);
+            var json = await GetResponseBody<UserDto>(response);
+            Assert.NotNull(json);
             Assert.Equal(100, json.Id);
             Assert.Equal("Taro", json.UserName);
         }
@@ -103,18 +78,18 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
         {
             var now = DateTimeOffset.UtcNow;
             var body = new UserNewDto() { UserName = "Scott", Password = "Tiger" };
-            var response = await this.client.PostAsJsonAsync("/api/users", body);
-            var responseString = await response.Content.ReadAsStringAsync();
-            Assert.True(response.IsSuccessStatusCode, responseString);
+            var response = await this.Client.PostAsJsonAsync("/api/users", body);
+            await AssertResponse(response);
 
-            var json = JsonConvert.DeserializeObject<UserDto>(responseString);
+            var json = await GetResponseBody<UserDto>(response);
+            Assert.NotNull(json);
             Assert.True(json.Id > 0);
             Assert.Equal(body.UserName, json.UserName);
             Assert.True(json.LastLogin > now);
             Assert.True(json.CreatedAt > now);
             Assert.True(json.UpdatedAt > now);
 
-            var dbuser = this.factory.CreateDbContext().Users.Find(json.Id);
+            var dbuser = this.Factory.CreateDbContext().Users.Find(json.Id);
             Assert.NotNull(dbuser);
             Assert.Equal(body.UserName, dbuser.UserName);
             Assert.NotNull(dbuser.PasswordHash);
@@ -135,22 +110,21 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
             // id=100のユーザーでログインしてログアウトする
             var now = DateTimeOffset.UtcNow;
             var body = new LoginDto() { UserName = "Taro", Password = "PASSWORD" };
-            var response = await this.client.PostAsJsonAsync("/api/users/login", body);
-            var responseString = await response.Content.ReadAsStringAsync();
-            Assert.True(response.IsSuccessStatusCode, responseString);
+            var response = await this.Client.PostAsJsonAsync("/api/users/login", body);
+            await AssertResponse(response);
 
-            var json = JsonConvert.DeserializeObject<UserDto>(responseString);
+            var json = await GetResponseBody<UserDto>(response);
+            Assert.NotNull(json);
             Assert.Equal(100, json.Id);
             Assert.Equal(body.UserName, json.UserName);
             Assert.True(json.LastLogin > now);
 
-            var dbuser = this.factory.CreateDbContext().Users.Find(json.Id);
+            var dbuser = this.Factory.CreateDbContext().Users.Find(json.Id);
             Assert.NotNull(dbuser);
             Assert.Equal(json.LastLogin, dbuser.LastLogin);
 
-            response = await this.client.PostAsync("/api/users/logout", null);
-            responseString = await response.Content.ReadAsStringAsync();
-            Assert.True(response.IsSuccessStatusCode, responseString);
+            response = await this.Client.PostAsync("/api/users/logout", null);
+            await AssertResponse(response);
         }
 
         /// <summary>
@@ -161,11 +135,10 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
         {
             var now = DateTimeOffset.UtcNow;
             var body = new UserEditDto() { UserName = "Ken" };
-            var response = await this.authedClient.PutAsJsonAsync("/api/users", body);
-            var responseString = await response.Content.ReadAsStringAsync();
-            Assert.True(response.IsSuccessStatusCode, responseString);
+            var response = await this.AuthedClient.PutAsJsonAsync("/api/users", body);
+            await AssertResponse(response);
 
-            var dbuser = this.factory.CreateDbContext().Users.Find(this.userId);
+            var dbuser = this.Factory.CreateDbContext().Users.Find(this.UserId);
             Assert.NotNull(dbuser);
             Assert.Equal(body.UserName, dbuser.UserName);
             Assert.True(dbuser.UpdatedAt > now);
@@ -179,11 +152,10 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
         {
             var now = DateTimeOffset.UtcNow;
             var body = new ChangePasswordDto() { CurrentPassword = "TEST_PASSWORD", NewPassword = "KenKen" };
-            var response = await this.authedClient.PutAsJsonAsync("/api/users/password", body);
-            var responseString = await response.Content.ReadAsStringAsync();
-            Assert.True(response.IsSuccessStatusCode, responseString);
+            var response = await this.AuthedClient.PutAsJsonAsync("/api/users/password", body);
+            await AssertResponse(response);
 
-            var dbuser = this.factory.CreateDbContext().Users.Find(this.userId);
+            var dbuser = this.Factory.CreateDbContext().Users.Find(this.UserId);
             Assert.NotNull(dbuser);
             Assert.NotNull(dbuser.PasswordHash);
             Assert.True(dbuser.UpdatedAt > now);

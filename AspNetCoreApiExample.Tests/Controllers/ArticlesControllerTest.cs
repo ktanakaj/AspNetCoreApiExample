@@ -3,7 +3,7 @@
 //      ブログ記事コントローラテストクラスソース</summary>
 //
 // <copyright file="ArticlesControllerTest.cs">
-//      Copyright (C) 2019 Koichi Tanaka. All rights reserved.</copyright>
+//      Copyright (C) 2022 Koichi Tanaka. All rights reserved.</copyright>
 // <author>
 //      Koichi Tanaka</author>
 // ================================================================================================
@@ -12,39 +12,14 @@ using System.Net.Http.Json;
 using Honememo.AspNetCoreApiExample.Dto;
 using Honememo.AspNetCoreApiExample.Entities;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 
 namespace Honememo.AspNetCoreApiExample.Tests.Controllers
 {
     /// <summary>
     /// ブログ記事コントローラのテストクラス。
     /// </summary>
-    public class ArticlesControllerTest : IClassFixture<CustomWebApplicationFactory>
+    public class ArticlesControllerTest : ControllerTestBase
     {
-        #region メンバー変数
-
-        /// <summary>
-        /// Webアプリのファクトリー。
-        /// </summary>
-        private readonly CustomWebApplicationFactory factory;
-
-        /// <summary>
-        /// Webアプリテスト用のHTTPクライアント。
-        /// </summary>
-        private readonly HttpClient client;
-
-        /// <summary>
-        /// Webアプリテスト用の認証済HTTPクライアント。
-        /// </summary>
-        private readonly HttpClient authedClient;
-
-        /// <summary>
-        /// 認証済HTTPクライアントのユーザーID。
-        /// </summary>
-        private readonly int userId;
-
-        #endregion
-
         #region コンストラクタ
 
         /// <summary>
@@ -52,10 +27,8 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
         /// </summary>
         /// <param name="factory">Webアプリファクトリー。</param>
         public ArticlesControllerTest(CustomWebApplicationFactory factory)
+            : base(factory)
         {
-            this.factory = factory;
-            this.client = factory.CreateClient();
-            (this.authedClient, this.userId) = factory.CreateAuthedClient();
         }
 
         #endregion
@@ -68,13 +41,13 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
         [Fact]
         public async void TestGetArticles()
         {
-            var response = await this.client.GetAsync("/api/articles");
-            var responseString = await response.Content.ReadAsStringAsync();
-            Assert.True(response.IsSuccessStatusCode, responseString);
+            var response = await this.Client.GetAsync("/api/articles");
+            await AssertResponse(response);
 
-            var array = JsonConvert.DeserializeObject<IEnumerable<ArticleDto>>(responseString);
+            var array = await GetResponseBody<IEnumerable<ArticleDto>>(response);
 
             // ※ 取れるブログ記事は不確定のため、データがあるかのみテスト
+            Assert.NotNull(array);
             Assert.NotEmpty(array);
 
             var article = array.First();
@@ -94,13 +67,13 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
         [Fact]
         public async void TestGetArticlesByBlogId()
         {
-            var response = await this.client.GetAsync("/api/articles?blogId=1000");
-            var responseString = await response.Content.ReadAsStringAsync();
-            Assert.True(response.IsSuccessStatusCode, responseString);
+            var response = await this.Client.GetAsync("/api/articles?blogId=1000");
+            await AssertResponse(response);
 
-            var array = JsonConvert.DeserializeObject<IEnumerable<ArticleDto>>(responseString);
+            var array = await GetResponseBody<IEnumerable<ArticleDto>>(response);
 
             // ※ 取れるブログ記事は不確定のため、データがあるかのみテスト
+            Assert.NotNull(array);
             Assert.NotEmpty(array);
 
             var article = array.First();
@@ -120,13 +93,13 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
         [Fact]
         public async void TestGetArticlesByTag()
         {
-            var response = await this.client.GetAsync("/api/articles?tag=お知らせ");
-            var responseString = await response.Content.ReadAsStringAsync();
-            Assert.True(response.IsSuccessStatusCode, responseString);
+            var response = await this.Client.GetAsync("/api/articles?tag=お知らせ");
+            await AssertResponse(response);
 
-            var array = JsonConvert.DeserializeObject<IEnumerable<ArticleDto>>(responseString);
+            var array = await GetResponseBody<IEnumerable<ArticleDto>>(response);
 
             // ※ 取れるブログ記事は不確定のため、データがあるかのみテスト
+            Assert.NotNull(array);
             Assert.NotEmpty(array);
 
             var article = array.First();
@@ -149,11 +122,11 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
         [Fact]
         public async void TestGetArticle()
         {
-            var response = await this.client.GetAsync("/api/articles/10000");
-            var responseString = await response.Content.ReadAsStringAsync();
-            Assert.True(response.IsSuccessStatusCode, responseString);
+            var response = await this.Client.GetAsync("/api/articles/10000");
+            await AssertResponse(response);
 
-            var json = JsonConvert.DeserializeObject<ArticleDto>(responseString);
+            var json = await GetResponseBody<ArticleDto>(response);
+            Assert.NotNull(json);
             Assert.Equal(10000, json.Id);
             Assert.Equal("初めまして", json.Subject);
             Assert.Equal("初めまして、太郎です。ブログにようこそ。", json.Body);
@@ -169,11 +142,11 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
         {
             var now = DateTimeOffset.UtcNow;
             var body = new ArticleNewDto() { Subject = "New Article", Body = "New Article Body", BlogId = 1000, Tags = new string[] { "Blog", "新規" } };
-            var response = await this.authedClient.PostAsJsonAsync("/api/articles", body);
-            var responseString = await response.Content.ReadAsStringAsync();
-            Assert.True(response.IsSuccessStatusCode, responseString);
+            var response = await this.AuthedClient.PostAsJsonAsync("/api/articles", body);
+            await AssertResponse(response);
 
-            var json = JsonConvert.DeserializeObject<ArticleDto>(responseString);
+            var json = await GetResponseBody<ArticleDto>(response);
+            Assert.NotNull(json);
             Assert.True(json.Id > 0);
             Assert.Equal(body.Subject, json.Subject);
             Assert.Equal(body.Body, json.Body);
@@ -183,7 +156,7 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
             Assert.Contains(body.Tags.First(), json.Tags);
             Assert.Contains(body.Tags.Last(), json.Tags);
 
-            var dbarticle = this.factory.CreateDbContext().Articles.Find(json.Id);
+            var dbarticle = this.Factory.CreateDbContext().Articles.Find(json.Id);
             Assert.NotNull(dbarticle);
             Assert.Equal(body.Subject, dbarticle.Subject);
             Assert.Equal(body.Body, dbarticle.Body);
@@ -204,16 +177,15 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
         {
             var now = DateTimeOffset.UtcNow;
             var article = new Article() { Subject = "Article for PutArticle", Body = "PutArticle Body", BlogId = 1000, Tags = new List<Tag>() { new Tag() { Name = "Blog" }, new Tag() { Name = "変更前" } } };
-            var db = this.factory.CreateDbContext();
+            var db = this.Factory.CreateDbContext();
             db.Articles.Add(article);
             db.SaveChanges();
 
             var body = new ArticleEditDto() { Subject = "Updated Article", Body = "Updated Article Body", Tags = new string[] { "変更後" } };
-            var response = await this.authedClient.PutAsJsonAsync($"/api/articles/{article.Id}", body);
-            var responseString = await response.Content.ReadAsStringAsync();
-            Assert.True(response.IsSuccessStatusCode, responseString);
+            var response = await this.AuthedClient.PutAsJsonAsync($"/api/articles/{article.Id}", body);
+            await AssertResponse(response);
 
-            var dbarticle = this.factory.CreateDbContext().Articles.Include(a => a.Tags).First(a => a.Id == article.Id);
+            var dbarticle = this.Factory.CreateDbContext().Articles.Include(a => a.Tags).First(a => a.Id == article.Id);
             Assert.NotNull(dbarticle);
             Assert.Equal(body.Subject, dbarticle.Subject);
             Assert.Equal(body.Body, dbarticle.Body);
@@ -233,16 +205,15 @@ namespace Honememo.AspNetCoreApiExample.Tests.Controllers
         public async void TestDeleteArticle()
         {
             var article = new Article() { Subject = "Article for DeleteArticle", Body = "DeleteArticle Body", BlogId = 1000, Tags = new List<Tag>() { new Tag() { Name = "Blog" } } };
-            var db = this.factory.CreateDbContext();
+            var db = this.Factory.CreateDbContext();
             db.Articles.Add(article);
             db.SaveChanges();
 
-            var response = await this.authedClient.DeleteAsync($"/api/articles/{article.Id}");
-            var responseString = await response.Content.ReadAsStringAsync();
-            Assert.True(response.IsSuccessStatusCode, responseString);
+            var response = await this.AuthedClient.DeleteAsync($"/api/articles/{article.Id}");
+            await AssertResponse(response);
 
-            Assert.Null(this.factory.CreateDbContext().Articles.Find(article.Id));
-            Assert.Null(this.factory.CreateDbContext().Tags.Find(article.Id, article.Tags.First().Name));
+            Assert.Null(this.Factory.CreateDbContext().Articles.Find(article.Id));
+            Assert.Null(this.Factory.CreateDbContext().Tags.Find(article.Id, article.Tags.First().Name));
         }
 
         #endregion

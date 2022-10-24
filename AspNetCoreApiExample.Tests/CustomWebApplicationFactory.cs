@@ -3,7 +3,7 @@
 //      アプリ独自の設定を入れたWebアプリケーションファクトリクラスソース</summary>
 //
 // <copyright file="CustomWebApplicationFactory.cs">
-//      Copyright (C) 2019 Koichi Tanaka. All rights reserved.</copyright>
+//      Copyright (C) 2022 Koichi Tanaka. All rights reserved.</copyright>
 // <author>
 //      Koichi Tanaka</author>
 // ================================================================================================
@@ -14,10 +14,6 @@ using Honememo.AspNetCoreApiExample.Dto;
 using Honememo.AspNetCoreApiExample.Repositories;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.EntityFrameworkCore.Storage;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Honememo.AspNetCoreApiExample.Tests
 {
@@ -26,17 +22,12 @@ namespace Honememo.AspNetCoreApiExample.Tests
     /// </summary>
     public class CustomWebApplicationFactory : WebApplicationFactory<Program>
     {
-        #region 定数
+        #region メンバー変数
 
         /// <summary>
-        /// インメモリDBのルート。
+        /// モックDBを扱うインスタンス。
         /// </summary>
-        private readonly InMemoryDatabaseRoot inMemoryDatabaseRoot = new InMemoryDatabaseRoot();
-
-        /// <summary>
-        /// WebアプリのインメモリDB名。
-        /// </summary>
-        private readonly string appDbName = "TestAppDB";
+        private readonly MockDb mockDb = new MockDb();
 
         #endregion
 
@@ -55,13 +46,16 @@ namespace Honememo.AspNetCoreApiExample.Tests
 
         #region テスト補助用メソッド
 
+        // ※ 以下DBコンテキストを取るメソッドが毎回newしているのは、
+        //    DI管理下のものを取ると未確定のデータなども取れてしまうため。
+
         /// <summary>
-        /// WebアプリのDBコンテキストを生成する。
+        /// アプリDBのDBコンテキストを生成する。
         /// </summary>
         /// <returns>DBコンテキスト。</returns>
         public AppDbContext CreateDbContext()
         {
-            return new AppDbContext(this.ApplyTestDbConfig(new DbContextOptionsBuilder<AppDbContext>(), this.appDbName).Options);
+            return this.mockDb.CreateAppDbContext();
         }
 
         /// <summary>
@@ -126,42 +120,9 @@ namespace Honememo.AspNetCoreApiExample.Tests
         {
             builder.ConfigureServices(services =>
             {
-                // DBをインメモリDBに置き換え
-                var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<AppDbContext>));
-                if (descriptor != null)
-                {
-                    services.Remove(descriptor);
-                }
-
-                services.AddDbContextPool<AppDbContext>(options => this.ApplyTestDbConfig(options, this.appDbName));
-
-                // データベースに汎用のテストデータを登録
-                var sp = services.BuildServiceProvider();
-                using (var scope = sp.CreateScope())
-                {
-                    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-                    db.Database.EnsureCreated();
-                    TestData.InitializeDbForTests(db);
-                }
+                // DBをテスト用に設定
+                this.mockDb.ConfigureTestDb(services);
             });
-        }
-
-        #endregion
-
-        #region 内部メソッド
-
-        /// <summary>
-        /// DBオプションビルダーにテスト用のDB設定値を適用する。
-        /// </summary>
-        /// <param name="builder">ビルダー。</param>
-        /// <param name="dbname">DB名。</param>
-        /// <returns>メソッドチェーン用のビルダー。</returns>
-        private T ApplyTestDbConfig<T>(T builder, string dbname)
-            where T : DbContextOptionsBuilder
-        {
-            builder.UseInMemoryDatabase(dbname, this.inMemoryDatabaseRoot);
-            builder.ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
-            return builder;
         }
 
         #endregion
