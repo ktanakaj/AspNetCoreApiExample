@@ -1,11 +1,11 @@
 # MySQLクライアントの入ったSQL実行用イメージを作成
-FROM debian:11 AS runtime
+FROM debian:13 AS runtime
 RUN apt-get update -yq && \
-    apt -y install wget lsb-release gnupg && \
-    wget -O /tmp/mysql-apt-config.deb https://dev.mysql.com/get/mysql-apt-config_0.8.23-1_all.deb && \
-    ( yes 4 | dpkg -i /tmp/mysql-apt-config.deb ) && \
+    apt-get -y install wget lsb-release gnupg && \
+    wget -O /tmp/mysql-apt-config.deb https://dev.mysql.com/get/mysql-apt-config_0.8.39-1_all.deb && \
+    DEBIAN_FRONTEND=noninteractive dpkg -i /tmp/mysql-apt-config.deb && \
     apt-get update -yq && \
-    apt -y install mysql-client
+    apt-get -y install mysql-client
 
 # DB起動チェック用のスクリプトもインストール
 ADD https://github.com/vishnubob/wait-for-it/raw/master/wait-for-it.sh /usr/local/bin/

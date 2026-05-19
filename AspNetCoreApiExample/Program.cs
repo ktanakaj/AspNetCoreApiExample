@@ -3,26 +3,27 @@
 //      アプリケーション起動用クラスソース</summary>
 //
 // <copyright file="Program.cs">
-//      Copyright (C) 2019 Koichi Tanaka. All rights reserved.</copyright>
+//      Copyright (C) 2026 Koichi Tanaka. All rights reserved.</copyright>
 // <author>
 //      Koichi Tanaka</author>
 // ================================================================================================
 
 using System.Net;
 using System.Reflection;
-using AutoMapper;
 using Hellang.Middleware.ProblemDetails;
 using Honememo.AspNetCoreApiExample.Dto;
 using Honememo.AspNetCoreApiExample.Entities;
 using Honememo.AspNetCoreApiExample.Exceptions;
 using Honememo.AspNetCoreApiExample.Middlewares;
 using Honememo.AspNetCoreApiExample.Repositories;
+using Mapster;
+using MapsterMapper;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 
 // ThreadPoolのワーカー数が少ないと、一気に負荷が掛かった場合に増えるまで処理が詰まってしまうので、大幅に増やす
 ThreadPool.GetMinThreads(out _, out int minCompletionPortThread);
@@ -32,18 +33,18 @@ ThreadPool.SetMinThreads(300, minCompletionPortThread);
 var builder = WebApplication.CreateBuilder(args);
 
 // ロガー設定
-builder.Host.ConfigureLogging(logging =>
-{
-    logging.ClearProviders();
-    logging.AddConsole();
-});
+builder.Logging.ClearProviders().AddConsole();
 
 // 設定ファイルの参照追加
 ApplyAppConfig(builder.Configuration);
 
 // マッピング設定
-var mappingConfig = new MapperConfiguration(mc => mc.AddProfile(new MappingProfile()));
-builder.Services.AddSingleton(mappingConfig.CreateMapper());
+builder.Services.AddSingleton<IMapper>(_ =>
+{
+    var config = new TypeAdapterConfig();
+    new MapperConfiguration().Register(config);
+    return new Mapper(config);
+});
 
 // DB設定
 builder.Services.AddDbContextPool<AppDbContext>((provider, options) =>
@@ -76,12 +77,12 @@ builder.Services.ConfigureApplicationCookie(options =>
 // リポジトリやサービスのDI設定
 builder.Services.AddScoped<IUnitOfWork>(x => x.GetRequiredService<AppDbContext>());
 builder.Services.Scan(scan => scan
-    .FromCallingAssembly()
+    .FromAssemblyOf<Program>()
         .AddClasses(classes => classes.Where(type => type.Name.EndsWith("Repository") || type.Name.EndsWith("Service")))
             .AsSelfWithInterfaces()
             .WithScopedLifetime());
 
-// Swagger定義の設定
+// OpenAPI定義の設定
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -99,7 +100,7 @@ var app = builder.Build();
 // 開発用ページの設定
 if (app.Environment.IsDevelopment())
 {
-    // Swagger JSONとUIのエンドポイントを有効化
+    // OpenAPIのエンドポイントを有効化
     app.UseSwagger();
     app.UseSwaggerUI();
 }
@@ -154,7 +155,7 @@ public partial class Program
         switch (dbconf.GetValue<string>("Type")?.ToLower())
         {
             case "mysql":
-                builder.UseMySql(dbconf.GetValue<string>("ConnectionString"), ServerVersion.Parse("8.0.28-mysql"));
+                builder.UseMySql(dbconf.GetValue<string>("ConnectionString"), ServerVersion.Parse("8.4.9-mysql"));
                 break;
             default:
                 builder.UseInMemoryDatabase("AppDB");

@@ -3,31 +3,30 @@
 //      ミドルウェアを無効にする場合のターゲットソース</summary>
 //
 // <copyright file="DisableTarget.cs">
-//      Copyright (C) 2022 Koichi Tanaka. All rights reserved.</copyright>
+//      Copyright (C) 2026 Koichi Tanaka. All rights reserved.</copyright>
 // <author>
 //      Koichi Tanaka</author>
 // ================================================================================================
 
-namespace Honememo.AspNetCoreApiExample.Middlewares
+namespace Honememo.AspNetCoreApiExample.Middlewares;
+
+/// <summary>
+/// ミドルウェアを無効にする場合のターゲット。
+/// </summary>
+public enum DisableTarget
 {
     /// <summary>
-    /// ミドルウェアを無効にする場合のターゲット。
+    /// リクエスト/レスポンス双方。
     /// </summary>
-    public enum DisableTarget
-    {
-        /// <summary>
-        /// リクエスト/レスポンス双方。
-        /// </summary>
-        All,
+    All,
 
-        /// <summary>
-        /// リクエストのみ無効。
-        /// </summary>
-        Request,
+    /// <summary>
+    /// リクエストのみ無効。
+    /// </summary>
+    Request,
 
-        /// <summary>
-        /// レスポンスのみ無効。
-        /// </summary>
-        Response,
-    }
+    /// <summary>
+    /// レスポンスのみ無効。
+    /// </summary>
+    Response,
 }

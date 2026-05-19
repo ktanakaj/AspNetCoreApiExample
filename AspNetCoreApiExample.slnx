@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/ソリューション項目/">
+    <File Path=".editorconfig" />
+    <File Path="Docker/migration/Dockerfile" />
+    <File Path="Docker/mysql/my.cnf" />
+    <File Path="Docker/nginx/Dockerfile" />
+    <File Path="Docker/nginx/mysite.template" />
+  </Folder>
+  <Project Path="AspNetCoreApiExample.Tests/AspNetCoreApiExample.Tests.csproj" />
+  <Project Path="AspNetCoreApiExample/AspNetCoreApiExample.csproj" />
+  <Project Path="docker-compose.dcproj">
+    <Build />
+  </Project>
+</Solution>

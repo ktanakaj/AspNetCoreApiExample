@@ -3,25 +3,24 @@
 //      ユーザー更新のリクエストパラメータDTOクラスソース</summary>
 //
 // <copyright file="UserEditDto.cs">
-//      Copyright (C) 2019 Koichi Tanaka. All rights reserved.</copyright>
+//      Copyright (C) 2026 Koichi Tanaka. All rights reserved.</copyright>
 // <author>
 //      Koichi Tanaka</author>
 // ================================================================================================
 
 using System.ComponentModel.DataAnnotations;
 
-namespace Honememo.AspNetCoreApiExample.Dto
+namespace Honememo.AspNetCoreApiExample.Dto;
+
+/// <summary>
+/// ユーザー更新のリクエストパラメータDTOクラス。
+/// </summary>
+public class UserEditDto
 {
     /// <summary>
-    /// ユーザー更新のリクエストパラメータDTOクラス。
+    /// ユーザー名。
     /// </summary>
-    public class UserEditDto
-    {
-        /// <summary>
-        /// ユーザー名。
-        /// </summary>
-        [Required]
-        [MaxLength(255)]
-        public string UserName { get; set; } = string.Empty;
-    }
+    [Required]
+    [MaxLength(255)]
+    public string UserName { get; set; } = string.Empty;
 }

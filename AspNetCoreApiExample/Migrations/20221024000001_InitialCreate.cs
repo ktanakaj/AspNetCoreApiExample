@@ -3,7 +3,7 @@
 //      初期DBマイグレーションスクリプトクラスソース</summary>
 //
 // <copyright file="20221024000001_InitialCreate.cs">
-//      Copyright (C) 2022 Koichi Tanaka. All rights reserved.</copyright>
+//      Copyright (C) 2026 Koichi Tanaka. All rights reserved.</copyright>
 // <author>
 //      Koichi Tanaka</author>
 // ================================================================================================
@@ -15,15 +15,10 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace Honememo.AspNetCoreApiExample.Migrations
 {
-    /// <summary>
-    /// 初期DBマイグレーションスクリプトクラス。
-    /// </summary>
+    /// <inheritdoc />
     public partial class InitialCreate : Migration
     {
-        /// <summary>
-        /// マイグレーション実施。
-        /// </summary>
-        /// <param name="migrationBuilder">マイグレーションビルダー。</param>
+        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AlterDatabase()
@@ -360,10 +355,7 @@ namespace Honememo.AspNetCoreApiExample.Migrations
                 columns: new[] { "Name", "ArticleId" });
         }
 
-        /// <summary>
-        /// マイグレーション差し戻し。
-        /// </summary>
-        /// <param name="migrationBuilder">マイグレーションビルダー。</param>
+        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(

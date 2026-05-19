@@ -5,7 +5,6 @@ CREATE TABLE IF NOT EXISTS `__EFMigrationsHistory` (
 ) CHARACTER SET=utf8mb4;
 
 START TRANSACTION;
-
 DROP PROCEDURE IF EXISTS MigrationsScript;
 DELIMITER //
 CREATE PROCEDURE MigrationsScript()
@@ -473,7 +472,7 @@ BEGIN
     IF NOT EXISTS(SELECT 1 FROM `__EFMigrationsHistory` WHERE `MigrationId` = '20221024000001_InitialCreate') THEN
 
     INSERT INTO `__EFMigrationsHistory` (`MigrationId`, `ProductVersion`)
-    VALUES ('20221024000001_InitialCreate', '6.0.10');
+    VALUES ('20221024000001_InitialCreate', '10.0.8');
 
     END IF;
 END //

@@ -3,24 +3,23 @@
 //      ブログ記事登録のリクエストパラメータ用のDTOクラスソース</summary>
 //
 // <copyright file="ArticleNewDto.cs">
-//      Copyright (C) 2019 Koichi Tanaka. All rights reserved.</copyright>
+//      Copyright (C) 2026 Koichi Tanaka. All rights reserved.</copyright>
 // <author>
 //      Koichi Tanaka</author>
 // ================================================================================================
 
 using System.ComponentModel.DataAnnotations;
 
-namespace Honememo.AspNetCoreApiExample.Dto
+namespace Honememo.AspNetCoreApiExample.Dto;
+
+/// <summary>
+/// ブログ記事登録のリクエストパラメータ用のDTOクラス。
+/// </summary>
+public class ArticleNewDto : ArticleEditDto
 {
     /// <summary>
-    /// ブログ記事登録のリクエストパラメータ用のDTOクラス。
+    /// ブログID。
     /// </summary>
-    public class ArticleNewDto : ArticleEditDto
-    {
-        /// <summary>
-        /// ブログID。
-        /// </summary>
-        [Required]
-        public int BlogId { get; set; }
-    }
+    [Required]
+    public int BlogId { get; set; }
 }

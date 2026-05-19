@@ -3,35 +3,29 @@
 //      アプリコントローラ基底クラスソース</summary>
 //
 // <copyright file="AppControllerBase.cs">
-//      Copyright (C) 2019 Koichi Tanaka. All rights reserved.</copyright>
+//      Copyright (C) 2026 Koichi Tanaka. All rights reserved.</copyright>
 // <author>
 //      Koichi Tanaka</author>
 // ================================================================================================
 
 using System.Security.Claims;
-using Honememo.AspNetCoreApiExample.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Honememo.AspNetCoreApiExample.Controllers
+namespace Honememo.AspNetCoreApiExample.Controllers;
+
+/// <summary>
+/// アプリコントローラ基底クラス。
+/// </summary>
+public abstract class AppControllerBase : ControllerBase
 {
     /// <summary>
-    /// アプリコントローラ基底クラス。
+    /// 認証中のユーザーのIDを取得する。
     /// </summary>
-    public abstract class AppControllerBase : ControllerBase
+    protected int UserId
     {
-        #region プロパティ
-
-        /// <summary>
-        /// 認証中のユーザーのIDを取得する。
-        /// </summary>
-        protected int UserId
+        get
         {
-            get
-            {
-                return int.Parse(this.User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? throw new Exception("Unauthorized"));
-            }
+            return int.Parse(this.User.FindFirst(ClaimTypes.NameIdentifier)?.Value ?? throw new Exception("Unauthorized"));
         }
-
-        #endregion
     }
 }

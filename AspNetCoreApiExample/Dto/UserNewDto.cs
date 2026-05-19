@@ -3,18 +3,17 @@
 //      ユーザー登録のリクエストパラメータDTOクラスソース</summary>
 //
 // <copyright file="UserNewDto.cs">
-//      Copyright (C) 2019 Koichi Tanaka. All rights reserved.</copyright>
+//      Copyright (C) 2026 Koichi Tanaka. All rights reserved.</copyright>
 // <author>
 //      Koichi Tanaka</author>
 // ================================================================================================
 
-namespace Honememo.AspNetCoreApiExample.Dto
+namespace Honememo.AspNetCoreApiExample.Dto;
+
+/// <summary>
+/// ユーザー登録のリクエストパラメータDTOクラス。
+/// </summary>
+/// <remarks>現状ログインと同じパラメータ。</remarks>
+public class UserNewDto : LoginDto
 {
-    /// <summary>
-    /// ユーザー登録のリクエストパラメータDTOクラス。
-    /// </summary>
-    /// <remarks>現状ログインと同じパラメータ。</remarks>
-    public class UserNewDto : LoginDto
-    {
-    }
 }

@@ -3,7 +3,7 @@
 //      アプリケーションDBコンテキストクラスソース</summary>
 //
 // <copyright file="AppDbContext.cs">
-//      Copyright (C) 2022 Koichi Tanaka. All rights reserved.</copyright>
+//      Copyright (C) 2026 Koichi Tanaka. All rights reserved.</copyright>
 // <author>
 //      Koichi Tanaka</author>
 // ================================================================================================
@@ -15,124 +15,107 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 
-namespace Honememo.AspNetCoreApiExample.Repositories
+namespace Honememo.AspNetCoreApiExample.Repositories;
+
+/// <summary>
+/// アプリケーションDBコンテキストクラス。
+/// </summary>
+public class AppDbContext : IdentityDbContext<User, IdentityRole<int>, int>, IUnitOfWork
 {
     /// <summary>
-    /// アプリケーションDBコンテキストクラス。
+    /// コンテキストを生成する。
     /// </summary>
-    public class AppDbContext : IdentityDbContext<User, IdentityRole<int>, int>, IUnitOfWork
+    /// <param name="options">オプション。</param>
+    public AppDbContext(DbContextOptions<AppDbContext> options)
+        : base(options)
     {
-        #region コンストラクタ
+    }
 
-        /// <summary>
-        /// コンテキストを生成する。
-        /// </summary>
-        /// <param name="options">オプション。</param>
-        public AppDbContext(DbContextOptions<AppDbContext> options)
-            : base(options)
+    /// <summary>
+    /// ブログテーブル。
+    /// </summary>
+    public DbSet<Blog> Blogs => this.Set<Blog>();
+
+    /// <summary>
+    /// ブログ記事テーブル。
+    /// </summary>
+    public DbSet<Article> Articles => this.Set<Article>();
+
+    /// <summary>
+    /// ブログ記事のタグテーブル。
+    /// </summary>
+    public DbSet<Tag> Tags => this.Set<Tag>();
+
+    /// <summary>
+    /// トランザクションを開始する。
+    /// </summary>
+    /// <returns>トランザクション。</returns>
+    public IDbContextTransaction BeginTransaction()
+    {
+        return this.Database.BeginTransaction();
+    }
+
+    /// <summary>
+    /// コンテキストの変更をDBに保存する。
+    /// </summary>
+    /// <param name="acceptAllChangesOnSuccess">保存成功時にAcceptAllChangesを呼び出すか？</param>
+    /// <returns>DBの更新件数。</returns>
+    public override int SaveChanges(bool acceptAllChangesOnSuccess)
+    {
+        // DB保存前に更新日時の更新を行う
+        this.TouchChangedEntities();
+        return base.SaveChanges(acceptAllChangesOnSuccess);
+    }
+
+    /// <summary>
+    /// コンテキストの変更をDBに保存する。
+    /// </summary>
+    /// <param name="acceptAllChangesOnSuccess">保存成功時にAcceptAllChangesを呼び出すか？</param>
+    /// <param name="cancellationToken">処理キャンセル用トークン。</param>
+    /// <returns>DBの更新件数。</returns>
+    public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default(CancellationToken))
+    {
+        // DB保存前に更新日時の更新を行う
+        this.TouchChangedEntities();
+        return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
+    }
+
+    /// <summary>
+    /// モデル構築時に呼ばれる処理。
+    /// </summary>
+    /// <param name="modelBuilder">モデルビルダー。</param>
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        base.OnModelCreating(modelBuilder);
+
+        // 個別のEntityにOnModelCreatingがある場合、実行する
+        var param = new object[] { modelBuilder };
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
-        }
-
-        #endregion
-
-        #region プロパティ
-
-        /// <summary>
-        /// ブログテーブル。
-        /// </summary>
-        public DbSet<Blog> Blogs => this.Set<Blog>();
-
-        /// <summary>
-        /// ブログ記事テーブル。
-        /// </summary>
-        public DbSet<Article> Articles => this.Set<Article>();
-
-        /// <summary>
-        /// ブログ記事のタグテーブル。
-        /// </summary>
-        public DbSet<Tag> Tags => this.Set<Tag>();
-
-        #endregion
-
-        #region 公開メソッド
-
-        /// <summary>
-        /// トランザクションを開始する。
-        /// </summary>
-        /// <returns>トランザクション。</returns>
-        public IDbContextTransaction BeginTransaction()
-        {
-            return this.Database.BeginTransaction();
-        }
-
-        /// <summary>
-        /// コンテキストの変更をDBに保存する。
-        /// </summary>
-        /// <param name="acceptAllChangesOnSuccess">保存成功時にAcceptAllChangesを呼び出すか？</param>
-        /// <returns>DBの更新件数。</returns>
-        public override int SaveChanges(bool acceptAllChangesOnSuccess)
-        {
-            // DB保存前に更新日時の更新を行う
-            this.TouchChangedEntities();
-            return base.SaveChanges(acceptAllChangesOnSuccess);
-        }
-
-        /// <summary>
-        /// コンテキストの変更をDBに保存する。
-        /// </summary>
-        /// <param name="acceptAllChangesOnSuccess">保存成功時にAcceptAllChangesを呼び出すか？</param>
-        /// <param name="cancellationToken">処理キャンセル用トークン。</param>
-        /// <returns>DBの更新件数。</returns>
-        public override async Task<int> SaveChangesAsync(bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            // DB保存前に更新日時の更新を行う
-            this.TouchChangedEntities();
-            return await base.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
-        }
-
-        #endregion
-
-        #region 内部メソッド
-
-        /// <summary>
-        /// モデル構築時に呼ばれる処理。
-        /// </summary>
-        /// <param name="modelBuilder">モデルビルダー。</param>
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            base.OnModelCreating(modelBuilder);
-
-            // 個別のEntityにOnModelCreatingがある場合、実行する
-            var param = new object[] { modelBuilder };
-            foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+            var method = entityType.ClrType.GetMethod("OnModelCreating", BindingFlags.Static | BindingFlags.Public);
+            if (method != null)
             {
-                var method = entityType.ClrType.GetMethod("OnModelCreating", BindingFlags.Static | BindingFlags.Public);
-                if (method != null)
-                {
-                    method.Invoke(null, param);
-                }
+                method.Invoke(null, param);
             }
         }
+    }
 
-        /// <summary>
-        /// 変更されているエンティティの登録日時/更新日時を更新する。
-        /// </summary>
-        private void TouchChangedEntities()
+    /// <summary>
+    /// 変更されているエンティティの登録日時/更新日時を更新する。
+    /// </summary>
+    private void TouchChangedEntities()
+    {
+        var now = DateTimeOffset.UtcNow;
+        foreach (var entity in this.ChangeTracker.Entries()
+            .Where(x => x.Entity is IHasCreatedAt e && x.State == EntityState.Added && e.CreatedAt == default))
         {
-            var now = DateTimeOffset.UtcNow;
-            foreach (var entity in this.ChangeTracker.Entries()
-                .Where(x => x.Entity is IHasCreatedAt e && x.State == EntityState.Added && e.CreatedAt == default))
-            {
-                ((IHasCreatedAt)entity.Entity).CreatedAt = now;
-            }
-
-            foreach (var entity in this.ChangeTracker.Entries()
-                .Where(x => x.Entity is IHasUpdatedAt && (x.State == EntityState.Added || x.State == EntityState.Modified)))
-            {
-                ((IHasUpdatedAt)entity.Entity).UpdatedAt = now;
-            }
+            ((IHasCreatedAt)entity.Entity).CreatedAt = now;
         }
 
-        #endregion
+        foreach (var entity in this.ChangeTracker.Entries()
+            .Where(x => x.Entity is IHasUpdatedAt && (x.State == EntityState.Added || x.State == EntityState.Modified)))
+        {
+            ((IHasUpdatedAt)entity.Entity).UpdatedAt = now;
+        }
     }
 }
