@@ -1,0 +1,39 @@
+# GitHub ActionsによるCI自動テスト設定。
+# masterブランチがpushまたはプルリク更新されたタイミングで自動テストを流す。
+# 高速化のため、NuGet参照等はキャッシュする。
+name: Test
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  test-and-lint:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      # リポジトリのチェックアウト
+      - uses: actions/checkout@v6
+
+      # .NETの環境設定
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.x'
+
+      # NuGetのキャッシュ設定
+      - uses: actions/cache@v5
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      # NuGetの取得
+      - run: dotnet restore ./AspNetCoreApiExample.slnx
+
+      # .NETユニットテストの実行
+      - run: dotnet test ./AspNetCoreApiExample.slnx --no-restore
+        timeout-minutes: 5
