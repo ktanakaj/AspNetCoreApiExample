@@ -1,0 +1,44 @@
+# Copilot Coding Agentの実行環境の設定。
+# 開発に必要なツールのインストールや、依存関係の解決を行う。
+name: "Copilot Setup Steps"
+
+on:
+  workflow_dispatch:
+
+  # pushやPRでこのファイルが更新された際に動作確認用に実行するよう設定
+  push:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+  pull_request:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+
+jobs:
+  copilot-setup-steps:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      # リポジトリのチェックアウト
+      - uses: actions/checkout@v6
+
+      # .NETの環境設定
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.x'
+
+      # NuGetのキャッシュ設定
+      - uses: actions/cache@v5
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      # Entity Framework Core Toolsのインストール
+      - run: dotnet tool install --global dotnet-ef
+
+      # NuGetの取得
+      - run: dotnet restore ./AspNetCoreApiExample.slnx
