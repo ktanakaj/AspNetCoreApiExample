@@ -13,6 +13,7 @@ using Honememo.AspNetCoreApiExample.Entities;
 using Honememo.AspNetCoreApiExample.Exceptions;
 using Honememo.AspNetCoreApiExample.Repositories;
 using MapsterMapper;
+using Microsoft.EntityFrameworkCore;
 
 namespace Honememo.AspNetCoreApiExample.Services;
 
@@ -27,26 +28,19 @@ public class ArticleService
     private readonly IMapper mapper;
 
     /// <summary>
-    /// ブログリポジトリ。
+    /// アプリケーションDBコンテキスト。
     /// </summary>
-    private readonly BlogRepository blogRepository;
+    private readonly AppDbContext context;
 
     /// <summary>
-    /// ブログ記事リポジトリ。
-    /// </summary>
-    private readonly ArticleRepository articleRepository;
-
-    /// <summary>
-    /// リポジトリ等を使用するサービスを生成する。
+    /// コンテキスト等を使用するサービスを生成する。
     /// </summary>
     /// <param name="mapper">Mapsterインスタンス。</param>
-    /// <param name="blogRepository">ブログリポジトリ。</param>
-    /// <param name="articleRepository">ブログ記事リポジトリ。</param>
-    public ArticleService(IMapper mapper, BlogRepository blogRepository, ArticleRepository articleRepository)
+    /// <param name="context">アプリケーションDBコンテキスト。</param>
+    public ArticleService(IMapper mapper, AppDbContext context)
     {
         this.mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-        this.blogRepository = blogRepository ?? throw new ArgumentNullException(nameof(blogRepository));
-        this.articleRepository = articleRepository ?? throw new ArgumentNullException(nameof(articleRepository));
+        this.context = context ?? throw new ArgumentNullException(nameof(context));
     }
 
     /// <summary>
@@ -56,7 +50,40 @@ public class ArticleService
     /// <returns>ブログ記事一覧。</returns>
     public async Task<IEnumerable<ArticleDto>> FindArticles(ArticleSearchDto param)
     {
-        return this.mapper.Map<IEnumerable<ArticleDto>>(await this.articleRepository.FindAll(param));
+        IQueryable<Article> query = this.context.Articles.Include(a => a.Tags);
+        if (param.BlogId > 0)
+        {
+            query = query.Where(a => a.BlogId == param.BlogId);
+        }
+
+        if (!string.IsNullOrWhiteSpace(param.Tag))
+        {
+            query = query.Where(a => a.Tags.Any(t => t.Name == param.Tag));
+        }
+
+        if (param.StartAt != null)
+        {
+            query = query.Where(a => a.CreatedAt >= param.StartAt);
+        }
+
+        if (param.EndAt != null)
+        {
+            query = query.Where(a => a.CreatedAt <= param.EndAt);
+        }
+
+        query = query.OrderByDescending(a => a.CreatedAt).ThenByDescending(a => a.Id);
+
+        if (param.Skip > 0)
+        {
+            query = query.Skip(param.Skip);
+        }
+
+        if (param.Take > 0)
+        {
+            query = query.Take(param.Take);
+        }
+
+        return this.mapper.Map<IEnumerable<ArticleDto>>(await query.ToListAsync());
     }
 
     /// <summary>
@@ -67,7 +94,7 @@ public class ArticleService
     /// <exception cref="NotFoundException">ブログ記事が存在しない場合。</exception>
     public async Task<ArticleDto> FindArticle(int id)
     {
-        return this.mapper.Map<ArticleDto>(await this.articleRepository.FindOrFail(id));
+        return this.mapper.Map<ArticleDto>(await this.FindOrFail(id));
     }
 
     /// <summary>
@@ -80,13 +107,17 @@ public class ArticleService
     /// <exception cref="ForbiddenException">ユーザーのブログでない場合。</exception>
     public async Task<ArticleDto> CreateArticle(int userId, ArticleNewDto param)
     {
-        var blog = await this.blogRepository.FindOrFail(param.BlogId);
+        var blog = await this.context.Blogs.FindAsync(param.BlogId)
+            ?? throw new NotFoundException($"BlogId={param.BlogId} is not found");
         if (blog.UserId != userId)
         {
             throw new ForbiddenException($"BlogId={param.BlogId} does not belong to me");
         }
 
-        var article = await this.articleRepository.Create(this.mapper.Map<Article>(param));
+        var article = this.mapper.Map<Article>(param);
+        article.Id = 0;
+        this.context.Articles.Add(article);
+        await this.context.SaveChangesAsync();
         return this.mapper.Map<ArticleDto>(article);
     }
 
@@ -101,15 +132,17 @@ public class ArticleService
     /// <exception cref="ForbiddenException">ユーザーのブログでない場合。</exception>
     public async Task UpdateArticle(int userId, int articleId, ArticleEditDto param)
     {
-        var article = await this.articleRepository.FindOrFail(articleId);
-        var blog = await this.blogRepository.FindOrFail(article.BlogId);
+        var article = await this.FindOrFail(articleId);
+        var blog = await this.context.Blogs.FindAsync(article.BlogId)
+            ?? throw new NotFoundException($"BlogId={article.BlogId} is not found");
         if (blog.UserId != userId)
         {
             throw new ForbiddenException($"id={articleId} does not belong to me");
         }
 
+        // 追跡済みエンティティを直接変更するため、SaveChangesAsync で差分のみUPDATEされる
         this.mapper.Map(param, article);
-        await this.articleRepository.Update(article);
+        await this.context.SaveChangesAsync();
     }
 
     /// <summary>
@@ -122,13 +155,27 @@ public class ArticleService
     /// <exception cref="ForbiddenException">ユーザーのブログでない場合。</exception>
     public async Task DeleteArticle(int userId, int articleId)
     {
-        var article = await this.articleRepository.FindOrFail(articleId);
-        var blog = await this.blogRepository.FindOrFail(article.BlogId);
+        var article = await this.FindOrFail(articleId);
+        var blog = await this.context.Blogs.FindAsync(article.BlogId)
+            ?? throw new NotFoundException($"BlogId={article.BlogId} is not found");
         if (blog.UserId != userId)
         {
             throw new ForbiddenException($"id={articleId} does not belong to me");
         }
 
-        await this.articleRepository.Delete(articleId);
+        this.context.Articles.Remove(article);
+        await this.context.SaveChangesAsync();
+    }
+
+    /// <summary>
+    /// ブログ記事IDでブログ記事を取得する。存在しない場合は例外を投げる。
+    /// </summary>
+    /// <param name="id">ブログ記事ID。</param>
+    /// <returns>ブログ記事。</returns>
+    /// <exception cref="NotFoundException">ブログ記事が存在しない場合。</exception>
+    private async Task<Article> FindOrFail(int id)
+    {
+        return await this.context.Articles.Include(a => a.Tags).FirstOrDefaultAsync(a => a.Id == id)
+            ?? throw new NotFoundException($"id={id} is not found");
     }
 }

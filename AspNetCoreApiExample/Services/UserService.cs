@@ -13,6 +13,8 @@ using Honememo.AspNetCoreApiExample.Entities;
 using Honememo.AspNetCoreApiExample.Exceptions;
 using Honememo.AspNetCoreApiExample.Repositories;
 using MapsterMapper;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace Honememo.AspNetCoreApiExample.Services;
 
@@ -27,26 +29,26 @@ public class UserService
     private readonly IMapper mapper;
 
     /// <summary>
-    /// DB処理単位集約用インスタンス。
+    /// アプリケーションDBコンテキスト。
     /// </summary>
-    private readonly IUnitOfWork unitOfWork;
+    private readonly AppDbContext context;
 
     /// <summary>
-    /// ユーザーリポジトリ。
+    /// ユーザーマネージャー。
     /// </summary>
-    private readonly UserRepository userRepository;
+    private readonly UserManager<User> userManager;
 
     /// <summary>
-    /// リポジトリ等を使用するサービスを生成する。
+    /// コンテキスト等を使用するサービスを生成する。
     /// </summary>
     /// <param name="mapper">Mapsterインスタンス。</param>
-    /// <param name="unitOfWork">DB処理単位集約用インスタンス。</param>
-    /// <param name="userRepository">ユーザーリポジトリ。</param>
-    public UserService(IMapper mapper, IUnitOfWork unitOfWork, UserRepository userRepository)
+    /// <param name="context">アプリケーションDBコンテキスト。</param>
+    /// <param name="userManager">ユーザーマネージャー。</param>
+    public UserService(IMapper mapper, AppDbContext context, UserManager<User> userManager)
     {
         this.mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
-        this.unitOfWork = unitOfWork ?? throw new ArgumentNullException(nameof(unitOfWork));
-        this.userRepository = userRepository ?? throw new ArgumentNullException(nameof(userRepository));
+        this.context = context ?? throw new ArgumentNullException(nameof(context));
+        this.userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
     }
 
     /// <summary>
@@ -55,7 +57,8 @@ public class UserService
     /// <returns>ユーザー一覧。</returns>
     public async Task<IEnumerable<UserDto>> FindUsers()
     {
-        return this.mapper.Map<IEnumerable<UserDto>>(await this.userRepository.FindAll());
+        return this.mapper.Map<IEnumerable<UserDto>>(
+            await this.userManager.Users.OrderBy(u => u.NormalizedUserName).ToListAsync());
     }
 
     /// <summary>
@@ -66,7 +69,7 @@ public class UserService
     /// <exception cref="NotFoundException">ユーザーが存在しない場合。</exception>
     public async Task<UserDto> FindUser(int id)
     {
-        return this.mapper.Map<UserDto>(await this.userRepository.FindOrFail(id));
+        return this.mapper.Map<UserDto>(await this.FindOrFail(id));
     }
 
     /// <summary>
@@ -77,12 +80,16 @@ public class UserService
     /// <exception cref="BadRequestException">入力値が不正な場合。</exception>
     public async Task<User> CreateUser(UserNewDto param)
     {
-        using (var transaction = this.unitOfWork.BeginTransaction())
+        using var transaction = await this.context.Database.BeginTransactionAsync();
+        var user = new User()
         {
-            var user = await this.userRepository.CreateBy(param.UserName, param.Password);
-            transaction.Commit();
-            return user;
-        }
+            UserName = param.UserName,
+            LastLogin = DateTimeOffset.UtcNow,
+        };
+        ThrowBadRequestExceptionIfResultIsNotSucceeded(await this.userManager.CreateAsync(user));
+        ThrowBadRequestExceptionIfResultIsNotSucceeded(await this.userManager.AddPasswordAsync(user, param.Password));
+        await transaction.CommitAsync();
+        return user;
     }
 
     /// <summary>
@@ -95,8 +102,9 @@ public class UserService
     /// <exception cref="BadRequestException">入力値が不正な場合。</exception>
     public async Task UpdateUser(int userId, UserEditDto param)
     {
-        // ※ 現状ユーザー名の変更のみ対応
-        await this.userRepository.ChangeUserName(userId, param.UserName);
+        var user = await this.FindOrFail(userId);
+        ThrowBadRequestExceptionIfResultIsNotSucceeded(
+            await this.userManager.SetUserNameAsync(user, param.UserName));
     }
 
     /// <summary>
@@ -109,7 +117,9 @@ public class UserService
     /// <exception cref="BadRequestException">パスワードが変更条件を満たさない場合。</exception>
     public async Task ChangePassword(int userId, ChangePasswordDto param)
     {
-        await this.userRepository.ChangePassword(userId, param.CurrentPassword, param.NewPassword);
+        var user = await this.FindOrFail(userId);
+        ThrowBadRequestExceptionIfResultIsNotSucceeded(
+            await this.userManager.ChangePasswordAsync(user, param.CurrentPassword, param.NewPassword));
     }
 
     /// <summary>
@@ -120,13 +130,34 @@ public class UserService
     /// <exception cref="NotFoundException">ユーザーが存在しない場合。</exception>
     public async Task<UserDto> FindAndUpdateForLogin(string name)
     {
-        var user = await this.userRepository.FindByName(name);
-        if (user == null)
-        {
-            throw new NotFoundException($"name={name} is not found");
-        }
-
+        var user = await this.userManager.FindByNameAsync(name)
+            ?? throw new NotFoundException($"name={name} is not found");
         user.LastLogin = DateTimeOffset.UtcNow;
-        return this.mapper.Map<UserDto>(await this.userRepository.Update(user));
+        ThrowBadRequestExceptionIfResultIsNotSucceeded(await this.userManager.UpdateAsync(user));
+        return this.mapper.Map<UserDto>(user);
+    }
+
+    /// <summary>
+    /// ユーザーIDでユーザーを取得する。存在しない場合は例外を投げる。
+    /// </summary>
+    /// <param name="id">ユーザーID。</param>
+    /// <returns>ユーザー。</returns>
+    /// <exception cref="NotFoundException">ユーザーが存在しない場合。</exception>
+    private async Task<User> FindOrFail(int id)
+    {
+        return await this.userManager.FindByIdAsync(id.ToString())
+            ?? throw new NotFoundException($"id={id} is not found");
+    }
+
+    /// <summary>
+    /// UserManagerの戻り値が失敗の場合に入力値不正例外を投げる。
+    /// </summary>
+    /// <param name="result">チェックする戻り値。</param>
+    private static void ThrowBadRequestExceptionIfResultIsNotSucceeded(IdentityResult result)
+    {
+        if (!result.Succeeded)
+        {
+            throw new BadRequestException(string.Join(", ", result.Errors.Select(e => e.Description)));
+        }
     }
 }

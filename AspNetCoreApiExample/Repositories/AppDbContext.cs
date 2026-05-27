@@ -13,14 +13,12 @@ using Honememo.AspNetCoreApiExample.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Storage;
-
 namespace Honememo.AspNetCoreApiExample.Repositories;
 
 /// <summary>
 /// アプリケーションDBコンテキストクラス。
 /// </summary>
-public class AppDbContext : IdentityDbContext<User, IdentityRole<int>, int>, IUnitOfWork
+public class AppDbContext : IdentityDbContext<User, IdentityRole<int>, int>
 {
     /// <summary>
     /// コンテキストを生成する。
@@ -45,15 +43,6 @@ public class AppDbContext : IdentityDbContext<User, IdentityRole<int>, int>, IUn
     /// ブログ記事のタグテーブル。
     /// </summary>
     public DbSet<Tag> Tags => this.Set<Tag>();
-
-    /// <summary>
-    /// トランザクションを開始する。
-    /// </summary>
-    /// <returns>トランザクション。</returns>
-    public IDbContextTransaction BeginTransaction()
-    {
-        return this.Database.BeginTransaction();
-    }
 
     /// <summary>
     /// コンテキストの変更をDBに保存する。

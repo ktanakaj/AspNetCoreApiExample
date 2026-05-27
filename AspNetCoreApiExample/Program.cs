@@ -75,10 +75,9 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 // リポジトリやサービスのDI設定
-builder.Services.AddScoped<IUnitOfWork>(x => x.GetRequiredService<AppDbContext>());
 builder.Services.Scan(scan => scan
     .FromAssemblyOf<Program>()
-        .AddClasses(classes => classes.Where(type => type.Name.EndsWith("Repository") || type.Name.EndsWith("Service")))
+        .AddClasses(classes => classes.Where(type => type.Name.EndsWith("Service")))
             .AsSelfWithInterfaces()
             .WithScopedLifetime());
 
