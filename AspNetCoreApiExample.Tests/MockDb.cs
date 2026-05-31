@@ -8,12 +8,14 @@
 //      Koichi Tanaka</author>
 // ================================================================================================
 
+using Honememo.AspNetCoreApiExample.Entities;
 using Honememo.AspNetCoreApiExample.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace Honememo.AspNetCoreApiExample.Tests;
 
@@ -89,6 +91,7 @@ public class MockDb
         builder.UseInMemoryDatabase(dbname, this.temporaryDatabaseRoot);
         builder.ConfigureWarnings(x => x.Ignore(InMemoryEventId.TransactionIgnoredWarning));
         builder.ConfigureWarnings(x => x.Ignore(CoreEventId.ManyServiceProvidersCreatedWarning));
+        builder.AddInterceptors(new TimeStampInterceptor());
         return builder;
     }
 }

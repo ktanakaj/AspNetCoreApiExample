@@ -10,6 +10,7 @@
 
 using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace Honememo.AspNetCoreApiExample.Entities;
 
@@ -21,6 +22,7 @@ namespace Honememo.AspNetCoreApiExample.Entities;
 /// 記事のタグを表す。主キーは記事IDとタグ名。
 /// </remarks>
 [Index(nameof(Name), nameof(ArticleId))]
+[EntityTypeConfiguration(typeof(EntityTypeConfiguration))]
 public class Tag
 {
     /// <summary>
@@ -41,12 +43,18 @@ public class Tag
     public Article Article { get; set; } = null!;
 
     /// <summary>
-    /// モデル構築時に呼ばれる処理。
+    /// エンティティ設定クラス。
     /// </summary>
-    /// <param name="modelBuilder">モデルビルダー。</param>
-    public static void OnModelCreating(ModelBuilder modelBuilder)
+    public class EntityTypeConfiguration : IEntityTypeConfiguration<Tag>
     {
-        // 複合主キーを設定
-        modelBuilder.Entity<Tag>().HasKey(t => new { t.ArticleId, t.Name });
+        /// <summary>
+        /// モデル構築時に呼ばれる処理。
+        /// </summary>
+        /// <param name="builder">エンティティビルダー。</param>
+        public void Configure(EntityTypeBuilder<Tag> builder)
+        {
+            // 複合主キーを設定
+            builder.HasKey(t => new { t.ArticleId, t.Name });
+        }
     }
 }

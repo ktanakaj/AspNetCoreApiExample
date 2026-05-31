@@ -52,6 +52,7 @@ builder.Services.AddDbContextPool<AppDbContext>((provider, options) =>
     options.EnableSensitiveDataLogging();
     options.UseLoggerFactory(provider.GetService<ILoggerFactory>());
     ApplyDbConfig(options, builder.Configuration.GetSection("Database"));
+    options.AddInterceptors(new TimeStampInterceptor());
 });
 
 // コントローラの設定
